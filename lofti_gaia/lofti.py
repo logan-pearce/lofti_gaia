@@ -581,6 +581,8 @@ def fitorbit(source_id1, source_id2,
     import numpy as np
     import progressbar
     import time as tm
+    from lofti_gaia.loftifittingtools import draw_priors, calc_OFTI
+    import pickle
     
     print('Computing constraints.')
     # Compute constraints:
@@ -657,6 +659,29 @@ def fitorbit(source_id1, source_id2,
         inp = input('Ok? Hit enter to proceed, n for no: ')
         if inp == 'n':
             accept_min = float(input('Enter desired number of orbits: '))
+
+    # Write out constraints to a file:
+    # Human readable:
+    outfile = open(output_directory+'/constraints','w')
+    string = 'DeltaRA: '+ str(deltaRA) + '\n'
+    string += 'DeltaDEC: '+ str(deltaDec) + '\n'
+    string += 'pmRA_kms: '+ str(pmRA_kms) + '\n'
+    string += 'pmDEC_kms: '+ str(pmDec_kms) + '\n'
+    string += 'deltaRV: '+ str(deltarv) + '\n'
+    string += 'Total_Plane_Of_Sky_Vel: '+ str(total_pos_velocity) + '\n'
+    string += 'Total_Velocity_kms: '+ str(total_velocity_kms) + '\n'
+    string += 'Separation_mas: '+ str(rho) + '\n'
+    string += 'PA_deg: '+ str(pa) + '\n'
+    string += 'delta_mag: '+ str(delta_mag) + '--' + '\n'
+    string += 'Distance_pc: '+ str(d_star) + '\n'
+    outfile.write(string + "\n")
+    outfile.close()
+    
+    # Machine readable:
+    outfile = open(output_directory+'/constraints.pkl','wb')
+    pickle.dump([deltaRA, deltaDec, pmRA_kms, pmDec_kms, deltarv, total_pos_velocity, total_velocity_kms, \
+        rho, pa, delta_mag, d_star], outfile)
+    outfile.close
     
     output_file = output_directory + '/accepted_'+str(rank)
     k = open(output_file, 'w')
@@ -754,6 +779,138 @@ def fitorbit(source_id1, source_id2,
     print('and',time/3600.,'hours')
 
 
-def loftiplots():
+def makeplots(input_directory,
+                  rank = 0,
+                  Collect_into_one_file = False,
+                  limit = 0.,
+                  roll_w = False,
+                  plot_posteriors = True,
+                  plot_orbits = True,
+                  plot_3d = True
+              ):
+    '''
+    '''
+    #from lofti_gaia.loftiplots import *
+    import numpy as np
+    import pickle
+    
+    files = input_directory + '/accepted_'+str(rank)
+
+    if Collect_into_one_file == True:
+        q = open(files, 'w')
+        ## Prepare fitter output:
+        # Collect into one file:
+        for ind in range(size):
+            # Collect all the outputs into one file:
+            dat = np.loadtxt(open(files+'_'+str(ind),"rb"),delimiter='   ',ndmin=2)
+            a,T,to,e,i,w,O,c,A,dice = dat[:,0],dat[:,1],dat[:,2],dat[:,3],dat[:,4],dat[:,5],dat[:,6],dat[:,7],dat[:,8],dat[:,9]
+            chi_min = np.min(c)
+            q = open(files, 'a')
+            for a1,T1,to1,e1,i1,w1,O1,c1,A1,dice1 in zip(a,T,to,e,i,w,O,c,A,dice):
+                string = '   '.join([str(p) for p in [a1,T1,to1,e1,i1,w1,O1,c1,A1,dice1]])
+                q.write(string + "\n")
+            q.close()
+
+        # Reperform accept/reject step with the min chi-squared from all processes:
+        dat = np.loadtxt(open(files,"rb"),delimiter='   ',ndmin=2)
+        a,T,to,e,i,w,O,c,A,dice = dat[:,0],dat[:,1],dat[:,2],dat[:,3],dat[:,4],dat[:,5],dat[:,6],dat[:,7],dat[:,8],dat[:,9]
+
+        chi_min = np.min(c)
+        print('Minimum chi^2 found: ',chi_min)
+    
+    dat = np.loadtxt(open(files,"rb"),delimiter='   ',ndmin=2)
+    num=dat.shape[0]
+
+    # Read in final parameter arrays:
+    a,T,to,e,i_deg,w_deg,O_deg,c,A,dice = dat[:,0],dat[:,1],dat[:,2],dat[:,3],dat[:,4],dat[:,5],dat[:,6],dat[:,7],dat[:,8],dat[:,9]
+    i,w,O = np.radians(i_deg),np.radians(w_deg),np.radians(O_deg)
+    
+    # Read in observational constraints:
+    infile = open(input_directory+"/constraints.pkl",'rb')
+    deltaRA, deltaDec, pmRA_kms, pmDec_kms, deltarv, total_pos_velocity, total_velocity_kms, rho, pa, delta_mag, d_star = pickle.load(infile)
+    date = 2015.5
+    
+    a_au=a*d_star[0]
+    periastron = (1.-e)*a_au
+
+    # If desired, truncate the semi-major axis plot:
+    if limit != 0.:
+        a_au2 = a_au[np.where(a_au<limit)]
+        to2 = to[np.where(a_au<limit)]
+        T2 = T[np.where(a_au<limit)]
+        periastron2 = periastron[np.where(a_au<limit)]
+    else:
+        a_au2 = a_au
+        to2 = to
+        T2 = T
+        periastron2 = periastron
+
+    # To center arg of periastron on 180 deg instead of 0:
+    if roll_w == True
+        w_temp = w_deg.copy()
+        for j in range(len(w_deg)):
+            if w_temp[j] > 180:
+                w_temp[j] = w_temp[j] - 360.
+    else:
+        w_temp = w_deg
+
+    O_temp = O_deg.copy()%360
+    for j in range(len(O_deg)):
+        if O_temp[j] > 180:
+            O_temp[j] = O_temp[j] - 360.
+        else:
+            pass
+
+    plot_params_names = [r"$a \; (AU)$",r"$e$",r"$ i \; (deg)$",r"$ \omega \; (deg)$",r"$\Omega \; (deg)$",r"$T_0 \; (yr)$",\
+                         r"$a\,(1-e) \; (AU)$"]
+
+    print('Writing out stats')
+    stats_name = directory+system+'_stats'
+    write_stats([a_au,e,i_deg,w_temp,O_temp,to,periastron],plot_params_names,stats_name)
+
+    print('Making histograms')
+    output_name = directory + system+"_hists.pdf"
+    plot_1d_hist([a_au2,e,i_deg,w_temp,O_deg,to2,periastron],plot_params_names,output_name,50,tick_fs = 25,
+                     label_fs = 30,label_x_x=0.5, label_x_y = -0.3)
+
+    if plot_posteriors == True:
+        print('Plotting observable posteriors')
+        os.system('mkdir '+directory+'observable_posteriors')
+        output_name = directory + 'observable_posteriors/' + system
+        plot_observables_hist(a,T,to,e,i,w,O,date,d_star,output_name)
+
+    if plot_orbits == True:
+        print('Plotting orbits')
+    # Select random orbits from sample:
+    if a.shape[0] >= 100:
+        size = 100
+    else:
+        size = a.shape[0]-1
+
+    index = np.random.choice(range(0,dat.shape[0]),replace=False,size=size)
+    a1,T1,to1,e1,i1,w1,O1 = a[index],T[index],to[index],e[index],i[index],w[index],O[index]
+
+    if args.axlim:
+        axlim = np.float(args.axlim)
+    else:
+        axlim = 6
+
+    # Plot those orbits:
+    # RA/Dec plane:
+    print 'XY plane'
+    output_name = directory + system+"_orbits"
+    plot_orbits(a1,T1,to1,e1,i1,w1,O1, output_name, date, axlim = axlim, ticksize = 15, 
+                    labelsize = 20)
+
+    # X/Z plane:
+    print 'XZ plane'
+    output_name = directory + system+"_orbits_xz"
+    plot_orbits(a1,T1,to1,e1,i1,w1,O1, output_name, date, axlim = axlim, plane = 'xz')
+
+    # Y/Z plane:
+    print 'YZ plane'
+    output_name = directory + system+"_orbits_yz"
+    plot_orbits(a1,T1,to1,e1,i1,w1,O1, output_name, date, axlim = axlim, plane = 'yz')
+    
         
          
