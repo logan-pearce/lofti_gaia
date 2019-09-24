@@ -1,6 +1,26 @@
 ########### Stats ################
+def freedman_diaconis(array):
+    '''Compute the optimal number of bins for a 1-d histogram using the Freedman-Diaconis rule of thumb
+       Bin width = 2IQR/cuberoot(N)
+       Inputs:
+           array (arr): flattened array of data
+        Returns:
+           bin_width (flt): width of bin in optimal binning
+           n (int): number of bins
+    '''
+    import numpy as np
+    # Get number of observations:
+    N = np.shape(array)[0]
+    # Get interquartile range:
+    iqr = np.diff(np.quantile(array, q=[.25, .75]))
+    bin_width = (2.*iqr)/(N**(1./3.))
+    n = int(((np.max(array) - np.min(array)) / bin_width)+1)
+    return bin_width, n
+
 def mode(array):
-    n, bins = np.histogram(array, 10000, density=True)
+    import numpy as np
+    from lofti_gaia.loftiplots import freedman_diaconis
+    n, bins = np.histogram(array, freedman_diaconis(array)[1])
     max_bin = np.max(n)
     bin_inner_edge = np.where(n==max_bin)[0]
     bin_outer_edge = np.where(n==max_bin)[0]+1
@@ -13,7 +33,7 @@ def calc_min_interval(x, alpha):
     Assumes that x is sorted numpy array.
     From: https://github.com/aloctavodia/Doing_bayesian_data_analysis/blob/master/hpd.py
     """
-
+    import numpy as np
     n = len(x)
     cred_mass = 1.0-alpha
 
@@ -30,6 +50,8 @@ def calc_min_interval(x, alpha):
     return hdi_min, hdi_max
 
 def write_stats(params,params_names,filename):
+    import numpy as np
+    from lofti_gaia.loftiplots import calc_min_interval
     k = open(filename, 'w')
     string = 'Parameter    Mean    Std    Mode    68% Min Cred Int    95% Min Cred Int'
     k.write(string + "\n")
@@ -66,125 +88,6 @@ def to_si(mas,mas_yr,d):
     km_s = (km_s.value)*(u.km/u.yr).to(u.km/u.s)
     return km.value,km_s
 
-def calc_XYZ(a,T,to,e,i,w,O,date):
-    ''' Compute projected on-sky position only of a single object on a Keplerian orbit given a 
-        set of orbital elements at a single observation point. 
-        Inputs:
-            a [as]: semi-major axis in mas
-            T [yrs]: period
-            to [yrs]: epoch of periastron passage (in same time structure as dates)
-            e: eccentricity
-            i [rad]: inclination
-            w [rad]: argument of periastron
-            O [rad]: longitude of nodes
-            date [yrs]: observation date
-        Returns: X, Y, and Z coordinates [as] where +X is in the reference direction (north) and +Y is east, and +Z
-            is towards observer
-    '''
-    n = (2*np.pi)/T
-    M = n*(date-to)
-    nextE = [solve(eccentricity_anomaly, varM,vare, 0.001) for varM,vare in zip(M,e)]
-    E = np.array(nextE)
-    #E = solve(eccentricity_anomaly, M,e, 0.001)
-    f1 = sqrt(1.+e)*sin(E/2.)
-    f2 = sqrt(1.-e)*cos(E/2.)
-    f = 2.*np.arctan2(f1,f2)
-    # orbit plane radius in as:
-    r = (a*(1.-e**2))/(1.+(e*cos(f)))
-    X = r * ( cos(O)*cos(w+f) - sin(O)*sin(w+f)*cos(i) )
-    Y = r * ( sin(O)*cos(w+f) + cos(O)*sin(w+f)*cos(i) )
-    Z = r * sin(w+f)*sin(i)
-    return X,Y,Z
-
-def calc_velocities(a,T,to,e,i,w,O,date,dist):
-    ''' Compute 3-d velocity of a single object on a Keplerian orbit given a 
-        set of orbital elements at a single observation point.  Uses my eqns derived from Seager 
-        Exoplanets Ch2.
-        Inputs:
-            a [as]: semi-major axis in mas
-            T [yrs]: period
-            to [yrs]: epoch of periastron passage (in same time structure as dates)
-            e: eccentricity
-            i [rad]: inclination
-            w [rad]: argument of periastron
-            O [rad]: longitude of nodes
-            date [yrs]: observation date
-            m_tot [Msol]: total system mass
-        Returns: X dot, Y dot, Z dot three dimensional velocities [km/s]
-    '''
-    # convert to km:
-    a_km = to_si(a*1000.,0.,dist)
-    a_km = a_km[0]
-    
-    # Compute true anomaly:
-    n = (2*np.pi)/T
-    M = n*(date-to)
-    nextE = [solve(eccentricity_anomaly, varM,vare, 0.001) for varM,vare in zip(M,e)]
-    E = np.array(nextE)
-    #E = solve(eccentricity_anomaly, M,e, 0.001)
-    r1 = a*(1.-e*cos(E))
-    f1 = sqrt(1.+e)*sin(E/2.)
-    f2 = sqrt(1.-e)*cos(E/2.)
-    f = 2.*np.arctan2(f1,f2)
-    
-    # Compute velocities:
-    rdot = ( (n*a_km) / (np.sqrt(1-e**2)) ) * e*sin(f)
-    rfdot = ( (n*a_km) / (np.sqrt(1-e**2)) ) * (1 + e*cos(f))
-    Xdot = rdot * (cos(O)*cos(w+f) - sin(O)*sin(w+f)*cos(i)) + \
-           rfdot * (-cos(O)*sin(w+f) - sin(O)*cos(w+f)*cos(i))
-    Ydot = rdot * (sin(O)*cos(w+f) + cos(O)*sin(w+f)*cos(i)) + \
-           rfdot * (-sin(O)*sin(w+f) + cos(O)*cos(w+f)*cos(i))
-    Zdot = ((n*a_km) / (np.sqrt(1-e**2))) * sin(i) * (cos(w+f) + e*cos(w))
-    
-    Xdot = Xdot*(u.km/u.yr).to((u.km/u.s))
-    Ydot = Ydot*(u.km/u.yr).to((u.km/u.s))
-    Zdot = Zdot*(u.km/u.yr).to((u.km/u.s))
-    return Xdot,Ydot,Zdot
-
-def calc_accel(a,T,to,e,i,w,O,date,dist):
-    ''' Compute 3-d acceleration of a single object on a Keplerian orbit given a 
-        set of orbital elements at a single observation point.  
-        Inputs:
-            a [as]: semi-major axis in mas
-            T [yrs]: period
-            to [yrs]: epoch of periastron passage (in same time structure as dates)
-            e: eccentricity
-            i [rad]: inclination
-            w [rad]: argument of periastron
-            O [rad]: longitude of nodes
-            date [yrs]: observation date
-            dist [pc]: distance to system in pc
-        Returns: X ddot, Y ddot, Z ddot three dimensional velocities [m/s/yr]
-    '''
-    # convert to km:
-    a_km = to_si(a*1000.,0.,dist)[0]
-    # Compute true anomaly:
-    n = (2*np.pi)/T
-    M = n*(date-to)
-    nextE = [solve(eccentricity_anomaly, varM,vare, 0.001) for varM,vare in zip(M,e)]
-    E = np.array(nextE)
-    #E = solve(eccentricity_anomaly, M,e, 0.001)
-    # r and f:
-    f1 = sqrt(1.+e)*sin(E/2.)
-    f2 = sqrt(1.-e)*cos(E/2.)
-    f = 2.*np.arctan2(f1,f2)
-    r = (a_km*(1-e**2))/(1+e*cos(f))
-    # Time derivatives of r, f, and E:
-    Edot = n/(1-e*cos(E))
-    rdot = e*sin(f)*((n*a_km)/(sqrt(1-e**2)))
-    fdot = ((n*(1+e*cos(f)))/(1-e**2))*((sin(f))/sin(E))
-    # Second time derivatives:
-    Eddot = ((-n*e*sin(f))/(1-e**2))*fdot
-    rddot = a_km*e*cos(E)*(Edot**2) + a_km*e*sin(E)*Eddot
-    fddot = Eddot*(sin(f)/sin(E)) - (Edot**2)*(e*sin(f)/(1-e*cos(E)))
-    # Positional accelerations:
-    Xddot = (rddot - r*fdot**2)*(cos(O)*cos(w+f) - sin(O)*sin(w+f)*cos(i)) + \
-            (-2*rdot*fdot - r*fddot)*(cos(O)*sin(w+f) + sin(O)*cos(w+f)*cos(i))
-    Yddot = (rddot - r*fdot**2)*(sin(O)*cos(w+f) + cos(O)*sin(w+f)*cos(i)) + \
-            (2*rdot*fdot + r*fddot)*(sin(O)*sin(w+f) + cos(O)*cos(w+f)*cos(i))
-    Zddot = sin(i)*((rddot - r*fdot**2)*sin(w+f) + (2*rdot*fdot+ r*fddot*cos(w+f)))
-    return Xddot*(u.km/u.yr/u.yr).to((u.m/u.s/u.yr)), Yddot*(u.km/u.yr/u.yr).to((u.m/u.s/u.yr)), \
-                    Zddot*(u.km/u.yr/u.yr).to((u.m/u.s/u.yr))
 
 ################################ Plots ##################################
 def plot_1d_hist(params,names,filename,bins,
@@ -194,6 +97,7 @@ def plot_1d_hist(params,names,filename,bins,
                      label_x_y=-0.25,
                      figsize=(30, 5.5)
                 ):
+    import matplotlib.pyplot as plt
     plt.ioff()
     # Bin size fo 1d hists:
     bins=bins
@@ -206,27 +110,9 @@ def plot_1d_hist(params,names,filename,bins,
         plt.xticks(rotation=45)
         plt.xlabel(names[i],fontsize=label_fs)
         ax.get_xaxis().set_label_coords(label_x_x,label_x_y)
-        if i == 0:
-            plt.xticks((200, 300, 400), ('200', '300', '400'))
-        if i == 1:
-            plt.xticks((0, 0.5, 1), ('0', '0.5', '1.0'))
-        if i == 2:
-            plt.xticks((50, 100, 150), ('50', '100', '150'))
-        if i == 3:
-            plt.xticks((-100, 0, 100), ('260','0','100'))
-        if i == 4:
-            plt.xticks((0, 100, 200, 300), ('0', '100', '200', '300'))
-        #if i == 4:
-            #plt.xticks((-150, -100, -50, 0, 50, 100, 150), ('210', '250', '310', '0', '50', '100','150'))
-            #plt.xticks((-100, -50, 0, 50), ('250', '310', '0', '50'))
-            #plt.xticks((0,150,300), ('0','150','300'))
-        if i == 5:
-            plt.xticks((-2000,0), ('-2000','0'))
-        if i == 6:
-            plt.xticks((100,200), ('100','200'))
 
     plt.tight_layout()
-    plt.savefig(filename, format='pdf')
+    plt.savefig(filename, format='png')
     plt.close(fig)
     return fig
 
@@ -266,6 +152,12 @@ def plot_orbits(a1,T1,to1,e1,i1,w1,O1, filename, obsdate, plane='xy',
                 colorbar must also be set to False.
         Returns: figure
     '''
+    import matplotlib.pyplot as plt
+    import numpy as np
+    from numpy import tan, arctan, sqrt, cos, sin, arccos
+    from matplotlib.ticker import MultipleLocator, FormatStrFormatter
+    from lofti_gaia.loftifittingtools import solve, eccentricity_anomaly
+    
     fig = plt.figure(figsize=figsize)
     plt.scatter(0,0,color='orange',marker='*',s=300,zorder=10)
     plt.xlim(-axlim,axlim)
@@ -320,7 +212,7 @@ def plot_orbits(a1,T1,to1,e1,i1,w1,O1, filename, obsdate, plane='xy',
     if colorbar == True:
         plt.colorbar().set_label(colorlabel, fontsize=labelsize)
     plt.tight_layout()
-    plt.savefig(filename+'.pdf', format='pdf')
+    #plt.savefig(filename+'.pdf', format='pdf')
     plt.savefig(filename+'.png', format='png', dpi=300)
     plt.close(fig)
     return fig
@@ -363,6 +255,13 @@ def plot_orbits3d(a1,T1,to1,e1,i1,w1,O1, filename, obsdate, plane='xy',
                 colorbar must also be set to False.
         Returns: figure
     '''
+    import matplotlib.pyplot as plt
+    import numpy as np
+    from mpl_toolkits.mplot3d import Axes3D
+    from numpy import tan, arctan, sqrt, cos, sin, arccos
+    from matplotlib.ticker import MultipleLocator, FormatStrFormatter
+    from lofti_gaia.loftifittingtools import solve, eccentricity_anomaly
+    
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     ax.scatter(0,0,0,color='orange',marker='*',s=300,zorder=10)
@@ -379,7 +278,7 @@ def plot_orbits3d(a1,T1,to1,e1,i1,w1,O1, filename, obsdate, plane='xy',
     minorLocator   = MultipleLocator(5)
     plt.grid(ls=':')
 
-    for a,T,to,e,i,w,O in zip(a1,T1,to1,e1,i1,w1,O1)[0:num_orbits]:
+    for a,T,to,e,i,w,O in zip(a1,T1,to1,e1,i1,w1,O1):
         times = np.linspace(obsdate,obsdate+T,4000)
         X,Y,Z = np.array([]),np.array([]),np.array([])
         E = np.array([])
@@ -402,7 +301,6 @@ def plot_orbits3d(a1,T1,to1,e1,i1,w1,O1, filename, obsdate, plane='xy',
     #if colorbar == True:
     #    plt.colorbar().set_label(colorlabel)
     plt.tight_layout()
-    plt.savefig(filename+'.pdf', format='pdf')
     plt.savefig(filename+'.png', format='png', dpi=300)
     return fig
 
@@ -429,6 +327,10 @@ def plot_observables_hist(a,T,to,e,i,w,O,date,dist, filename,
             X dot, Y dot, Z dot three dimensional velocities [km/s]
             X ddot, Y ddot, Z ddot 3d accelerations in [m/s/yr]
     '''
+    import matplotlib.pyplot as plt
+    import numpy as np
+    from lofti_gaia.loftifittingtools import calc_XYZ, calc_velocities, calc_accel
+    
     ddot = calc_accel(a,T,to,e,i,w,O,date,dist)
     dot = calc_velocities(a,T,to,e,i,w,O,date,dist)
     pos = calc_XYZ(a,T,to,e,i,w,O,date)
@@ -441,62 +343,62 @@ def plot_observables_hist(a,T,to,e,i,w,O,date,dist, filename,
     plt.hist(pos[0],bins=50)
     plt.xlabel(r'$X$ [mas]')
     plt.tight_layout()
-    plt.savefig(filename+'_X.pdf', format='pdf')
+    plt.savefig(filename+'X.png', format='png', dpi=300)
     plt.close(fig)
     # Plot Y:
     fig = plt.figure(figsize=figsize)
     plt.hist(pos[1],bins=50)
     plt.xlabel(r'$Y$ [mas]')
     plt.tight_layout()
-    plt.savefig(filename+'_Y.pdf', format='pdf')
+    plt.savefig(filename+'Y.png', format='png', dpi=300)
     plt.close(fig)
     # Plot Z:
     fig = plt.figure(figsize=figsize)
     plt.hist(pos[2],bins=50)
     plt.xlabel(r'$Z$ [mas]')
     plt.tight_layout()
-    plt.savefig(filename+'_Z.pdf', format='pdf')
+    plt.savefig(filename+'Z.png', format='png', dpi=300)
     plt.close(fig)
     # Plot Xdot:
     fig = plt.figure(figsize=figsize)
     plt.hist(dot[0],bins=50)
     plt.xlabel(r'$\dot{X}$ [km/s]')
     plt.tight_layout()
-    plt.savefig(filename+'_xdot.pdf', format='pdf')
+    plt.savefig(filename+'xdot.png', format='png', dpi=300)
     plt.close(fig)
     # Plot Ydot:
     fig = plt.figure(figsize=figsize)
     plt.hist(dot[1],bins=50)
     plt.xlabel(r'$\dot{Y}$ km/s]')
     plt.tight_layout()
-    plt.savefig(filename+'_ydot.pdf', format='pdf')
+    plt.savefig(filename+'ydot.png', format='png', dpi=300)
     plt.close(fig)
     # Plot Zdot:
     fig = plt.figure(figsize=figsize)
     plt.hist(dot[2],bins=50)
     plt.xlabel(r'$\dot{Z}$ [km/s]')
     plt.tight_layout()
-    plt.savefig(filename+'_zdot.pdf', format='pdf')
+    plt.savefig(filename+'zdot.png', format='png', dpi=300)
     plt.close(fig)
     # Plot Xddot:
     fig = plt.figure(figsize=figsize)
     plt.hist(ddot[0],bins=50)
     plt.xlabel(r'$\ddot{X}$ [m/s/yr]')
     plt.tight_layout()
-    plt.savefig(filename+'_xddot.pdf', format='pdf')
+    plt.savefig(filename+'xddot.png', format='png', dpi=300)
     plt.close(fig)
     # Plot Yddot:
     fig = plt.figure(figsize=figsize)
     plt.hist(ddot[1],bins=50)
     plt.xlabel(r'$\ddot{Y}$ [m/s/yr]')
     plt.tight_layout()
-    plt.savefig(filename+'_yddot.pdf', format='pdf')
+    plt.savefig(filename+'yddot.png', format='png', dpi=300)
     plt.close(fig)
     # Plot Zddot:
     fig = plt.figure(figsize=figsize)
     plt.hist(ddot[2],bins=50)
     plt.xlabel(r'$\ddot{Z}$ [m/s/yr]')
     plt.tight_layout()
-    plt.savefig(filename+'_zddot.pdf', format='pdf')
+    plt.savefig(filename+'zddot.png', format='png', dpi=300)
     plt.close(fig)
     return fig

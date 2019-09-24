@@ -1,3 +1,85 @@
+### Observation tools: ###
+def distance(parallax,parallax_error):
+    '''Computes distance from Gaia parallaxes using the Bayesian method of Bailer-Jones 2015.
+    Input: parallax [mas], parallax error [mas]
+    Output: distance [pc], 1-sigma uncertainty in distance [pc]
+    '''
+    import numpy as np
+    
+    # Compute most probable distance:
+    L=1350 #parsecs
+    # Convert to arcsec:
+    parallax, parallax_error = parallax/1000., parallax_error/1000.
+    # establish the coefficients of the mode-finding polynomial:
+    coeff = np.array([(1./L),(-2),((parallax)/((parallax_error)**2)),-(1./((parallax_error)**2))])
+    # use numpy to find the roots:
+    g = np.roots(coeff)
+    # Find the number of real roots:
+    reals = np.isreal(g)
+    realsum = np.sum(reals)
+    # If there is one real root, that root is the  mode:
+    if realsum == 1:
+        gd = np.real(g[np.where(reals)[0]])
+    # If all roots are real:
+    elif realsum == 3:
+        if parallax >= 0:
+            # Take the smallest root:
+            gd = np.min(g)
+        elif parallax < 0:
+            # Take the positive root (there should be only one):
+            gd = g[np.where(g>0)[0]]
+    
+    # Compute error on distance from FWHM of probability distribution:
+    from scipy.optimize import brentq
+    rmax = 1e6
+    rmode = gd[0]
+    M = (rmode**2*np.exp(-rmode/L)/parallax_error)*np.exp((-1./(2*(parallax_error)**2))*(parallax-(1./rmode))**2)
+    lo = brentq(lambda x: 2*np.log(x)-(x/L)-(((parallax-(1./x))**2)/(2*parallax_error**2)) \
+               +np.log(2)-np.log(M)-np.log(parallax_error), 0.001, rmode)
+    hi = brentq(lambda x: 2*np.log(x)-(x/L)-(((parallax-(1./x))**2)/(2*parallax_error**2)) \
+               +np.log(2)-np.log(M)-np.log(parallax_error), rmode, rmax)
+    fwhm = hi-lo
+    # Compute 1-sigma from FWHM:
+    sigma = fwhm/2.355
+            
+    return gd[0],sigma
+
+def to_si(mas,mas_yr,d):
+    '''Convert from mas -> km and mas/yr -> km/s
+        Input: 
+         mas (array) [mas]: distance in mas
+         mas_yr (array) [mas/yr]: velocity in mas/yr
+         d (float) [pc]: distance to system in parsecs
+        Returns:
+         km (array) [km]: distance in km
+         km_s (array) [km/s]: velocity in km/s
+    '''
+    import astropy.units as u
+    
+    km = ((mas*u.mas.to(u.arcsec)*d)*u.AU).to(u.km)
+    km_s = ((mas_yr*u.mas.to(u.arcsec)*d)*u.AU).to(u.km)
+    km_s = (km_s.value)*(u.km/u.yr).to(u.km/u.s)
+    
+    return km.value,km_s
+
+def to_polar(RAa,RAb,Deca,Decb):
+    ''' Converts RA/Dec [deg] of two binary components into separation and position angle of B relative 
+        to A [mas, deg]
+    '''
+    import numpy as np
+    import astropy.units as u
+    
+    dRA = (RAb - RAa) * np.cos(np.radians(np.mean([Deca,Decb])))
+    dRA = (dRA*u.deg).to(u.mas)
+    dDec = (Decb - Deca)
+    dDec = (dDec*u.deg).to(u.mas)
+    r = np.sqrt( (dRA ** 2) + (dDec ** 2) )
+    p = (np.degrees( np.arctan2(dDec.value,-dRA.value) ) + 270.) % 360.
+    p = p*u.deg
+    
+    return r, p
+
+#### Fitting tools ####
 def eccentricity_anomaly(E,e,M):
     '''Eccentric anomaly function'''
     import numpy as np
@@ -141,7 +223,7 @@ def calc_XYZ(a,T,to,e,i,w,O,date):
             is towards observer
     '''
     import numpy as np
-    from lofti_gaia.lofti import solve
+    from lofti_gaia.loftifittingtools import solve
     from numpy import tan, arctan, sqrt, cos, sin, arccos
     
     n = (2*np.pi)/T
@@ -177,7 +259,7 @@ def calc_velocities(a,T,to,e,i,w,O,date,dist):
     '''
     import numpy as np
     import astropy.units as u
-    from lofti_gaia.lofti import to_si, solve
+    from lofti_gaia.loftifittingtools import to_si, solve
     from numpy import tan, arctan, sqrt, cos, sin, arccos
     
     # convert to km:
@@ -213,7 +295,7 @@ def calc_accel(a,T,to,e,i,w,O,date,dist):
     ''' Compute 3-d acceleration of a single object on a Keplerian orbit given a 
         set of orbital elements at a single observation point.  
         Inputs:
-            a [as]: semi-major axis in mas
+            a [as]: semi-major axis in as
             T [yrs]: period
             to [yrs]: epoch of periastron passage (in same time structure as dates)
             e: eccentricity
@@ -222,21 +304,27 @@ def calc_accel(a,T,to,e,i,w,O,date,dist):
             O [rad]: longitude of nodes
             date [yrs]: observation date
             dist [pc]: distance to system in pc
-        Returns: X ddot, Y ddot, Z ddot three dimensional velocities [m/s/yr]
+        Returns: X ddot, Y ddot, Z ddot three dimensional accelerations [m/s/yr]
     '''
     import numpy as np
-    import astropy.units as u
-    from lofti_gaia.lofti import to_si, solve
     from numpy import tan, arctan, sqrt, cos, sin, arccos
-    
+    import astropy.units as u
+    from lofti_gaia.loftifittingtools import to_si, solve
     # convert to km:
-    a_km = to_si(a*1000.,0.,dist)[0]
+    a_mas = a*u.arcsec.to(u.mas)
+    try:
+        a_mas = a_mas.value
+    except:
+        pass
+    a_km = to_si(a_mas,0.,dist)[0]
     # Compute true anomaly:
     n = (2*np.pi)/T
     M = n*(date-to)
-    nextE = [solve(eccentricity_anomaly, varM,vare, 0.001) for varM,vare in zip(M,e)]
-    E = np.array(nextE)
-    #E = solve(eccentricity_anomaly, M,e, 0.001)
+    try:
+        nextE = [solve(eccentricity_anomaly, varM,vare, 0.001) for varM,vare in zip(M,e)]
+        E = np.array(nextE)
+    except:
+        E = solve(eccentricity_anomaly, M,e, 0.001)
     # r and f:
     f1 = sqrt(1.+e)*sin(E/2.)
     f2 = sqrt(1.-e)*cos(E/2.)
@@ -255,7 +343,7 @@ def calc_accel(a,T,to,e,i,w,O,date,dist):
             (-2*rdot*fdot - r*fddot)*(cos(O)*sin(w+f) + sin(O)*cos(w+f)*cos(i))
     Yddot = (rddot - r*fdot**2)*(sin(O)*cos(w+f) + cos(O)*sin(w+f)*cos(i)) + \
             (2*rdot*fdot + r*fddot)*(sin(O)*sin(w+f) + cos(O)*cos(w+f)*cos(i))
-    Zddot = sin(i)*((rddot - r*fdot**2)*sin(w+f) + (2*rdot*fdot+ r*fddot*cos(w+f)))
+    Zddot = sin(i)*((rddot - r*(fdot**2))*sin(w+f) + ((2*rdot*fdot + r*fddot)*cos(w+f)))
     return Xddot*(u.km/u.yr/u.yr).to((u.m/u.s/u.yr)), Yddot*(u.km/u.yr/u.yr).to((u.m/u.s/u.yr)), \
                     Zddot*(u.km/u.yr/u.yr).to((u.m/u.s/u.yr))
 

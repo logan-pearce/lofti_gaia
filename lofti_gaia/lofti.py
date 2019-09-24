@@ -1,393 +1,4 @@
-### Observation tools: ###
-def distance(parallax,parallax_error):
-    '''Computes distance from Gaia parallaxes using the Bayesian method of Bailer-Jones 2015.
-    Input: parallax [mas], parallax error [mas]
-    Output: distance [pc], 1-sigma uncertainty in distance [pc]
-    '''
-    import numpy as np
-    
-    # Compute most probable distance:
-    L=1350 #parsecs
-    # Convert to arcsec:
-    parallax, parallax_error = parallax/1000., parallax_error/1000.
-    # establish the coefficients of the mode-finding polynomial:
-    coeff = np.array([(1./L),(-2),((parallax)/((parallax_error)**2)),-(1./((parallax_error)**2))])
-    # use numpy to find the roots:
-    g = np.roots(coeff)
-    # Find the number of real roots:
-    reals = np.isreal(g)
-    realsum = np.sum(reals)
-    # If there is one real root, that root is the  mode:
-    if realsum == 1:
-        gd = np.real(g[np.where(reals)[0]])
-    # If all roots are real:
-    elif realsum == 3:
-        if parallax >= 0:
-            # Take the smallest root:
-            gd = np.min(g)
-        elif parallax < 0:
-            # Take the positive root (there should be only one):
-            gd = g[np.where(g>0)[0]]
-    
-    # Compute error on distance from FWHM of probability distribution:
-    from scipy.optimize import brentq
-    rmax = 1e6
-    rmode = gd[0]
-    M = (rmode**2*np.exp(-rmode/L)/parallax_error)*np.exp((-1./(2*(parallax_error)**2))*(parallax-(1./rmode))**2)
-    lo = brentq(lambda x: 2*np.log(x)-(x/L)-(((parallax-(1./x))**2)/(2*parallax_error**2)) \
-               +np.log(2)-np.log(M)-np.log(parallax_error), 0.001, rmode)
-    hi = brentq(lambda x: 2*np.log(x)-(x/L)-(((parallax-(1./x))**2)/(2*parallax_error**2)) \
-               +np.log(2)-np.log(M)-np.log(parallax_error), rmode, rmax)
-    fwhm = hi-lo
-    # Compute 1-sigma from FWHM:
-    sigma = fwhm/2.355
-            
-    return gd[0],sigma
 
-def to_si(mas,mas_yr,d):
-    '''Convert from mas -> km and mas/yr -> km/s
-        Input: 
-         mas (array) [mas]: distance in mas
-         mas_yr (array) [mas/yr]: velocity in mas/yr
-         d (float) [pc]: distance to system in parsecs
-        Returns:
-         km (array) [km]: distance in km
-         km_s (array) [km/s]: velocity in km/s
-    '''
-    import astropy.units as u
-    
-    km = ((mas*u.mas.to(u.arcsec)*d)*u.AU).to(u.km)
-    km_s = ((mas_yr*u.mas.to(u.arcsec)*d)*u.AU).to(u.km)
-    km_s = (km_s.value)*(u.km/u.yr).to(u.km/u.s)
-    
-    return km.value,km_s
-
-def to_polar(RAa,RAb,Deca,Decb):
-    ''' Converts RA/Dec [deg] of two binary components into separation and position angle of B relative 
-        to A [mas, deg]
-    '''
-    import numpy as np
-    import astropy.units as u
-    
-    dRA = (RAb - RAa) * np.cos(np.radians(np.mean([Deca,Decb])))
-    dRA = (dRA*u.deg).to(u.mas)
-    dDec = (Decb - Deca)
-    dDec = (dDec*u.deg).to(u.mas)
-    r = np.sqrt( (dRA ** 2) + (dDec ** 2) )
-    p = (np.degrees( np.arctan2(dDec.value,-dRA.value) ) + 270.) % 360.
-    p = p*u.deg
-    
-    return r, p
-
-### OFTI fitting tools: ###
-
-def eccentricity_anomaly(E,e,M):
-    '''Eccentric anomaly function'''
-    import numpy as np
-    return E - (e*np.sin(E)) - M
-
-def solve(f, M0, e, h):
-    ''' Newton-Raphson solver for eccentricity anomaly
-    from https://stackoverflow.com/questions/20659456/python-implementing-a-numerical-equation-solver-newton-raphson
-    Inputs: 
-        f (function): function to solve (transcendental ecc. anomaly function)
-        M0 (float): mean anomaly
-        e (float): eccentricity
-        h (float): termination criteria for solver
-    Returns: nextE (float): converged solution for eccentric anomaly
-    '''
-    import numpy as np
-    
-    if M0 / (1.-e) - np.sqrt( ( (6.*(1-e)) / e ) ) <= 0:
-        E0 = M0 / (1.-e)
-    else:
-        E0 = (6. * M0 / e) ** (1./3.)
-    lastE = E0
-    nextE = lastE + 10* h  
-    number=0
-    while (abs(lastE - nextE) > h) and number < 1001:  
-        newY = f(nextE,e,M0) 
-        lastE = nextE
-        nextE = lastE - newY / (1.-e*np.cos(lastE))
-        number=number+1
-        if number >= 1000:
-            nextE = float('NaN')
-    return nextE
-
-def draw_priors(number, m_tot, d_star, d):
-    """Draw a set of orbital elements from proability distribution functions.
-        Input: 
-            number (int): number of orbits desired to draw elements for. Typically 10000
-            m_tot [Msol] (tuple, flt): total system mass[0] and error[1] in solar masses
-            d_star [pc] (tuple, flt): distance to system in pc
-            d [decimal year] (flt): observation date.  2015.5 for Gaia DR2
-        Returns:
-            a [as]: semi-major axis - set at 100 AU inital value
-            T [yr]: period
-            const: constant defining orbital phase of observation
-            to [yr]: epoch of periastron passage
-            e: eccentricity
-            i [rad]: inclination in radians
-            w [rad]: arguement of periastron
-            O [rad]: longitude of nodes - set at 0 initial value
-            m1 [Msol]: total system mass in solar masses
-            dist [pc]: distance to system
-    """
-    import numpy as np
-    
-    #m1 = np.random.normal(m_tot[0],m_tot[1],number)
-    #dist = np.random.normal(d_star[0],d_star[1],number)
-    m1 = m_tot[0]
-    dist = d_star[0]
-    # Fixing and initial semi-major axis:
-    a_au=100.0
-    a_au=np.linspace(a_au,a_au,number)
-    T = np.sqrt((np.absolute(a_au)**3)/np.absolute(m1))
-    a = a_au/dist #semimajor axis in arcsec
-
-    # Fixing an initial Longitude of ascending node in radians:
-    O = np.radians(0.0)  
-    O=[O]*number
-
-    # Randomly generated parameters:
-    #to = Time of periastron passage in years:
-    const = np.random.uniform(0.0,1.0,number)
-    #^ Constant that represents the ratio between (reference epoch minus to) over period.  Because we are scaling
-    #semi-major axis, period will also scale, and epoch of periastron passage will change as a result.  This ratio
-    #will remain constant however, so we can use it scale both T and to appropriately.
-    to = d-(const*T)
-
-    # Eccentricity:
-    e = np.random.uniform(0.0,1.0,number)
-    # Inclination in radians:
-    cosi = np.random.uniform(-1.0,1.0,number)  #Draws sin(i) from a uniform distribution.  Inclination
-    # is computed as the arccos of cos(i):
-    i = np.arccos(cosi)
-    # Argument of periastron in degrees:
-    w = np.random.uniform(0.0,360.0,number)
-    w = np.radians(w) #convert to radians for calculations
-    return a,T,const,to,e,i,w,O,m1,dist
-
-def scale_and_rotate(X,Y,rho,pa,a,const,m1,dist,d):
-    ''' Generates a new semi-major axis, period, epoch of peri passage, and long of peri for each orbit
-        given the X,Y plane of the sky coordinates for the orbit at the date of the reference epoch
-    '''
-    import numpy as np
-    
-    r_model = np.sqrt((X**2)+(Y**2))
-    rho_rand = np.random.normal(rho[0]/1000.,rho[1]/1000.) #This generates a gaussian random to 
-    #scale to that takes observational uncertainty into account.  #convert to arcsec
-    #rho_rand = rho/1000.
-
-    # scale:
-    a2 = a*(rho_rand/r_model) 
-    #New period:
-    a2_au=a2*dist #convert to AU for period calc:
-    T2 = np.sqrt((np.absolute(a2_au)**3)/np.absolute(m1))
-    #New epoch of periastron passage
-    to2 = d-(const*T2)
-
-    # Rotate:
-    PA_model = (np.degrees(np.arctan2(X,-Y))+270)%360 #corrects for difference in zero-point
-    #between arctan function and ra/dec projection
-    PA_rand = np.random.normal(pa[0],pa[1]) #Generates a random PA within 1 sigma of observation
-    #PA_rand = pa
-    #New omega value:
-    O2=[]
-    for PA_i in PA_model:
-        if PA_i < 0:
-            O2.append((PA_rand-PA_i) + 360.)
-        else:
-            O2.append(PA_rand-PA_i)
-    # ^ This step corrects for the fact that the arctan gives the angle from the +x axis being zero,
-    #while for RA/Dec the zero angle is +y axis.  
-
-    #Recompute model with new rotation:
-    O2 = np.array(O2)
-    O2 = np.radians(O2)
-    
-    return a2,T2,to2,O2
-
-def calc_XYZ(a,T,to,e,i,w,O,date):
-    ''' Compute projected on-sky position only of a single object on a Keplerian orbit given a 
-        set of orbital elements at a single observation point. 
-        Inputs:
-            a [as]: semi-major axis in mas
-            T [yrs]: period
-            to [yrs]: epoch of periastron passage (in same time structure as dates)
-            e: eccentricity
-            i [rad]: inclination
-            w [rad]: argument of periastron
-            O [rad]: longitude of nodes
-            date [yrs]: observation date
-        Returns: X, Y, and Z coordinates [as] where +X is in the reference direction (north) and +Y is east, and +Z
-            is towards observer
-    '''
-    import numpy as np
-    from lofti_gaia.lofti import solve
-    from numpy import tan, arctan, sqrt, cos, sin, arccos
-    
-    n = (2*np.pi)/T
-    M = n*(date-to)
-    nextE = [solve(eccentricity_anomaly, varM,vare, 0.001) for varM,vare in zip(M,e)]
-    E = np.array(nextE)
-    #E = solve(eccentricity_anomaly, M,e, 0.001)
-    f1 = sqrt(1.+e)*sin(E/2.)
-    f2 = sqrt(1.-e)*cos(E/2.)
-    f = 2.*np.arctan2(f1,f2)
-    # orbit plane radius in as:
-    r = (a*(1.-e**2))/(1.+(e*cos(f)))
-    X = r * ( cos(O)*cos(w+f) - sin(O)*sin(w+f)*cos(i) )
-    Y = r * ( sin(O)*cos(w+f) + cos(O)*sin(w+f)*cos(i) )
-    Z = r * sin(w+f)*sin(i)
-    return X,Y,Z
-
-def calc_velocities(a,T,to,e,i,w,O,date,dist):
-    ''' Compute 3-d velocity of a single object on a Keplerian orbit given a 
-        set of orbital elements at a single observation point.  Uses my eqns derived from Seager 
-        Exoplanets Ch2.
-        Inputs:
-            a [as]: semi-major axis in mas
-            T [yrs]: period
-            to [yrs]: epoch of periastron passage (in same time structure as dates)
-            e: eccentricity
-            i [rad]: inclination
-            w [rad]: argument of periastron
-            O [rad]: longitude of nodes
-            date [yrs]: observation date
-            m_tot [Msol]: total system mass
-        Returns: X dot, Y dot, Z dot three dimensional velocities [km/s]
-    '''
-    import numpy as np
-    import astropy.units as u
-    from lofti_gaia.lofti import to_si, solve
-    from numpy import tan, arctan, sqrt, cos, sin, arccos
-    
-    # convert to km:
-    a_km = to_si(a*1000.,0.,dist)
-    a_km = a_km[0]
-    
-    # Compute true anomaly:
-    n = (2*np.pi)/T
-    M = n*(date-to)
-    nextE = [solve(eccentricity_anomaly, varM,vare, 0.001) for varM,vare in zip(M,e)]
-    E = np.array(nextE)
-    #E = solve(eccentricity_anomaly, M,e, 0.001)
-    r1 = a*(1.-e*cos(E))
-    f1 = sqrt(1.+e)*sin(E/2.)
-    f2 = sqrt(1.-e)*cos(E/2.)
-    f = 2.*np.arctan2(f1,f2)
-    
-    # Compute velocities:
-    rdot = ( (n*a_km) / (np.sqrt(1-e**2)) ) * e*sin(f)
-    rfdot = ( (n*a_km) / (np.sqrt(1-e**2)) ) * (1 + e*cos(f))
-    Xdot = rdot * (cos(O)*cos(w+f) - sin(O)*sin(w+f)*cos(i)) + \
-           rfdot * (-cos(O)*sin(w+f) - sin(O)*cos(w+f)*cos(i))
-    Ydot = rdot * (sin(O)*cos(w+f) + cos(O)*sin(w+f)*cos(i)) + \
-           rfdot * (-sin(O)*sin(w+f) + cos(O)*cos(w+f)*cos(i))
-    Zdot = ((n*a_km) / (np.sqrt(1-e**2))) * sin(i) * (cos(w+f) + e*cos(w))
-    
-    Xdot = Xdot*(u.km/u.yr).to((u.km/u.s))
-    Ydot = Ydot*(u.km/u.yr).to((u.km/u.s))
-    Zdot = Zdot*(u.km/u.yr).to((u.km/u.s))
-    return Xdot,Ydot,Zdot
-
-def calc_accel(a,T,to,e,i,w,O,date,dist):
-    ''' Compute 3-d acceleration of a single object on a Keplerian orbit given a 
-        set of orbital elements at a single observation point.  
-        Inputs:
-            a [as]: semi-major axis in mas
-            T [yrs]: period
-            to [yrs]: epoch of periastron passage (in same time structure as dates)
-            e: eccentricity
-            i [rad]: inclination
-            w [rad]: argument of periastron
-            O [rad]: longitude of nodes
-            date [yrs]: observation date
-            dist [pc]: distance to system in pc
-        Returns: X ddot, Y ddot, Z ddot three dimensional velocities [m/s/yr]
-    '''
-    import numpy as np
-    import astropy.units as u
-    from lofti_gaia.lofti import to_si, solve
-    from numpy import tan, arctan, sqrt, cos, sin, arccos
-    
-    # convert to km:
-    a_km = to_si(a*1000.,0.,dist)[0]
-    # Compute true anomaly:
-    n = (2*np.pi)/T
-    M = n*(date-to)
-    nextE = [solve(eccentricity_anomaly, varM,vare, 0.001) for varM,vare in zip(M,e)]
-    E = np.array(nextE)
-    #E = solve(eccentricity_anomaly, M,e, 0.001)
-    # r and f:
-    f1 = sqrt(1.+e)*sin(E/2.)
-    f2 = sqrt(1.-e)*cos(E/2.)
-    f = 2.*np.arctan2(f1,f2)
-    r = (a_km*(1-e**2))/(1+e*cos(f))
-    # Time derivatives of r, f, and E:
-    Edot = n/(1-e*cos(E))
-    rdot = e*sin(f)*((n*a_km)/(sqrt(1-e**2)))
-    fdot = ((n*(1+e*cos(f)))/(1-e**2))*((sin(f))/sin(E))
-    # Second time derivatives:
-    Eddot = ((-n*e*sin(f))/(1-e**2))*fdot
-    rddot = a_km*e*cos(E)*(Edot**2) + a_km*e*sin(E)*Eddot
-    fddot = Eddot*(sin(f)/sin(E)) - (Edot**2)*(e*sin(f)/(1-e*cos(E)))
-    # Positional accelerations:
-    Xddot = (rddot - r*fdot**2)*(cos(O)*cos(w+f) - sin(O)*sin(w+f)*cos(i)) + \
-            (-2*rdot*fdot - r*fddot)*(cos(O)*sin(w+f) + sin(O)*cos(w+f)*cos(i))
-    Yddot = (rddot - r*fdot**2)*(sin(O)*cos(w+f) + cos(O)*sin(w+f)*cos(i)) + \
-            (2*rdot*fdot + r*fddot)*(sin(O)*sin(w+f) + cos(O)*cos(w+f)*cos(i))
-    Zddot = sin(i)*((rddot - r*fdot**2)*sin(w+f) + (2*rdot*fdot+ r*fddot*cos(w+f)))
-    return Xddot*(u.km/u.yr/u.yr).to((u.m/u.s/u.yr)), Yddot*(u.km/u.yr/u.yr).to((u.m/u.s/u.yr)), \
-                    Zddot*(u.km/u.yr/u.yr).to((u.m/u.s/u.yr))
-
-def calc_OFTI(a,T,const,to,e,i,w,O,d,m1,dist,rho,pa):
-    '''Perform OFTI steps to determine position/velocity/acceleration predictions given
-       orbital elements.
-        Inputs:
-            a [as]: semi-major axis in mas
-            T [yrs]: period
-            to [yrs]: epoch of periastron passage (in same time structure as dates)
-            e: eccentricity
-            i [rad]: inclination
-            w [rad]: argument of periastron
-            O [rad]: longitude of nodes
-            date [yrs]: observation date
-            dist [pc]: distance to system in pc
-            rho [mas] (tuple, flt): separation and error
-            pa [deg] (tuple, flt): position angle and error
-        Returns: 
-            X, Y, Z positions in plane of the sky [mas],
-            X dot, Y dot, Z dot three dimensional velocities [km/s]
-            X ddot, Y ddot, Z ddot 3d accelerations in [m/s/yr]
-    '''
-    import numpy as np
-    import astropy.units as u
-    
-    # Calculate predicted positions at observation date:
-    X1,Y1,Z1 = calc_XYZ(a,T,to,e,i,w,O,d)
-    # scale and rotate:
-    a2,T2,to2,O2 = scale_and_rotate(X1,Y1,rho,pa,a,const,m1,dist,d)
-    # recompute predicted position:
-    X2,Y2,Z2 = calc_XYZ(a2,T2,to2,e,i,w,O2,d)
-    # convert units:
-    X2,Y2,Z2 = (X2*u.arcsec).to(u.mas).value, (Y2*u.arcsec).to(u.mas).value, (Z2*u.arcsec).to(u.mas).value
-    # Compute velocities at observation date:
-    Xdot,Ydot,Zdot = calc_velocities(a2,T2,to2,e,i,w,O2,d,dist)
-    # Compute accelerations at observation date:
-    Xddot,Yddot,Zddot = calc_accel(a2,T2,to2,e,i,w,O2,d,dist)
-    # Convert to degrees:
-    i,w,O2 = np.degrees(i),np.degrees(w),np.degrees(O2)
-    return X2,Y2,Z2,Xdot,Ydot,Zdot,Xddot,Yddot,Zddot,a2,T2,to2,e,i,w,O2
-
-### Plotting tools: ###
-
-
-
-
-
-### OFTI: ###
 
 def prepareconstraints(source_id1, source_id2):
     """ Convert Gaia astrometric solution into constraints to feed to orbit fitter
@@ -416,7 +27,7 @@ def prepareconstraints(source_id1, source_id2):
 
     from astroquery.gaia import Gaia
     import astropy.units as u
-    from lofti_gaia.lofti import distance, to_polar
+    from lofti_gaia.loftifittingtools import distance, to_polar, to_si
     import numpy as np
     # Astroquery throws some warnings we can ignore:
     import warnings
@@ -554,7 +165,7 @@ def fitorbit(source_id1, source_id2,
 
     Returns:
     --------
-    output file :
+    output files :
         writes out accepted orbits to a file called name+rank+'_accepted'.  The columns of the file are:
             semi-major axis [arcsec]
             period [yrs]
@@ -566,6 +177,19 @@ def fitorbit(source_id1, source_id2,
             chi-squared value of the orbit
             probability of orbit generating observations
             random uniform number to determine acceptance
+        writes out a human-readable text file of the constraints it computed from Gaia data, called "constraints.txt".
+            deltaRA [mas]: relative RA separation
+            deltaDec [mas]: relative DEC separation
+            pmRA_kms [km/s]: relative proper motion in RA
+            pmDec_kms [km/s]: relative proper motion in DEC
+            deltarv [km/s]: relative radial velocity (if applicable)
+            total_pos_velocity [mas/yr]: total velocity vector in the plane of the sky
+            total_velocity_kms [km.s]: total velocity vector in the plane of the sky 
+            rho [mas]: separation
+            pa [deg]: position angle
+            delta_mag [mag]: contrast in magnitudes
+            d_star [pc]: distance
+        writes out the above parameters to a machine readable file called "constraints.pkl"
 
     Notes:
     ------
@@ -581,7 +205,7 @@ def fitorbit(source_id1, source_id2,
     import numpy as np
     import progressbar
     import time as tm
-    from lofti_gaia.loftifittingtools import draw_priors, calc_OFTI
+    from lofti_gaia.loftifittingtools import draw_priors, calc_OFTI, to_si
     import pickle
     
     print('Computing constraints.')
@@ -608,7 +232,7 @@ def fitorbit(source_id1, source_id2,
         print('D_star',d_star[0],'+\-',d_star[1])
         print('Delta Gmag',delta_mag)
         print()
-        yn = input('Proceed? Hit enter to start the fit, n to exit')
+        yn = input('Does this look good? Hit enter to start the fit, n to exit')
         if yn == 'n':
             return None
         else:
@@ -661,8 +285,9 @@ def fitorbit(source_id1, source_id2,
             accept_min = float(input('Enter desired number of orbits: '))
 
     # Write out constraints to a file:
+    
     # Human readable:
-    outfile = open(output_directory+'/constraints','w')
+    outfile = open(output_directory+'/constraints.txt','w')
     string = 'DeltaRA: '+ str(deltaRA) + '\n'
     string += 'DeltaDEC: '+ str(deltaDec) + '\n'
     string += 'pmRA_kms: '+ str(pmRA_kms) + '\n'
@@ -672,7 +297,7 @@ def fitorbit(source_id1, source_id2,
     string += 'Total_Velocity_kms: '+ str(total_velocity_kms) + '\n'
     string += 'Separation_mas: '+ str(rho) + '\n'
     string += 'PA_deg: '+ str(pa) + '\n'
-    string += 'delta_mag: '+ str(delta_mag) + '--' + '\n'
+    string += 'delta_mag: '+ str(delta_mag) + '\n'
     string += 'Distance_pc: '+ str(d_star) + '\n'
     outfile.write(string + "\n")
     outfile.close()
@@ -682,7 +307,8 @@ def fitorbit(source_id1, source_id2,
     pickle.dump([deltaRA, deltaDec, pmRA_kms, pmDec_kms, deltarv, total_pos_velocity, total_velocity_kms, \
         rho, pa, delta_mag, d_star], outfile)
     outfile.close
-    
+
+    # Make file to store output:
     output_file = output_directory + '/accepted_'+str(rank)
     k = open(output_file, 'w')
 
@@ -715,6 +341,7 @@ def fitorbit(source_id1, source_id2,
         parameters[0,:],parameters[1,:],parameters[2,:],parameters[3,:],parameters[4,:],parameters[5,:], \
               parameters[6,:],parameters[7,:],parameters[8,:],parameters[9,:] = a2,T2,to2,e,i,w,O2,chi,A,rand
         parameters=np.transpose(parameters)
+        # Write out to text file:
         k = open(output_file, 'a')
         for params in parameters[accepted]:
             string = '   '.join([str(p) for p in params])
@@ -785,14 +412,63 @@ def makeplots(input_directory,
                   limit = 0.,
                   roll_w = False,
                   plot_posteriors = True,
-                  plot_orbits = True,
-                  plot_3d = True
+                  plot_orbit_plane = True,
+                  plot_3d = True,
+                  axlim = 6
               ):
-    '''
-    '''
-    #from lofti_gaia.loftiplots import *
+    """ 
+    Produce plots and summary statistics for the output from lofti.fitorbit.
+    
+    Parameters:
+    -----------
+    input_directory : str
+        Gaia DR2 source identifiers, found in the Gaia archive or Simbad.  Fit will be
+        of source_id2 relative to source_id1.
+    rank : int
+        Set this parameter to iterate through processes if running on multiple threads
+    Collect_into_one_file : bool
+        Set to true if running on multiple process and the script did not terminate on its own.  This will
+        tell the script to collect output from each multiple process and put into one file.
+    limit : int [au]
+        Sometimes semi-major axis posteriors will have very long tails.  If you wish to truncate the sma histogram 
+        at some value for clarity, set the limit parameter to that value.
+    roll_w : bool
+        I you wish to have arg of periastron wrap around zero, set this to True
+    plot_posteriors : bool
+        set to True to make posterior histogram plots of X, Y, Z, dotX, dotY, dotZ, ddotX, ddotY, ddotZ
+    plot_orbit_plane : bool
+        set to True to generate plot of 100 random orbits from the posterior in XY plane, XZ plane, and YZ plane
+    plot_3d: bool
+        set to True to generare a 3D plot of 20 random orbits from the posterior.
+    axlim: flt [arcsec]
+        if plot_orbits = True or plot_3d = True, set this parameter to set the axis limits (in arcsec) for the plots
+
+    Returns:
+    --------
+    output files :
+        stats: summary statistics for each orbital parameter + periastron distance, including:
+            Mean    Std    Mode    68% Min Cred Int    95% Min Cred Int
+        hist.pdf: 1d histogram of orbital parameter posteriors
+        observable_posteriors (if plot_posteriors = True): directory containing 1d histograms of 
+            posteriors for X, Y, Z, dotX, dotY, dotZ, ddotX, ddotY, ddotZ
+        orbits.png (if plot_orbits = True): plot of a selection of 100 random orbits from fitorbit posterior in 
+            RA/DEC, colored by orbital phase
+        orbits_yz.png, orbits_xz.png (if plot_orbits = True): plots of the same 100 orbits in YZ and XZ planes
+        orbits_3d.png (if plot_3d = True): 3d plot of 20 random orbits from posterior
+
+    Notes:
+    ------
+    These are suggested summary stats and plots.  For more versatility you can use
+    the fitorbit output with your own plotting scheme.
+    If you use this package, please cite Pearce et al. 2019.
+
+    Written by Logan A. Pearce, 2019
+    """ 
+
     import numpy as np
     import pickle
+    from lofti_gaia.loftiplots import write_stats, plot_1d_hist, plot_observables_hist, plot_orbits3d, plot_orbits
+    import os
     
     files = input_directory + '/accepted_'+str(rank)
 
@@ -833,7 +509,7 @@ def makeplots(input_directory,
     a_au=a*d_star[0]
     periastron = (1.-e)*a_au
 
-    # If desired, truncate the semi-major axis plot:
+    # If desired, truncate the semi-major axis histogram:
     if limit != 0.:
         a_au2 = a_au[np.where(a_au<limit)]
         to2 = to[np.where(a_au<limit)]
@@ -846,7 +522,7 @@ def makeplots(input_directory,
         periastron2 = periastron
 
     # To center arg of periastron on 180 deg instead of 0:
-    if roll_w == True
+    if roll_w == True:
         w_temp = w_deg.copy()
         for j in range(len(w_deg)):
             if w_temp[j] > 180:
@@ -863,54 +539,64 @@ def makeplots(input_directory,
 
     plot_params_names = [r"$a \; (AU)$",r"$e$",r"$ i \; (deg)$",r"$ \omega \; (deg)$",r"$\Omega \; (deg)$",r"$T_0 \; (yr)$",\
                          r"$a\,(1-e) \; (AU)$"]
-
+                         
     print('Writing out stats')
-    stats_name = directory+system+'_stats'
+    stats_name = input_directory+'/stats'
     write_stats([a_au,e,i_deg,w_temp,O_temp,to,periastron],plot_params_names,stats_name)
 
     print('Making histograms')
-    output_name = directory + system+"_hists.pdf"
+    output_name = input_directory+"/hists.png"
     plot_1d_hist([a_au2,e,i_deg,w_temp,O_deg,to2,periastron],plot_params_names,output_name,50,tick_fs = 25,
                      label_fs = 30,label_x_x=0.5, label_x_y = -0.3)
 
     if plot_posteriors == True:
         print('Plotting observable posteriors')
-        os.system('mkdir '+directory+'observable_posteriors')
-        output_name = directory + 'observable_posteriors/' + system
-        plot_observables_hist(a,T,to,e,i,w,O,date,d_star,output_name)
+        os.system('mkdir '+str(input_directory)+'/observable_posteriors')
+        output_name = input_directory + '/observable_posteriors/'
+        plot_observables_hist(a,T,to,e,i,w,O,date,d_star[0],output_name)
 
-    if plot_orbits == True:
+    if plot_orbit_plane == True:
         print('Plotting orbits')
-    # Select random orbits from sample:
-    if a.shape[0] >= 100:
-        size = 100
-    else:
-        size = a.shape[0]-1
+        # Select random orbits from sample:
+        if a.shape[0] >= 100:
+            size = 100
+        else:
+            size = a.shape[0]-1
 
-    index = np.random.choice(range(0,dat.shape[0]),replace=False,size=size)
-    a1,T1,to1,e1,i1,w1,O1 = a[index],T[index],to[index],e[index],i[index],w[index],O[index]
+        index = np.random.choice(range(0,dat.shape[0]),replace=False,size=size)
+        a1,T1,to1,e1,i1,w1,O1 = a[index],T[index],to[index],e[index],i[index],w[index],O[index]
 
-    if args.axlim:
-        axlim = np.float(args.axlim)
-    else:
-        axlim = 6
+        # Plot those orbits:
+        # RA/Dec plane:
+        print('XY plane')
+        output_name = input_directory+"/orbits"
+        plot_orbits(a1,T1,to1,e1,i1,w1,O1, output_name, date, axlim = axlim, ticksize = 15, 
+                            labelsize = 20)
 
-    # Plot those orbits:
-    # RA/Dec plane:
-    print 'XY plane'
-    output_name = directory + system+"_orbits"
-    plot_orbits(a1,T1,to1,e1,i1,w1,O1, output_name, date, axlim = axlim, ticksize = 15, 
-                    labelsize = 20)
+        # X/Z plane:
+        print('XZ plane')
+        output_name = input_directory+"/orbits_xz"
+        plot_orbits(a1,T1,to1,e1,i1,w1,O1, output_name, date, axlim = axlim, plane = 'xz')
 
-    # X/Z plane:
-    print 'XZ plane'
-    output_name = directory + system+"_orbits_xz"
-    plot_orbits(a1,T1,to1,e1,i1,w1,O1, output_name, date, axlim = axlim, plane = 'xz')
+        # Y/Z plane:
+        print('YZ plane')
+        output_name = input_directory+"/orbits_yz"
+        plot_orbits(a1,T1,to1,e1,i1,w1,O1, output_name, date, axlim = axlim, plane = 'yz')
 
-    # Y/Z plane:
-    print 'YZ plane'
-    output_name = directory + system+"_orbits_yz"
-    plot_orbits(a1,T1,to1,e1,i1,w1,O1, output_name, date, axlim = axlim, plane = 'yz')
+
+    if plot_3d == True:
+        # Select only 20 random orbits from sample:
+        if a.shape[0] >= 20:
+            size = 20
+        else:
+            size = a.shape[0]-1
+
+        index = np.random.choice(range(0,dat.shape[0]),replace=False,size=size)
+        a1,T1,to1,e1,i1,w1,O1 = a[index],T[index],to[index],e[index],i[index],w[index],O[index]
+
+        print('3D')
+        output_name = input_directory+"/orbits_3d"
+        plot_orbits3d(a1,T1,to1,e1,i1,w1,O1, output_name, date, axlim = axlim)
     
         
          
