@@ -12,6 +12,8 @@ numpy, matplotlib, astropy, astroquery, pickle
 ### Description:
 lofti_gaia is a basic orbit fitter designed to fit orbital parameters for one wide stellar binary relative to the other, when both objects are resolved in Gaia DR2.  It takes as input only the Gaia DR2 source id of the two components, and their masses.  It retrieves the relevant parameters from the Gaia archive, computes observational constraints for them, and fits orbital parameters to those measurements using a method based on Orbits for the Impatient (OFTI; Blunt et al. 2017).  It assumes the two components are bound in an elliptical orbit.  
 
+Also included are some suggested basic statistics and plotting tools to examining the output from the fitter.
+
 Caution:
  - It will give you answers, even if the two source ids you give it aren't actually bound.
  - It will give you answers even if the two Gaia astrometric solutions are not of good quality.
