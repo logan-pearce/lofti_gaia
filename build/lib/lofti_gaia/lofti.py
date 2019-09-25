@@ -203,8 +203,9 @@ def fitorbit(source_id1, source_id2,
     """
     
     import numpy as np
+    import progressbar
     import time as tm
-    from lofti_gaia.loftifittingtools import draw_priors, calc_OFTI, to_si, update_progress
+    from lofti_gaia.loftifittingtools import draw_priors, calc_OFTI, to_si
     import pickle
     
     print('Computing constraints.')
@@ -314,6 +315,7 @@ def fitorbit(source_id1, source_id2,
     # initialize:
     num = 0
     loop_count = 0
+    bar = progressbar.ProgressBar(max_value=accept_min)
     start=tm.time()
     
     while num <= accept_min:
@@ -387,7 +389,10 @@ def fitorbit(source_id1, source_id2,
                 print("Rank ",rank," has found ",num,"accepted orbits")
                 #print('Chi-min:',chi_min)
             else:
-                update_progress(num,accept_min)
+                try:
+                    bar.update(num)
+                except ValueError:
+                     pass
 	
         loop_count = loop_count + 1  #Iterate the counter
         found_new_chi_min = 'no' #reset the re-evaluator for the next loop

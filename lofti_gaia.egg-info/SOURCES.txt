@@ -1,0 +1,11 @@
+README.md
+setup.py
+lofti_gaia/__init__.py
+lofti_gaia/lofti.py
+lofti_gaia/loftifittingtools.py
+lofti_gaia/loftiplots.py
+lofti_gaia.egg-info/PKG-INFO
+lofti_gaia.egg-info/SOURCES.txt
+lofti_gaia.egg-info/dependency_links.txt
+lofti_gaia.egg-info/not-zip-safe
+lofti_gaia.egg-info/top_level.txt

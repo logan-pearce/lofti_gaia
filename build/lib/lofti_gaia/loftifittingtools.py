@@ -385,30 +385,3 @@ def calc_OFTI(a,T,const,to,e,i,w,O,d,m1,dist,rho,pa):
     # Convert to degrees:
     i,w,O2 = np.degrees(i),np.degrees(w),np.degrees(O2)
     return X2,Y2,Z2,Xdot,Ydot,Zdot,Xddot,Yddot,Zddot,a2,T2,to2,e,i,w,O2
-
-def update_progress(n,max_value):
-    import sys
-    import time
-    import numpy as np
-    barLength = 20 # Modify this to change the length of the progress bar
-    status = ""
-    progress = np.round(np.float(n/max_value),decimals=2)
-    if isinstance(progress, int):
-        progress = float(progress)
-    if not isinstance(progress, float):
-        progress = 0
-        status = "error: progress var must be float\r\n"
-    if progress < 0:
-        progress = 0
-        status = "Halt...\r\n"
-    if progress >= 1.:
-        progress = 1
-        status = "Done...\r\n"
-    block = int(round(barLength*progress))
-    text = "\r{0}% ({1} of {2}): |{3}|  {4}".format(np.round(progress*100,decimals=1), 
-                                                  n, 
-                                                  max_value, 
-                                                  "#"*block + "-"*(barLength-block), 
-                                                  status)
-    sys.stdout.write(text)
-    sys.stdout.flush()
