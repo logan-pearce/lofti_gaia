@@ -1,10 +1,10 @@
 Metadata-Version: 1.0
 Name: lofti-gaia
-Version: 0.2
+Version: 0.3
 Summary: Orbit fitting with Gaia astrometry
 Home-page: https://github.com/logan-pearce/lofti_gaia
 Author: Logan Pearce
 Author-email: loganpearce55@gmail.com
-License: UNKNOWN
+License: MIT
 Description: UNKNOWN
 Platform: UNKNOWN
