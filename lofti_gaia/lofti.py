@@ -310,6 +310,9 @@ def fitorbit(source_id1, source_id2,
     # Make file to store output:
     output_file = output_directory + '/accepted_'+str(rank)
     k = open(output_file, 'w')
+    k.write('# semimajoraxis[arcsec]    period[yrs]    t_o[yr]    ecc    incl[deg]    argofperiastron[deg]    posangleofnodes[deg]\
+        chisquaredvalue    proboforbit    randnum' + "\n")
+    k.close()
 
     # initialize:
     num = 0
