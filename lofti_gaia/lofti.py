@@ -23,6 +23,9 @@ def prepareconstraints(source_id1, source_id2):
           pa [deg] (tuple, flt): position angle[0] and error[1] in degrees east of north
           delta_mag (flt): contrast in magnitudes from primary to secondary star
           d_star [pc] (flt): distance to system in parsecs
+          ruwe (tuple, flt): renormilized unit weight error.  RUWE <~ 1.2 indicates reliable astrometric
+              solution.  
+              See https://gea.esac.esa.int/archive/documentation/GDR2/Gaia_archive/chap_datamodel/sec_dm_main_tables/ssec_dm_ruwe.html
     """
 
     from astroquery.gaia import Gaia
@@ -42,6 +45,13 @@ def prepareconstraints(source_id1, source_id2):
 
     job = Gaia.launch_job("SELECT * FROM gaiadr2.gaia_source WHERE source_id = "+str(source_id2))
     k = job.get_results()
+    
+    # Retrieve RUWE for both sources
+    job = Gaia.launch_job("SELECT * FROM gaiadr2.ruwe WHERE source_id = "+str(source_id1))
+    jruwe = job.get_results()
+
+    job = Gaia.launch_job("SELECT * FROM gaiadr2.ruwe WHERE source_id = "+str(source_id2))
+    kruwe = job.get_results()
 
     # Parallaxes:
     plxa, plxaerr = j[0]['parallax'], j[0]['parallax_error']
@@ -122,7 +132,7 @@ def prepareconstraints(source_id1, source_id2):
     return [deltaRA, deltaRA_err], [deltaDec, deltaDec_err], [pmRA_kms, pmRA_err_kms], \
            [pmDec_kms, pmDec_err_kms], [deltarv, deltarverr], [total_pos_velocity, total_pos_velocity_error], \
            [total_velocity_kms, total_velocity_error_kms], [rho, rhoerr], [pa, paerr], \
-           delta_mag, [d_star,d_star_err]
+           delta_mag, [d_star,d_star_err], [jruwe['ruwe'],kruwe['ruwe']]
 
     
 
@@ -206,11 +216,13 @@ def fitorbit(source_id1, source_id2,
     import time as tm
     from lofti_gaia.loftifittingtools import draw_priors, calc_OFTI, to_si, update_progress
     import pickle
+    import warnings
+    warnings.filterwarnings("ignore")
     
     print('Computing constraints.')
     # Compute constraints:
     deltaRA, deltaDec, pmRA_kms, pmDec_kms, deltarv, total_pos_velocity, total_velocity_kms, \
-    rho, pa, delta_mag, d_star = prepareconstraints(source_id1, source_id2)
+    rho, pa, delta_mag, d_star, ruwe = prepareconstraints(source_id1, source_id2)
 
     if verbose == True:
         print('Finished computing constraints:')
@@ -230,12 +242,26 @@ def fitorbit(source_id1, source_id2,
         print('sep, err [km]',to_si(rho[0],0,d_star[0]),to_si(rho[1],0,d_star[0]))
         print('D_star',d_star[0],'+\-',d_star[1])
         print('Delta Gmag',delta_mag)
+        print('RUWE source 1:', ruwe[0][0])
+        print('RUWE source 2:', ruwe[1][0])
         print()
-        yn = input('Does this look good? Hit enter to start the fit, n to exit')
+        yn = input('Does this look good? Hit enter to start the fit, n to exit: ')
         if yn == 'n':
             return None
         else:
             print("Yeehaw let's go")
+
+    if ruwe[0]>1.2 or ruwe[1]>1.2:
+        yn = input('''WARNING: RUWE for one or more of your solutions is greater than 1.2. This indicates 
+            that the source might be an unresolved binary or experiencing acceleration 
+            during the observation.  Orbit fit results may not be trustworthy.  Do you 
+            wish to continue?
+            Hit enter to proceed, n to exit: ''')
+        if yn == 'n':
+            return None
+        else:
+            pass
+        
     
     #################### Begin the fit: ####################
     

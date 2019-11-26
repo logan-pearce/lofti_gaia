@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='lofti_gaia',
-      version='0.3',
+      version='0.5',
       description='Orbit fitting with Gaia astrometry',
       url='https://github.com/logan-pearce/lofti_gaia',
       author='Logan Pearce',
