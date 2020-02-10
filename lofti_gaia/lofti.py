@@ -165,7 +165,7 @@ def fitorbit(source_id1, source_id2,
         if set to True, script will print constraints to screen, ask for confrimation before proceeding,
         and print regular updates on number of accepted orbits.  If set to False, script will print a progress bar 
         to screen.  Default = False.
-    output_name : str
+    output_directory : str
         directory to write output files to.  If verbose = True, script will prompt for directory, if 
         verbose = False it will write files to current directly unless the name argument is specified.
     rank : int
