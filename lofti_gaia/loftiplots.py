@@ -69,7 +69,7 @@ def write_stats(params,params_names,filename):
         # Write it out:
         k = open(filename, 'a')
         string = params_names[i] + '    ' + str(np.mean(params[i])) + '    ' + str(np.median(params[i])) + '    ' +\
-          str(np.std(params[i])) + '    ' + str(m) + '    ' + str(ci68) + '    ' + str(ci95)
+          str(m) + '    ' +  str(np.std(params[i])) + '    ' + str(ci68) + '    ' + str(ci95)
         k.write(string + "\n")
         k.close()
 

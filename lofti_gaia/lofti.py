@@ -289,7 +289,7 @@ def fitorbit(source_id1, source_id2,
     dd = (deltaDec[0] - X)/(deltaDec[1])
     dxdot = (pmDec_kms[0] - Xdot)/(pmDec_kms[1])
     dydot = (pmRA_kms[0] - Ydot)/(pmRA_kms[1])
-    if deltarv != 0.:
+    if np.min(deltarv) != 0.:
         dzdot = (deltarv[0] - Zdot)/(deltarv[1])
         chi = dr**2 + dd**2 + dxdot**2 + dydot**2 + dzdot**2
     else:
@@ -328,10 +328,8 @@ def fitorbit(source_id1, source_id2,
     outfile.close()
     
     # Machine readable:
-    outfile = open(output_directory+'/constraints.pkl','wb')
     pickle.dump([deltaRA, deltaDec, pmRA_kms, pmDec_kms, deltarv, total_pos_velocity, total_velocity_kms, \
-        rho, pa, delta_mag, d_star], outfile)
-    outfile.close
+        rho, pa, delta_mag, d_star], open(output_directory+'/constraints.pkl','wb'))
 
     # Make file to store output:
     output_file = output_directory + '/accepted_'+str(rank)
@@ -355,7 +353,11 @@ def fitorbit(source_id1, source_id2,
         dd = (deltaDec[0] - X)/(deltaDec[1])
         dxdot = (pmDec_kms[0] - Xdot)/(pmDec_kms[1])
         dydot = (pmRA_kms[0] - Ydot)/(pmRA_kms[1])
-        chi = dr**2 + dd**2 + dxdot**2 + dydot**2
+        if np.min(deltarv) != 0.:
+            dzdot = (deltarv[0] - Zdot)/(deltarv[1])
+            chi = dr**2 + dd**2 + dxdot**2 + dydot**2 + dzdot**2
+        else:
+            chi = dr**2 + dd**2 + dxdot**2 + dydot**2
 
         # Accept/reject:
         delta_chi = -(chi-chi_min)/2.0
