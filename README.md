@@ -1,10 +1,10 @@
-# lofti_gaia
+# lofti_gaiaDR2
 ### Python package for orbit fitting with Gaia astrometry
 Written by Logan A. Pearce, 2019<br>
-If you use LOFTI in your work please cite Pearce et al. 2019 (in prep)
+If you use LOFTI in your work please cite Pearce et al. 2020 (submitted to ApJ)
 
-### To install lofti_gaia:
-    pip install lofti_gaia
+### To install lofti_gaiaDR2:
+    pip install lofti_gaiaDR2
    
 ### Required packages:
 numpy, matplotlib, astropy, astroquery, pickle

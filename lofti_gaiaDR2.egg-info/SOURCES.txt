@@ -1,0 +1,11 @@
+README.md
+setup.py
+lofti_gaiaDR2/__init__.py
+lofti_gaiaDR2/lofti.py
+lofti_gaiaDR2/loftifittingtools.py
+lofti_gaiaDR2/loftiplots.py
+lofti_gaiaDR2.egg-info/PKG-INFO
+lofti_gaiaDR2.egg-info/SOURCES.txt
+lofti_gaiaDR2.egg-info/dependency_links.txt
+lofti_gaiaDR2.egg-info/not-zip-safe
+lofti_gaiaDR2.egg-info/top_level.txt
