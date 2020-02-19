@@ -122,7 +122,7 @@ def prepareconstraints(source_id1, source_id2):
           np.sqrt(pmDec_err_kms**2+pmRA_err_kms**2)
     if rv == 'yes':
         total_velocity_kms, total_velocity_error_kms = np.sqrt(pmDec_kms**2+pmRA_kms**2+deltarv**2), \
-          np.sqrt(pmDec_err_kms**2+pmRA_err_kms**2+deltarv**2)
+          np.sqrt(pmDec_err_kms**2+pmRA_err_kms**2+deltarverr**2)
     total_pos_velocity, total_pos_velocity_error = np.sqrt(pmDec**2+pmRA**2), np.sqrt(pmDecerr**2+pmRAerr**2)
         
 
