@@ -19,7 +19,7 @@ def freedman_diaconis(array):
 
 def mode(array):
     import numpy as np
-    from lofti_gaia.loftiplots import freedman_diaconis
+    from lofti_gaiaDR2.loftiplots import freedman_diaconis
     n, bins = np.histogram(array, freedman_diaconis(array)[1])
     max_bin = np.max(n)
     bin_inner_edge = np.where(n==max_bin)[0]
@@ -51,7 +51,7 @@ def calc_min_interval(x, alpha):
 
 def write_stats(params,params_names,filename):
     import numpy as np
-    from lofti_gaia.loftiplots import calc_min_interval
+    from lofti_gaiaDR2.loftiplots import calc_min_interval
     k = open(filename, 'w')
     string = 'Parameter    Mean    Median    Std    Mode    68% Min Cred Int    95% Min Cred Int'
     k.write(string + "\n")
@@ -154,7 +154,7 @@ def plot_orbits(a1,T1,to1,e1,i1,w1,O1, filename, obsdate, plane='xy',
     import numpy as np
     from numpy import tan, arctan, sqrt, cos, sin, arccos
     from matplotlib.ticker import MultipleLocator, FormatStrFormatter
-    from lofti_gaia.loftifittingtools import solve, eccentricity_anomaly
+    from lofti_gaiaDR2.loftifittingtools import solve, eccentricity_anomaly
     
     fig = plt.figure(figsize=figsize)
     plt.scatter(0,0,color='orange',marker='*',s=300,zorder=10)
@@ -258,7 +258,7 @@ def plot_orbits3d(a1,T1,to1,e1,i1,w1,O1, filename, obsdate, plane='xy',
     from mpl_toolkits.mplot3d import Axes3D
     from numpy import tan, arctan, sqrt, cos, sin, arccos
     from matplotlib.ticker import MultipleLocator, FormatStrFormatter
-    from lofti_gaia.loftifittingtools import solve, eccentricity_anomaly
+    from lofti_gaiaDR2.loftifittingtools import solve, eccentricity_anomaly
     
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
@@ -327,7 +327,7 @@ def plot_observables_hist(a,T,to,e,i,w,O,date,dist, filename,
     '''
     import matplotlib.pyplot as plt
     import numpy as np
-    from lofti_gaia.loftifittingtools import calc_XYZ, calc_velocities, calc_accel
+    from lofti_gaiaDR2.loftifittingtools import calc_XYZ, calc_velocities, calc_accel
     
     ddot = calc_accel(a,T,to,e,i,w,O,date,dist)
     dot = calc_velocities(a,T,to,e,i,w,O,date,dist)

@@ -30,7 +30,7 @@ def prepareconstraints(source_id1, source_id2):
 
     from astroquery.gaia import Gaia
     import astropy.units as u
-    from lofti_gaia.loftifittingtools import distance, to_polar, to_si
+    from lofti_gaiaDR2.loftifittingtools import distance, to_polar, to_si
     import numpy as np
     # Astroquery throws some warnings we can ignore:
     import warnings
@@ -214,7 +214,7 @@ def fitorbit(source_id1, source_id2,
     
     import numpy as np
     import time as tm
-    from lofti_gaia.loftifittingtools import draw_priors, calc_OFTI, to_si, update_progress
+    from lofti_gaiaDR2.loftifittingtools import draw_priors, calc_OFTI, to_si, update_progress
     import pickle
     import warnings
     warnings.filterwarnings("ignore")

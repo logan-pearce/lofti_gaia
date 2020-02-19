@@ -223,7 +223,7 @@ def calc_XYZ(a,T,to,e,i,w,O,date):
             is towards observer
     '''
     import numpy as np
-    from lofti_gaia.loftifittingtools import solve
+    from lofti_gaiaDR2.loftifittingtools import solve
     from numpy import tan, arctan, sqrt, cos, sin, arccos
     
     n = (2*np.pi)/T
@@ -259,7 +259,7 @@ def calc_velocities(a,T,to,e,i,w,O,date,dist):
     '''
     import numpy as np
     import astropy.units as u
-    from lofti_gaia.loftifittingtools import to_si, solve
+    from lofti_gaiaDR2.loftifittingtools import to_si, solve
     from numpy import tan, arctan, sqrt, cos, sin, arccos
     
     # convert to km:
@@ -309,7 +309,7 @@ def calc_accel(a,T,to,e,i,w,O,date,dist):
     import numpy as np
     from numpy import tan, arctan, sqrt, cos, sin, arccos
     import astropy.units as u
-    from lofti_gaia.loftifittingtools import to_si, solve
+    from lofti_gaiaDR2.loftifittingtools import to_si, solve
     # convert to km:
     a_mas = a*u.arcsec.to(u.mas)
     try:
