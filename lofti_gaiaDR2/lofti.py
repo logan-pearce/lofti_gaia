@@ -430,6 +430,33 @@ def fitorbit(source_id1, source_id2,
     print('This operation took',time,'seconds')
     print('and',time/3600.,'hours')
 
+def showconstraints(source_id1, source_id2):
+    """ Show the Gaia measurements without performing a fit
+    """
+    from lofti_gaiaDR2.lofti import prepareconstraints
+    from lofti_gaiaDR2.loftifittingtools import to_si
+    deltaRA, deltaDec, pmRA_kms, pmDec_kms, deltarv, total_pos_velocity, total_velocity_kms, \
+    rho, pa, delta_mag, d_star, ruwe = prepareconstraints(source_id1, source_id2)
+    print('Finished computing constraints:')
+    print('Delta RA, err in mas:', deltaRA[0], deltaRA[1])
+    print('Delta Dec, err in mas:', deltaDec[0], deltaDec[1])
+    print()
+    print('pmRA, err in km/s:',pmRA_kms[0], pmRA_kms[1])
+    print('pmDec, err in km/s:',pmDec_kms[0], pmDec_kms[1])
+    if deltarv != 0.:
+        print('deltaRV, err im km/s (pos towards observer):',deltarv[0], deltarv[1])
+    print()
+    print('Total relative velocity [km/s]:',total_velocity_kms[0],'+/-',total_velocity_kms[1])
+    print('Total plane-of-sky relative velocity [mas/yr]:',total_pos_velocity[0],'+/-',total_pos_velocity[1])
+    print()
+    print('sep,err [mas]',rho[0],rho[1], 'pa,err [deg]:',pa[0],pa[1])
+    print('sep [AU]',(rho[0]/1000)*d_star[0])
+    print('sep, err [km]',to_si(rho[0],0,d_star[0]),to_si(rho[1],0,d_star[0]))
+    print('D_star',d_star[0],'+\-',d_star[1])
+    print('Delta Gmag',delta_mag)
+    print('RUWE source 1:', ruwe[0][0])
+    print('RUWE source 2:', ruwe[1][0])
+
 
 def makeplots(input_directory,
                   rank = 0,
