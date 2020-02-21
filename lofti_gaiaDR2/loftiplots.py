@@ -53,7 +53,7 @@ def write_stats(params,params_names,filename):
     import numpy as np
     from lofti_gaiaDR2.loftiplots import calc_min_interval
     k = open(filename, 'w')
-    string = 'Parameter    Mean    Median    Std    Mode    68% Min Cred Int    95% Min Cred Int'
+    string = 'Parameter    Mean    Median    Mode    Std    68% Min Cred Int    95% Min Cred Int'
     k.write(string + "\n")
     k.close()
     for i in range(len(params)):
