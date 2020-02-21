@@ -310,7 +310,7 @@ def fitorbit(source_id1, source_id2,
             accept_min = float(input('Enter desired number of orbits: '))
 
     # Write out constraints to a file:
-    
+    outfile = open(output_directory + '/constraints.txt', 'w')
     # Human readable:
     string = 'DeltaRA: '+ str(deltaRA) + '\n'
     string += 'DeltaDEC: '+ str(deltaDec) + '\n'
@@ -519,7 +519,7 @@ def makeplots(input_directory,
 
     import numpy as np
     import pickle
-    from lofti_gaia.loftiplots import write_stats, plot_1d_hist, plot_observables_hist, plot_orbits3d, plot_orbits
+    from lofti_gaiaDR2.loftiplots import write_stats, plot_1d_hist, plot_observables_hist, plot_orbits3d, plot_orbits
     import os
     
     files = input_directory + '/accepted_'+str(rank)
