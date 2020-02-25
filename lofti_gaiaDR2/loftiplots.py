@@ -95,11 +95,13 @@ def plot_1d_hist(params,names,filename,bins,
                      label_fs = 25,
                      label_x_x=0.5,
                      label_x_y=-0.25,
-                     figsize=(30, 5.5)
+                     figsize=(30, 5.5),
+                     plot_style = 'default'
                 ):
     import matplotlib.pyplot as plt
     plt.ioff()
     fig = plt.figure(figsize=figsize)
+    plt.style.use(plot_style)
     for i in range(len(params)):
         ax = plt.subplot2grid((1,len(params)), (0,i))
         plt.hist(params[i],bins=bins,edgecolor='none',alpha=0.8)
@@ -126,6 +128,7 @@ def plot_orbits(a1,T1,to1,e1,i1,w1,O1, filename, obsdate, plane='xy',
                     colorlabel = 'Phase',
                     color = True,
                     colorbar = True,
+                    plot_style = 'default'
                ):
     ''' Plot orbits in RA/Dec given a set of orbital elements
         Inputs:  Array of orbital elements to plot
@@ -157,6 +160,7 @@ def plot_orbits(a1,T1,to1,e1,i1,w1,O1, filename, obsdate, plane='xy',
     from lofti_gaiaDR2.loftifittingtools import solve, eccentricity_anomaly
     
     fig = plt.figure(figsize=figsize)
+    plt.style.use(plot_style)
     plt.scatter(0,0,color='orange',marker='*',s=300,zorder=10)
     plt.xlim(-axlim,axlim)
     plt.ylim(-axlim,axlim)
@@ -229,6 +233,7 @@ def plot_orbits3d(a1,T1,to1,e1,i1,w1,O1, filename, obsdate, plane='xy',
                     colorlabel = 'Phase',
                     color = True,
                     colorbar = True,
+                    plot_style = 'default'
                ):
     ''' Plot orbits in RA/Dec given a set of orbital elements
         Inputs:  Array of orbital elements to plot
@@ -261,6 +266,7 @@ def plot_orbits3d(a1,T1,to1,e1,i1,w1,O1, filename, obsdate, plane='xy',
     from lofti_gaiaDR2.loftifittingtools import solve, eccentricity_anomaly
     
     fig = plt.figure()
+    plt.style.use(plot_style)
     ax = fig.add_subplot(111, projection='3d')
     ax.scatter(0,0,0,color='orange',marker='*',s=300,zorder=10)
     plt.xlim(axlim,-axlim)
@@ -306,7 +312,8 @@ def plot_observables_hist(a,T,to,e,i,w,O,date,dist, filename,
                     bins = 50,
                     ticksize = 10, 
                     labelsize = 12,
-                    figsize = (7.5, 6.)
+                    figsize = (7.5, 6.),
+                    plot_style = 'default'
                     ):
     ''' Plot histograms of posteriors of velocities and acceleration in the X, Y, and Z directions
         Inputs:
@@ -337,6 +344,7 @@ def plot_observables_hist(a,T,to,e,i,w,O,date,dist, filename,
     bins=bins
 
     # Plot X:
+    plt.style.use(plot_style)
     fig = plt.figure(figsize=figsize)
     plt.hist(pos[0],bins=50)
     plt.xlabel(r'$X$ [mas]')

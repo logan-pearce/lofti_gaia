@@ -316,7 +316,10 @@ def fitorbit(source_id1, source_id2,
     string += 'DeltaDEC: '+ str(deltaDec) + '\n'
     string += 'pmRA_kms: '+ str(pmRA_kms) + '\n'
     string += 'pmDEC_kms: '+ str(pmDec_kms) + '\n'
-    string += 'deltaRV: '+ str(deltarv) + '\n'
+    if deltarv[0] == 0.0:
+        string += 'deltaRV: No RV \n'
+    else:
+        string += 'deltaRV: '+ str(deltarv) + '\n'
     string += 'Total_Plane_Of_Sky_Vel: '+ str(total_pos_velocity) + '\n'
     string += 'Total_Velocity_kms: '+ str(total_velocity_kms) + '\n'
     string += 'Separation_mas: '+ str(rho) + '\n'
@@ -443,7 +446,9 @@ def showconstraints(source_id1, source_id2):
     print()
     print('pmRA, err in km/s:',pmRA_kms[0], pmRA_kms[1])
     print('pmDec, err in km/s:',pmDec_kms[0], pmDec_kms[1])
-    if deltarv != 0.:
+    if deltarv[0] == 0.0:
+        print('No RV')
+    else:
         print('deltaRV, err im km/s (pos towards observer):',deltarv[0], deltarv[1])
     print()
     print('Total relative velocity [km/s]:',total_velocity_kms[0],'+/-',total_velocity_kms[1])
@@ -463,10 +468,14 @@ def makeplots(input_directory,
                   Collect_into_one_file = False,
                   limit = 0.,
                   roll_w = False,
+                  limit_w = False,
+                  limit_O = False,
                   plot_posteriors = True,
                   plot_orbit_plane = True,
                   plot_3d = True,
-                  axlim = 6
+                  axlim = 6,
+                  log_a = True,
+                  plot_style = 'default'
               ):
     """ 
     Produce plots and summary statistics for the output from lofti.fitorbit.
@@ -485,7 +494,13 @@ def makeplots(input_directory,
         Sometimes semi-major axis posteriors will have very long tails.  If you wish to truncate the sma histogram 
         at some value for clarity, set the limit parameter to that value.
     roll_w : bool
-        I you wish to have arg of periastron wrap around zero, set this to True
+        If you wish to have arg of periastron wrap around zero, set this to True
+    limit_w : bool
+        If you wish to limit arg of peri to the interval [0,180], set this to True
+        (recommended in the absence of RV information).  Default = False
+    limit_O : bool
+        If you wish to limit position angle of nodes to the interval [0,180], set this to True
+        (Do not limit both w and O, recommend limiting w instead of O).  Default = False
     plot_posteriors : bool
         set to True to make posterior histogram plots of X, Y, Z, dotX, dotY, dotZ, ddotX, ddotY, ddotZ
     plot_orbit_plane : bool
@@ -561,6 +576,10 @@ def makeplots(input_directory,
     a_au=a*d_star[0]
     periastron = (1.-e)*a_au
 
+    if log_a == True:
+        a_au = np.log10(a_au)
+        periastron = np.log10(periastron)
+
     # If desired, truncate the semi-major axis histogram:
     if limit != 0.:
         a_au2 = a_au[np.where(a_au<limit)]
@@ -582,6 +601,11 @@ def makeplots(input_directory,
     else:
         w_temp = w_deg
 
+    if limit_w == True:
+        w_temp = w_temp % 180
+    if limit_O == True:
+        O_deg = O_deg % 180
+
     O_temp = O_deg.copy()%360
     for j in range(len(O_deg)):
         if O_temp[j] > 180:
@@ -589,7 +613,11 @@ def makeplots(input_directory,
         else:
             pass
 
-    plot_params_names = [r"$a \; (AU)$",r"$e$",r"$ i \; (deg)$",r"$ \omega \; (deg)$",r"$\Omega \; (deg)$",r"$T_0 \; (yr)$",\
+    if log_a == True:
+        plot_params_names = [r"$log(a) \; (AU)$",r"$e$",r"$ i \; (deg)$",r"$ \omega \; (deg)$",r"$\Omega \; (deg)$",r"$T_0 \; (yr)$",\
+                         r"$log(a\,(1-e)) \; (AU)$"]
+    else:
+        plot_params_names = [r"$a \; (AU)$",r"$e$",r"$ i \; (deg)$",r"$ \omega \; (deg)$",r"$\Omega \; (deg)$",r"$T_0 \; (yr)$",\
                          r"$a\,(1-e) \; (AU)$"]
                          
     print('Writing out stats')
@@ -599,13 +627,13 @@ def makeplots(input_directory,
     print('Making histograms')
     output_name = input_directory+"/hists.png"
     plot_1d_hist([a_au2,e,i_deg,w_temp,O_deg,to2,periastron],plot_params_names,output_name,'fd',tick_fs = 25,
-                     label_fs = 30,label_x_x=0.5, label_x_y = -0.3)
+                     label_fs = 30,label_x_x=0.5, label_x_y = -0.3, plot_style = plot_style)
 
     if plot_posteriors == True:
         print('Plotting observable posteriors')
         os.system('mkdir '+str(input_directory)+'/observable_posteriors')
         output_name = input_directory + '/observable_posteriors/'
-        plot_observables_hist(a,T,to,e,i,w,O,date,d_star[0],output_name)
+        plot_observables_hist(a,T,to,e,i,w,O,date,d_star[0],output_name, plot_style=plot_style)
 
     if plot_orbit_plane == True:
         print('Plotting orbits')
@@ -623,17 +651,17 @@ def makeplots(input_directory,
         print('XY plane')
         output_name = input_directory+"/orbits"
         plot_orbits(a1,T1,to1,e1,i1,w1,O1, output_name, date, axlim = axlim, ticksize = 15, 
-                            labelsize = 20)
+                            labelsize = 20, plot_style = plot_style)
 
         # X/Z plane:
         print('XZ plane')
         output_name = input_directory+"/orbits_xz"
-        plot_orbits(a1,T1,to1,e1,i1,w1,O1, output_name, date, axlim = axlim, plane = 'xz')
+        plot_orbits(a1,T1,to1,e1,i1,w1,O1, output_name, date, axlim = axlim, plane = 'xz', plot_style = plot_style)
 
         # Y/Z plane:
         print('YZ plane')
         output_name = input_directory+"/orbits_yz"
-        plot_orbits(a1,T1,to1,e1,i1,w1,O1, output_name, date, axlim = axlim, plane = 'yz')
+        plot_orbits(a1,T1,to1,e1,i1,w1,O1, output_name, date, axlim = axlim, plane = 'yz', plot_style = plot_style)
 
 
     if plot_3d == True:
@@ -648,7 +676,7 @@ def makeplots(input_directory,
 
         print('3D')
         output_name = input_directory+"/orbits_3d"
-        plot_orbits3d(a1,T1,to1,e1,i1,w1,O1, output_name, date, axlim = axlim)
+        plot_orbits3d(a1,T1,to1,e1,i1,w1,O1, output_name, date, axlim = axlim, plot_style = plot_style)
     
         
          
