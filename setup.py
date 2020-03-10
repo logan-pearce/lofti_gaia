@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='lofti_gaiaDR2',
-      version='0.0.2',
+      version='0.0.3',
       description='Orbit fitting with Gaia astrometry',
       url='https://github.com/logan-pearce/lofti_gaiaDR2',
       download_url='https://github.com/logan-pearce/lofti_gaiaDR2/archive/0.0.2.tar.gz',

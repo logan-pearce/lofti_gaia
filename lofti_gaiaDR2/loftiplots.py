@@ -96,7 +96,8 @@ def plot_1d_hist(params,names,filename,bins,
                      label_x_x=0.5,
                      label_x_y=-0.25,
                      figsize=(30, 5.5),
-                     plot_style = 'default'
+                     plot_style = 'default',
+                     saveas = 'png'
                 ):
     import matplotlib.pyplot as plt
     plt.ioff()
@@ -112,7 +113,7 @@ def plot_1d_hist(params,names,filename,bins,
         ax.get_xaxis().set_label_coords(label_x_x,label_x_y)
 
     plt.tight_layout()
-    plt.savefig(filename, format='png')
+    plt.savefig(filename+'.'+saveas, format=saveas)
     plt.close(fig)
     return fig
 
@@ -128,7 +129,8 @@ def plot_orbits(a1,T1,to1,e1,i1,w1,O1, filename, obsdate, plane='xy',
                     colorlabel = 'Phase',
                     color = True,
                     colorbar = True,
-                    plot_style = 'default'
+                    plot_style = 'default',
+                    saveas = 'png'
                ):
     ''' Plot orbits in RA/Dec given a set of orbital elements
         Inputs:  Array of orbital elements to plot
@@ -215,7 +217,7 @@ def plot_orbits(a1,T1,to1,e1,i1,w1,O1, filename, obsdate, plane='xy',
         plt.colorbar().set_label(colorlabel, fontsize=labelsize)
     plt.tight_layout()
     #plt.savefig(filename+'.pdf', format='pdf')
-    plt.savefig(filename+'.png', format='png', dpi=300)
+    plt.savefig(filename+'.'+saveas, format=saveas, dpi=300)
     plt.close(fig)
     return fig
 
@@ -233,7 +235,8 @@ def plot_orbits3d(a1,T1,to1,e1,i1,w1,O1, filename, obsdate, plane='xy',
                     colorlabel = 'Phase',
                     color = True,
                     colorbar = True,
-                    plot_style = 'default'
+                    plot_style = 'default',
+                    saveas = 'png'
                ):
     ''' Plot orbits in RA/Dec given a set of orbital elements
         Inputs:  Array of orbital elements to plot
@@ -305,7 +308,7 @@ def plot_orbits3d(a1,T1,to1,e1,i1,w1,O1, filename, obsdate, plane='xy',
     #if colorbar == True:
     #    plt.colorbar().set_label(colorlabel)
     plt.tight_layout()
-    plt.savefig(filename+'.png', format='png', dpi=300)
+    plt.savefig(filename+'.'+saveas, format=saveas, dpi=300)
     return fig
 
 def plot_observables_hist(a,T,to,e,i,w,O,date,dist, filename,
@@ -313,7 +316,8 @@ def plot_observables_hist(a,T,to,e,i,w,O,date,dist, filename,
                     ticksize = 10, 
                     labelsize = 12,
                     figsize = (7.5, 6.),
-                    plot_style = 'default'
+                    plot_style = 'default',
+                    saveas = 'png'
                     ):
     ''' Plot histograms of posteriors of velocities and acceleration in the X, Y, and Z directions
         Inputs:
@@ -349,62 +353,62 @@ def plot_observables_hist(a,T,to,e,i,w,O,date,dist, filename,
     plt.hist(pos[0],bins=50)
     plt.xlabel(r'$X$ [mas]')
     plt.tight_layout()
-    plt.savefig(filename+'X.png', format='png', dpi=300)
+    plt.savefig(filename+'X.'+saveas, format=saveas, dpi=300)
     plt.close(fig)
     # Plot Y:
     fig = plt.figure(figsize=figsize)
     plt.hist(pos[1],bins=50)
     plt.xlabel(r'$Y$ [mas]')
     plt.tight_layout()
-    plt.savefig(filename+'Y.png', format='png', dpi=300)
+    plt.savefig(filename+'Y.'+saveas, format=saveas, dpi=300)
     plt.close(fig)
     # Plot Z:
     fig = plt.figure(figsize=figsize)
     plt.hist(pos[2],bins=50)
     plt.xlabel(r'$Z$ [mas]')
     plt.tight_layout()
-    plt.savefig(filename+'Z.png', format='png', dpi=300)
+    plt.savefig(filename+'Z.'+saveas, format=saveas, dpi=300)
     plt.close(fig)
     # Plot Xdot:
     fig = plt.figure(figsize=figsize)
     plt.hist(dot[0],bins=50)
     plt.xlabel(r'$\dot{X}$ [km/s]')
     plt.tight_layout()
-    plt.savefig(filename+'xdot.png', format='png', dpi=300)
+    plt.savefig(filename+'xdot.'+saveas, format=saveas, dpi=300)
     plt.close(fig)
     # Plot Ydot:
     fig = plt.figure(figsize=figsize)
     plt.hist(dot[1],bins=50)
     plt.xlabel(r'$\dot{Y}$ km/s]')
     plt.tight_layout()
-    plt.savefig(filename+'ydot.png', format='png', dpi=300)
+    plt.savefig(filename+'ydot.'+saveas, format=saveas, dpi=300)
     plt.close(fig)
     # Plot Zdot:
     fig = plt.figure(figsize=figsize)
     plt.hist(dot[2],bins=50)
     plt.xlabel(r'$\dot{Z}$ [km/s]')
     plt.tight_layout()
-    plt.savefig(filename+'zdot.png', format='png', dpi=300)
+    plt.savefig(filename+'zdot.'+saveas, format=saveas, dpi=300)
     plt.close(fig)
     # Plot Xddot:
     fig = plt.figure(figsize=figsize)
     plt.hist(ddot[0],bins=50)
     plt.xlabel(r'$\ddot{X}$ [m/s/yr]')
     plt.tight_layout()
-    plt.savefig(filename+'xddot.png', format='png', dpi=300)
+    plt.savefig(filename+'xddot.'+saveas, format=saveas, dpi=300)
     plt.close(fig)
     # Plot Yddot:
     fig = plt.figure(figsize=figsize)
     plt.hist(ddot[1],bins=50)
     plt.xlabel(r'$\ddot{Y}$ [m/s/yr]')
     plt.tight_layout()
-    plt.savefig(filename+'yddot.png', format='png', dpi=300)
+    plt.savefig(filename+'yddot.'+saveas, format=saveas, dpi=300)
     plt.close(fig)
     # Plot Zddot:
     fig = plt.figure(figsize=figsize)
     plt.hist(ddot[2],bins=50)
     plt.xlabel(r'$\ddot{Z}$ [m/s/yr]')
     plt.tight_layout()
-    plt.savefig(filename+'zddot.png', format='png', dpi=300)
+    plt.savefig(filename+'zddot.'+saveas, format=saveas, dpi=300)
     plt.close(fig)
     return fig

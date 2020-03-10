@@ -250,19 +250,21 @@ def fitorbit(source_id1, source_id2,
             return None
         else:
             print("Yeehaw let's go")
-
-    if ruwe[0]>1.2 or ruwe[1]>1.2:
-        yn = input('''WARNING: RUWE for one or more of your solutions is greater than 1.2. This indicates 
+    if rank == 0:
+        if ruwe[0]>1.2 or ruwe[1]>1.2:
+            print(rank)
+            yn = input('''WARNING: RUWE for one or more of your solutions is greater than 1.2. This indicates 
             that the source might be an unresolved binary or experiencing acceleration 
             during the observation.  Orbit fit results may not be trustworthy.  Do you 
             wish to continue?
             Hit enter to proceed, n to exit: ''')
-        if yn == 'n':
-            return None
+            if yn == 'n':
+                return None
         else:
-            pass
+                pass
+    else:
+        pass
         
-    
     #################### Begin the fit: ####################
     
     # Get the masses of the objects:
@@ -475,7 +477,8 @@ def makeplots(input_directory,
                   plot_3d = True,
                   axlim = 6,
                   log_a = True,
-                  plot_style = 'default'
+                  plot_style = 'default',
+                  saveas = 'png'
               ):
     """ 
     Produce plots and summary statistics for the output from lofti.fitorbit.
@@ -505,10 +508,16 @@ def makeplots(input_directory,
         set to True to make posterior histogram plots of X, Y, Z, dotX, dotY, dotZ, ddotX, ddotY, ddotZ
     plot_orbit_plane : bool
         set to True to generate plot of 100 random orbits from the posterior in XY plane, XZ plane, and YZ plane
-    plot_3d: bool
+    plot_3d : bool
         set to True to generare a 3D plot of 20 random orbits from the posterior.
-    axlim: flt [arcsec]
+    axlim : flt [arcsec]
         if plot_orbits = True or plot_3d = True, set this parameter to set the axis limits (in arcsec) for the plots
+    log_a : bool
+        set to True to plot semi-major axis and periastron in log scale in marginalized posterior
+    plot_style : str
+        matplotlib plotting style.  Default = True
+    saveas : str
+        keyword for plt.savefig to set the output format.
 
     Returns:
     --------
@@ -625,9 +634,9 @@ def makeplots(input_directory,
     write_stats([a_au,e,i_deg,w_temp,O_temp,to,periastron],plot_params_names,stats_name)
 
     print('Making histograms')
-    output_name = input_directory+"/hists.png"
+    output_name = input_directory+"/hists"
     plot_1d_hist([a_au2,e,i_deg,w_temp,O_deg,to2,periastron],plot_params_names,output_name,'fd',tick_fs = 25,
-                     label_fs = 30,label_x_x=0.5, label_x_y = -0.3, plot_style = plot_style)
+                     label_fs = 30,label_x_x=0.5, label_x_y = -0.3, plot_style = plot_style, saveas = saveas)
 
     if plot_posteriors == True:
         print('Plotting observable posteriors')
@@ -651,17 +660,19 @@ def makeplots(input_directory,
         print('XY plane')
         output_name = input_directory+"/orbits"
         plot_orbits(a1,T1,to1,e1,i1,w1,O1, output_name, date, axlim = axlim, ticksize = 15, 
-                            labelsize = 20, plot_style = plot_style)
+                            labelsize = 20, plot_style = plot_style, saveas = saveas)
 
         # X/Z plane:
         print('XZ plane')
         output_name = input_directory+"/orbits_xz"
-        plot_orbits(a1,T1,to1,e1,i1,w1,O1, output_name, date, axlim = axlim, plane = 'xz', plot_style = plot_style)
+        plot_orbits(a1,T1,to1,e1,i1,w1,O1, output_name, date, axlim = axlim, plane = 'xz', plot_style = plot_style,
+                        saveas = saveas)
 
         # Y/Z plane:
         print('YZ plane')
         output_name = input_directory+"/orbits_yz"
-        plot_orbits(a1,T1,to1,e1,i1,w1,O1, output_name, date, axlim = axlim, plane = 'yz', plot_style = plot_style)
+        plot_orbits(a1,T1,to1,e1,i1,w1,O1, output_name, date, axlim = axlim, plane = 'yz', plot_style = plot_style,
+                        saveas = saveas)
 
 
     if plot_3d == True:
@@ -676,7 +687,8 @@ def makeplots(input_directory,
 
         print('3D')
         output_name = input_directory+"/orbits_3d"
-        plot_orbits3d(a1,T1,to1,e1,i1,w1,O1, output_name, date, axlim = axlim, plot_style = plot_style)
+        plot_orbits3d(a1,T1,to1,e1,i1,w1,O1, output_name, date, axlim = axlim, plot_style = plot_style,
+                          saveas = saveas)
     
         
          
