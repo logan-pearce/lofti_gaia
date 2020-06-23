@@ -211,7 +211,7 @@ def calc_XYZ(a,T,to,e,i,w,O,date):
     ''' Compute projected on-sky position only of a single object on a Keplerian orbit given a 
         set of orbital elements at a single observation point. 
         Inputs:
-            a [as]: semi-major axis
+            a [as]: semi-major axis in mas
             T [yrs]: period
             to [yrs]: epoch of periastron passage (in same time structure as dates)
             e: eccentricity
@@ -246,7 +246,7 @@ def calc_velocities(a,T,to,e,i,w,O,date,dist):
         set of orbital elements at a single observation point.  Uses my eqns derived from Seager 
         Exoplanets Ch2.
         Inputs:
-            a [as]: semi-major axis
+            a [as]: semi-major axis in mas
             T [yrs]: period
             to [yrs]: epoch of periastron passage (in same time structure as dates)
             e: eccentricity
@@ -351,7 +351,7 @@ def calc_OFTI(a,T,const,to,e,i,w,O,d,m1,dist,rho,pa):
     '''Perform OFTI steps to determine position/velocity/acceleration predictions given
        orbital elements.
         Inputs:
-            a [as]: semi-major axis
+            a [as]: semi-major axis in mas
             T [yrs]: period
             to [yrs]: epoch of periastron passage (in same time structure as dates)
             e: eccentricity

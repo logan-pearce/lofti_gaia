@@ -153,7 +153,6 @@ def plot_orbits(a1,T1,to1,e1,i1,w1,O1, filename, obsdate, plane='xy',
             color: True plots in color, False plots orbits in bw
             colorbar: True renders colorbar, False omits colorbar.  If color is set to False, 
                 colorbar must also be set to False.
-            showplot: set to True to return the figure
         Returns: figure
     '''
     import matplotlib.pyplot as plt

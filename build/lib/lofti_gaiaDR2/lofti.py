@@ -299,7 +299,7 @@ def fitorbit(source_id1, source_id2,
     chi_min = np.nanmin(chi)
     if verbose == True:
         print('Chi-min:',chi_min)
-        
+
     print('Ok, starting loop')
     if verbose == True:
         print('I will write files out to this directory:',output_directory)
@@ -578,13 +578,8 @@ def makeplots(input_directory,
     i,w,O = np.radians(i_deg),np.radians(w_deg),np.radians(O_deg)
     
     # Read in observational constraints:
-    try:
-        infile = open(input_directory+"/constraints.pkl",'rb')
-        deltaRA, deltaDec, pmRA_kms, pmDec_kms, deltarv, total_pos_velocity, total_velocity_kms, rho, pa, delta_mag, d_star = pickle.load(infile)
-    except:
-        d = float(input('Enter distance to star [pc]: '))
-        derr = float(input('Enter distance error: '))
-        d_star = [d,derr]
+    infile = open(input_directory+"/constraints.pkl",'rb')
+    deltaRA, deltaDec, pmRA_kms, pmDec_kms, deltarv, total_pos_velocity, total_velocity_kms, rho, pa, delta_mag, d_star = pickle.load(infile)
     date = 2015.5
     
     a_au=a*d_star[0]
