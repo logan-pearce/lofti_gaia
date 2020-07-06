@@ -1,6 +1,6 @@
 import astropy.units as u
 import numpy as np
-from loftitools import *
+from loftitools2 import *
 # Astroquery throws some warnings we can ignore:
 import warnings
 warnings.filterwarnings("ignore")
@@ -64,6 +64,8 @@ class Fitter(object):
         self.Norbits = Norbits
         # Get Gaia measurements, compute needed cosntraints, and add to object:
         self.PrepareConstraints()
+        # Make an empty results object to store results:
+        #self.results = Results(self.Norbits)
 
     def PrepareConstraints(self, rv=False):
         '''
@@ -180,8 +182,9 @@ class Fitter(object):
 
         # compute deltamag:
         self.deltaGmag = j[0]['phot_g_mean_mag'] - k[0]['phot_g_mean_mag']
-    
 
+
+                
 class FitOrbit(object):
     def __init__(self, fitterobject):
         self.deltaRA = fitterobject.deltaRA
@@ -204,9 +207,11 @@ class FitOrbit(object):
         ########### Perform initial run to get initial chi-squared: #############
         # Draw random orbits:
         #parameters = a,T,const,to,e,i,w,O,m1,dist
-        parameters_init = draw_samples(10000, [self.mtot, self.mtoterr], self.distance, self.ref_epoch)
-        # Compute positions and velocities:
-        X,Y,Z,Xdot,Ydot,Zdot,Xddot,Yddot,Zddot,parameters = calc_OFTI(parameters_init,self.ref_epoch,self.sep,self.pa)
+        a,T,const,to,e,i,w,O,m1,dist = draw_samples(10000, [self.mtot, self.mtoterr], self.distance, self.ref_epoch)
+             #a,T,const,to,e,i,w,O,d,m_tot,dist,rho,pa
+            # Compute positions and velocities and new parameters array with scaled and rotated values:
+        X,Y,Z,Xdot,Ydot,Zdot,Xddot,Yddot,Zddot,a2,T2,to2,e,i,w,O2 = calc_OFTI(a,T,const,to,e,i,w,O,\
+            self.ref_epoch,m1,dist,self.sep,self.pa)
         # Compute chi squared:
         if self.rv[0] != 0:
             measurements = np.array([Y,X,Ydot,Xdot,Zdot])
@@ -226,12 +231,24 @@ class FitOrbit(object):
         accepted, lnprob, lnrand = AcceptOrReject(chi2,self.chi_min)
         # count number accepted:
         number_orbits_accepted = np.size(accepted)
+        parameters = np.zeros((13,10000))
+        parameters[0,:],parameters[1,:],parameters[2,:],parameters[3,:],parameters[4,:],parameters[5,:], \
+              parameters[6,:],parameters[7,:],parameters[8,:],parameters[9,:],parameters[10,:],parameters[11,:], \
+              parameters[12,:] = a2,T2,const,to2,e,i,w,O2,m1,dist,chi2,lnprob,lnrand
         # tack on chi2, log probability, log random unif number to parameters array:
-        parameters = np.concatenate((parameters,chi2[None,:],lnprob[None,:],lnrand[None,:]), axis = 0)
+        #parameters = np.concatenate((parameters,chi2[None,:],lnprob[None,:],lnrand[None,:]), axis = 0)
         # transpose:
         parameters=np.transpose(parameters)
         # intialist results object and store accepted orbits:
-        self.results = Results(self.Norbits, orbits = parameters[accepted])
+        '''self.results = Results(self.Norbits, orbits = parameters[accepted])'''
+        # Make file to store output:
+        output_directory = '.'
+        rank = 0
+        output_file = output_directory + '/accepted_'+str(rank)
+        k = open(output_file, 'w')
+        k.write('# semimajoraxis[arcsec]    period[yrs]    orbitfrac    t_o[yr]    ecc    incl[deg]    argofperiastron[deg]    posangleofnodes[deg]\
+            mass[Msun]   distance[pc]  chisquaredvalue    proboforbit    randnum' + "\n")
+        k.close()
         
         ###### start loop ########
         # initialize:
@@ -241,9 +258,11 @@ class FitOrbit(object):
         
         while number_orbits_accepted < self.Norbits:
             # Draw random orbits:
-            parameters_init = draw_samples(10000, [self.mtot, self.mtoterr], self.distance, self.ref_epoch)
+            a,T,const,to,e,i,w,O,m1,dist = draw_samples(10000, [self.mtot, self.mtoterr], self.distance, self.ref_epoch)
+             #a,T,const,to,e,i,w,O,d,m_tot,dist,rho,pa
             # Compute positions and velocities and new parameters array with scaled and rotated values:
-            X,Y,Z,Xdot,Ydot,Zdot,Xddot,Yddot,Zddot,parameters = calc_OFTI(parameters_init,self.ref_epoch,self.sep,self.pa)
+            X,Y,Z,Xdot,Ydot,Zdot,Xddot,Yddot,Zddot,a2,T2,to2,e,i,w,O2 = calc_OFTI(a,T,const,to,e,i,w,O,\
+                self.ref_epoch,m1,dist,self.sep,self.pa)
             # compute chi2 for orbits:
             if self.rv[0] != 0:
                 measurements = np.array([Y,X,Ydot,Xdot,Zdot])
@@ -255,21 +274,35 @@ class FitOrbit(object):
             
             # Accept/reject:
             accepted, lnprob, lnrand = AcceptOrReject(chi2,self.chi_min)
+
+            parameters = np.zeros((13,10000))
+            parameters[0,:],parameters[1,:],parameters[2,:],parameters[3,:],parameters[4,:],parameters[5,:], \
+                parameters[6,:],parameters[7,:],parameters[8,:],parameters[9,:],parameters[10,:],parameters[1,:], \
+                parameters[12,:] = a2,T2,const,to2,e,i,w,O2,m1,dist,chi2,lnprob,lnrand
             if np.size(accepted) == 0:
                 #print('none accepted')
                 pass
             else:
                 # count num accepted
                 number_orbits_accepted += np.size(accepted)
-                parameters = np.concatenate((parameters,chi2[None,:],lnprob[None,:],lnrand[None,:]), axis = 0)
+                parameters = np.zeros((13,10000))
+                parameters[0,:],parameters[1,:],parameters[2,:],parameters[3,:],parameters[4,:],parameters[5,:], \
+                    parameters[6,:],parameters[7,:],parameters[8,:],parameters[9,:],parameters[10,:],parameters[1,:], \
+                    parameters[12,:] = a2,T2,const,to2,e,i,w,O2,m1,dist,chi2,lnprob,lnrand
                 parameters=np.transpose(parameters)
-                # Store results:
+                '''# Store results:
                 self.results.orbits = np.vstack((self.results.orbits,parameters[accepted]))
                 # update orbital parameters attributes:
                 self.results.Update(self.results.orbits)
-                #print('num orbits',number_orbits_accepted)
+                #print('num orbits',number_orbits_accepted)'''
+                # Write out to text file:
+                k = open(output_file, 'a')
+                for params in parameters[accepted]:
+                    string = '   '.join([str(p) for p in params])
+                    k.write(string + "\n")
+                k.close()
 
-            if np.nanmin(chi2) < self.chi_min:
+            '''if np.nanmin(chi2) < self.chi_min:
                 # If there is a new min chi2:
                 self.chi_min = np.nanmin(chi2)
                 # print('New chi min:',self.chi_min)
@@ -277,15 +310,55 @@ class FitOrbit(object):
                 accepted_recompute, lnprob, lnrand = AcceptOrReject(self.results.chi2,self.chi_min)
                 self.results.orbits = self.results.orbits[accepted_recompute]
                 self.results.Update(self.results.orbits)
-                number_orbits_accepted = len(self.results.chi2)
+                number_orbits_accepted = len(self.results.chi2)'''
+            if np.nanmin(chi2) < self.chi_min:
+                self.chi_min = np.nanmin(chi2)
+                #print('Found new chi min: ',chi_min)
+                found_new_chi_min = 'yes'
+            else:
+                found_new_chi_min = 'no'
+            #if this minimum chi is less than the previously assigned chi_min, update the chi_min variable
+            #to the new value, and write it out to this file. 
+        
+            if found_new_chi_min == 'yes' and number_orbits_accepted!=0: 
+                ############## Recalculate old accepted orbits with new chi-min for acceptance #######
+                dat = np.loadtxt(open(output_file,"rb"),delimiter='   ',ndmin=2)
+                a,T,const,to,e,i,w,O,m1,dist,chi,lnprob,lnrand = dat[:,0],dat[:,1],dat[:,2],dat[:,3],dat[:,4],dat[:,5],\
+                    dat[:,6],dat[:,7],dat[:,8],dat[:,9],dat[:,10],dat[:,11],dat[:,12]
+                q = open(output_file, 'w')
+                q.write('# semimajoraxis[arcsec]    period[yrs]    orbitfrac    t_o[yr]    ecc    incl[deg]    argofperiastron[deg]    posangleofnodes[deg]\
+                        mass[Msun]   distance[pc]  chisquaredvalue    proboforbit    randnum' + "\n")
+                acc = 0
+                for a1,T1,const1,to1,e1,i1,w1,O1,m11,dist1,c1,A1,dice1  in zip(a,T,const,to,e,i,w,O,m1,dist,chi,lnprob,lnrand):
+                    delta_chi1 = -(c1-self.chi_min)/2.0
+                    AA = delta_chi1
+                    if AA > dice1:
+                        string = '   '.join([str(p) for p in [a1,T1,const1,to1,e1,i1,w1,O1,m11,dist1,c1,AA,dice1]])
+                        q.write(string + "\n")
+                    else:
+                        pass
+                q.close()
+                dat2 = np.loadtxt(open(output_file,"rb"),delimiter='   ',ndmin=2)
+                number_orbits_accepted=dat2.shape[0]
+            else:
+                pass
+
+            if loop_count%10 == 0:
+                dat2 = np.loadtxt(open(output_file,"rb"),delimiter='   ',ndmin=2)
+                number_orbits_accepted=dat2.shape[0]
+                update_progress(number_orbits_accepted,self.Norbits)
 
             
             loop_count += 1
             #print('loop count',loop_count)
-            update_progress(number_orbits_accepted,self.Norbits)
+            #update_progress(number_orbits_accepted,self.Norbits)
 
         stop = tm.time()
         print('Time',stop - start,((stop - start)*u.s).to(u.hr))
+
+            
+
+
             
 class Results(object):
     def __init__(self, Norbits, orbits = []):

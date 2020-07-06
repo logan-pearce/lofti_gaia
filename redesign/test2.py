@@ -1,4 +1,4 @@
-from lofti_redesign import Fitter, FitOrbit
+from lofti_redesign2 import Fitter, FitOrbit
 #import numpy as np
 
 DSTucA = 6387058411482257536

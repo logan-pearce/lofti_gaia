@@ -216,6 +216,7 @@ def plot_orbits(a1,T1,to1,e1,i1,w1,O1, filename, obsdate, plane='xy',
             plt.xlabel(Ylabel,fontsize=labelsize)
     if colorbar == True:
         plt.colorbar().set_label(colorlabel, fontsize=labelsize)
+    plt.grid(b=False)
     plt.tight_layout()
     #plt.savefig(filename+'.pdf', format='pdf')
     plt.savefig(filename+'.'+saveas, format=saveas, dpi=300)

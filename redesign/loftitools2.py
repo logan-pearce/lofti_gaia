@@ -119,6 +119,24 @@ def mas_to_km2(arcsec,dist):
 
     return km
 
+def to_si(mas,mas_yr,d):
+    '''Convert from mas -> km and mas/yr -> km/s
+        Input: 
+         mas (array) [mas]: distance in mas
+         mas_yr (array) [mas/yr]: velocity in mas/yr
+         d (float) [pc]: distance to system in parsecs
+        Returns:
+         km (array) [km]: distance in km
+         km_s (array) [km/s]: velocity in km/s
+    '''
+    import astropy.units as u
+    
+    km = ((mas*u.mas.to(u.arcsec)*d)*u.AU).to(u.km)
+    km_s = ((mas_yr*u.mas.to(u.arcsec)*d)*u.AU).to(u.km)
+    km_s = (km_s.value)*(u.km/u.yr).to(u.km/u.s)
+    
+    return km.value,km_s
+
 def to_polar(RAa,RAb,Deca,Decb):
     ''' Converts RA/Dec [deg] of two binary components into separation and position angle of B relative 
         to A [mas, deg]
@@ -236,6 +254,34 @@ def mikkola_solve(M,e):
 
     return E0 + dx4
 
+def solve(f, M0, e, h):
+    ''' Newton-Raphson solver for eccentricity anomaly
+    from https://stackoverflow.com/questions/20659456/python-implementing-a-numerical-equation-solver-newton-raphson
+    Inputs: 
+        f (function): function to solve (transcendental ecc. anomaly function)
+        M0 (float): mean anomaly
+        e (float): eccentricity
+        h (float): termination criteria for solver
+    Returns: nextE (float): converged solution for eccentric anomaly
+    '''
+    import numpy as np
+    
+    if M0 / (1.-e) - np.sqrt( ( (6.*(1-e)) / e ) ) <= 0:
+        E0 = M0 / (1.-e)
+    else:
+        E0 = (6. * M0 / e) ** (1./3.)
+    lastE = E0
+    nextE = lastE + 10* h  
+    number=0
+    while (abs(lastE - nextE) > h) and number < 1001:  
+        newY = f(nextE,e,M0) 
+        lastE = nextE
+        nextE = lastE - newY / (1.-e*np.cos(lastE))
+        number=number+1
+        if number >= 100:
+            nextE = float('NaN')
+    return nextE
+
 def draw_samples(number, m_tot, d_star, date):
     """
     Draw a set of orbital elements from proability distribution functions.
@@ -350,11 +396,14 @@ def calc_XYZ(a,T,to,e,i,w,O,date):
         Returns: X, Y, and Z coordinates [as] where +X is in the reference direction (north) and +Y is east, and +Z
             is towards observer
     '''
+    import numpy as np
+    from numpy import tan, arctan, sqrt, cos, sin, arccos
+    
     n = (2*np.pi)/T
     M = n*(date-to)
-    nextE = [danby_solve(eccentricity_anomaly, varM,vare, 0.001) for varM,vare in zip(M,e)]
+    nextE = [solve(eccentricity_anomaly, varM,vare, 0.001) for varM,vare in zip(M,e)]
     E = np.array(nextE)
-    # true anomaly:
+    #E = solve(eccentricity_anomaly, M,e, 0.001)
     f1 = sqrt(1.+e)*sin(E/2.)
     f2 = sqrt(1.-e)*cos(E/2.)
     f = 2.*np.arctan2(f1,f2)
@@ -363,9 +412,9 @@ def calc_XYZ(a,T,to,e,i,w,O,date):
     X = r * ( cos(O)*cos(w+f) - sin(O)*sin(w+f)*cos(i) )
     Y = r * ( sin(O)*cos(w+f) + cos(O)*sin(w+f)*cos(i) )
     Z = r * sin(w+f)*sin(i)
-    return X,Y,Z,E
+    return X,Y,Z
 
-def calc_velocities(a,T,to,e,i,w,O,date,dist,E):
+def calc_velocities(a,T,to,e,i,w,O,date,dist):
     ''' Compute 3-d velocity of a single object on a Keplerian orbit given a 
         set of orbital elements at a single observation point.  Uses my eqns derived from Seager 
         Exoplanets Ch2.
@@ -381,18 +430,21 @@ def calc_velocities(a,T,to,e,i,w,O,date,dist,E):
             m_tot [Msol]: total system mass
         Returns: X dot, Y dot, Z dot three dimensional velocities [km/s]
     '''
-    #from lofti_gaiaDR2.loftifittingtools import to_si, solve
+    import numpy as np
+    import astropy.units as u
+    from numpy import tan, arctan, sqrt, cos, sin, arccos
     
     # convert to km:
-    a_km = mas_to_km2(a,dist)
+    a_km = to_si(a*1000.,0.,dist)
+    a_km = a_km[0]
     
     # Compute true anomaly:
     n = (2*np.pi)/T
-    #M = n*(date-to)
-    #nextE = [danby_solve(eccentricity_anomaly, varM,vare, 0.001) for varM,vare in zip(M,e)]
-    #E = np.array(nextE)
+    M = n*(date-to)
+    nextE = [solve(eccentricity_anomaly, varM,vare, 0.001) for varM,vare in zip(M,e)]
+    E = np.array(nextE)
     #E = solve(eccentricity_anomaly, M,e, 0.001)
-    #r1 = a*(1.-e*cos(E))
+    r1 = a*(1.-e*cos(E))
     f1 = sqrt(1.+e)*sin(E/2.)
     f2 = sqrt(1.-e)*cos(E/2.)
     f = 2.*np.arctan2(f1,f2)
@@ -411,7 +463,7 @@ def calc_velocities(a,T,to,e,i,w,O,date,dist,E):
     Zdot = Zdot*(u.km/u.yr).to((u.km/u.s))
     return Xdot,Ydot,Zdot
 
-def calc_accel(a,T,to,e,i,w,O,date,dist,E):
+def calc_accel(a,T,to,e,i,w,O,date,dist):
     ''' Compute 3-d acceleration of a single object on a Keplerian orbit given a 
         set of orbital elements at a single observation point.  
         Inputs:
@@ -426,12 +478,24 @@ def calc_accel(a,T,to,e,i,w,O,date,dist,E):
             dist [pc]: distance to system in pc
         Returns: X ddot, Y ddot, Z ddot three dimensional accelerations [m/s/yr]
     '''
-    
-    #from lofti_gaiaDR2.loftifittingtools import to_si, solve
+    import numpy as np
+    from numpy import tan, arctan, sqrt, cos, sin, arccos
+    import astropy.units as u
     # convert to km:
-    a_km = mas_to_km2(a,dist)
-    # mean motion:
+    a_mas = a*u.arcsec.to(u.mas)
+    try:
+        a_mas = a_mas.value
+    except:
+        pass
+    a_km = to_si(a_mas,0.,dist)[0]
+    # Compute true anomaly:
     n = (2*np.pi)/T
+    M = n*(date-to)
+    try:
+        nextE = [solve(eccentricity_anomaly, varM,vare, 0.001) for varM,vare in zip(M,e)]
+        E = np.array(nextE)
+    except:
+        E = solve(eccentricity_anomaly, M,e, 0.001)
     # r and f:
     f1 = sqrt(1.+e)*sin(E/2.)
     f2 = sqrt(1.-e)*cos(E/2.)
@@ -454,7 +518,7 @@ def calc_accel(a,T,to,e,i,w,O,date,dist,E):
     return Xddot*(u.km/u.yr/u.yr).to((u.m/u.s/u.yr)), Yddot*(u.km/u.yr/u.yr).to((u.m/u.s/u.yr)), \
                     Zddot*(u.km/u.yr/u.yr).to((u.m/u.s/u.yr))
 
-def calc_OFTI(parameters,date,rho,pa):
+def calc_OFTI(a,T,const,to,e,i,w,O,d,m1,dist,rho,pa):
     '''Perform OFTI steps to determine position/velocity/acceleration predictions given
        orbital elements.
         Inputs:
@@ -476,28 +540,22 @@ def calc_OFTI(parameters,date,rho,pa):
     '''
     import numpy as np
     import astropy.units as u
-    #a,T,const,to,e,i,w,O,m1,dist = parameters
-    p = parameters
-    # pull values out of array:
-    a,T,const,to,e,i,w,O,m1,dist = p[0],p[1],p[2],p[3],p[4],p[5],p[6],p[7],p[8],p[9]
     # Calculate predicted positions at observation date:
-    X1,Y1,Z1,E1 = calc_XYZ(a,T,to,e,i,w,O,date)
+    X1,Y1,Z1 = calc_XYZ(a,T,to,e,i,w,O,d)
     # scale and rotate:
-    a2,T2,to2,O2 = scale_and_rotate(X1,Y1,rho,pa,a,const,m1,dist,date)
+    a2,T2,to2,O2 = scale_and_rotate(X1,Y1,rho,pa,a,const,m1,dist,d)
     # recompute predicted position:
-    X2,Y2,Z2,E2 = calc_XYZ(a2,T2,to2,e,i,w,O2,date)
+    X2,Y2,Z2 = calc_XYZ(a2,T2,to2,e,i,w,O2,d)
     # convert units:
     X2,Y2,Z2 = (X2*u.arcsec).to(u.mas).value, (Y2*u.arcsec).to(u.mas).value, (Z2*u.arcsec).to(u.mas).value
     # Compute velocities at observation date:
-    Xdot,Ydot,Zdot = calc_velocities(a2,T2,to2,e,i,w,O2,date,dist,E2)
+    Xdot,Ydot,Zdot = calc_velocities(a2,T2,to2,e,i,w,O2,d,dist)
     # Compute accelerations at observation date:
-    Xddot,Yddot,Zddot = calc_accel(a2,T2,to2,e,i,w,O2,date,dist,E2)
-    # Convert to degrees for output:
+    Xddot,Yddot,Zddot = calc_accel(a2,T2,to2,e,i,w,O2,d,dist)
+    # Convert to degrees:
     i,w,O2 = np.degrees(i),np.degrees(w),np.degrees(O2)
-    # put back into output array:
-    p[0],p[1],p[2],p[3],p[4],p[5],p[6],p[7] = a2,T2,const,to2,e,i,w,O2
-    #return X2,Y2,Z2,Xdot,Ydot,Zdot,Xddot,Yddot,Zddot,a2,T2,to2,e,i,w,O2
-    return X2,Y2,Z2,Xdot,Ydot,Zdot,Xddot,Yddot,Zddot,p
+    #a,T,const,to,e,i,w,O,m1,dist
+    return X2,Y2,Z2,Xdot,Ydot,Zdot,Xddot,Yddot,Zddot,a2,T2,to2,e,i,w,O2
 
 def AcceptOrReject(chi2,chi_min):
     nvals = len(chi2)
