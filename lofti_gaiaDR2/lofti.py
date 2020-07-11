@@ -281,7 +281,7 @@ def fitorbit(source_id1, source_id2,
         
     m_tot, m_tot_err = mA + mB, np.sqrt((mAerr**2) + (mBerr**2))
 
-    ########### Perform initial run to get initial chi-squared:
+    ########### Perform initial run to get initial chi-squared: #############
     # Draw random orbits:
     a,T,const,to,e,i,w,O,m1,dist = draw_priors(10000, [m_tot, m_tot_err], d_star, d)
     # Compute positions and velocities:

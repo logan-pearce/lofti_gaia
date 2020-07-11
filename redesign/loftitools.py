@@ -13,6 +13,8 @@ def MonteCarloIt(thing, N = 10000):
         N (int): number of samples
     Returns:
         array: N random samples from a Gaussian.
+
+    Written by Logan Pearce, 2020
     '''
     try:
         out = np.random.normal(thing[0].value,thing[1].value,N)
@@ -29,6 +31,8 @@ def distance(parallax,parallax_error):
     Returns:
         distance (flt): distance to systems in pc
         sigma (flt): 1-sigma uncertainty in distance
+
+    Written by Logan Pearce, 2018
     '''
 
     # Compute most probable distance:
@@ -78,6 +82,8 @@ def masyr_to_kms(mas_yr,plx):
         plx (tuple,float): parallax, tuple of (plx,plx error)
     Returns:
         km_s (array): velocity in km/s
+    
+    Written by Logan Pearce, 2019
     '''
     d = distance(*plx)
     # convert mas to km:
@@ -96,6 +102,8 @@ def mas_to_km(mas,plx):
         plx (tuple, flt): parallax, tuple of (plx,plx error) in mas
     Returns:
         array : separation in km
+
+    Written by Logan Pearce, 2019
     '''
     d = distance(*plx)
     # convert mas to km:
@@ -112,6 +120,8 @@ def mas_to_km2(arcsec,dist):
         dist (array, flt): distance in parsecs
     Returns:
         array : separation in km
+
+    Written by Logan Pearce, 2019
     '''
     # convert to arcsec, and multiply by distance in pc:
     km = (arcsec)*dist # AU
@@ -122,6 +132,8 @@ def mas_to_km2(arcsec,dist):
 def to_polar(RAa,RAb,Deca,Decb):
     ''' Converts RA/Dec [deg] of two binary components into separation and position angle of B relative 
         to A [mas, deg]
+
+    Written by Logan Pearce, 2019
     '''
     
     dRA = (RAb - RAa) * np.cos(np.radians(np.mean([Deca,Decb])))
@@ -136,17 +148,29 @@ def to_polar(RAa,RAb,Deca,Decb):
 
 def add_in_quad(thing):
     """
-    Add a elements of an array of things in quadrature
+    Add elements of an array of things in quadrature
     """
     out = 0
     for t in thing:
         out += t**2
     return np.sqrt(out)
 
-def ComputeChi2(array, measurements):
+def ComputeChi2(array, model):
+    '''
+    Cumpute the Chi2 for an array of model predictions and measurements
+
+    Args:
+        array (2 x N array): array of observations, row [0] = value, row [1] = errors
+        model (1 x N array): array of model predicitons
+    
+    Returns:
+        chi (flt): Chi^2 value
+
+    Written by Logan Pearce, 2020
+    '''
     chi = 0
     for i in range(len(array)):
-        chi += ( (array[i][0] - measurements[i]) / array[i][1] ) ** 2
+        chi += ( (array[i][0] - model[i]) / array[i][1] ) ** 2
     return chi
 
 ######## Fitting tools: ##############
@@ -167,7 +191,8 @@ def danby_solve(f, M0, e, h, maxnum=50):
             use the Mikkola solver instead.
     Returns: 
         nextE (float): converged solution for eccentric anomaly
-    Written by Logan Pearce, 2020
+
+    Written by Logan Pearce, 2019
     '''
     #f = eccentricity_anomaly
     k = 0.85
@@ -202,7 +227,7 @@ def mikkola_solve(M,e):
     Returns: 
         eccentric anomaly (flt)
 
-    Written by Logan Pearce, 2020
+    Written by Logan Pearce, 2019
     '''
     # Constants:
     alpha = (1 - e) / ((4.*e) + 0.5)
@@ -239,23 +264,35 @@ def mikkola_solve(M,e):
 def draw_samples(number, m_tot, d_star, date):
     """
     Draw a set of orbital elements from proability distribution functions.
+
+    Parameters are drawn from the probability distributions:
+        a: single value for semi-major axis due to scale and rotate
+        const: unif [0,1]
+        e: unif [0,1)
+        cos(i): unif [0,1]
+        w: unif [0,360] deg
+        O: single value fixed at 0 due to scale and rotate
+
     Args: 
         number (int): number of orbits desired to draw elements for. Typically 10000
         m_tot [Msol] (tuple, flt): total system mass[0] and error[1] in solar masses
         d_star [pc] (tuple, flt): distance to system in pc
         date [decimal year] (flt): observation date.  2015.5 for Gaia DR2
+
     Returns:
         array of samples:
-        a [as]: semi-major axis - set at 100 AU inital value
-        T [yr]: period
-        const: constant defining orbital phase of observation
-        to [yr]: epoch of periastron passage
-        e: eccentricity
-        i [rad]: inclination in radians
-        w [rad]: arguement of periastron
-        O [rad]: longitude of nodes - set at 0 initial value
-        m1 [Msol]: total system mass in solar masses
-        dist [pc]: distance to system
+            a [as]: semi-major axis - set at 100 AU inital value
+            T [yr]: period (derived from a via Kepler's 3rd law)
+            const: constant defining orbital phase of observation
+            to [yr]: epoch of periastron passage (derived from orbital phase constant)
+            e: eccentricity
+            i [rad]: inclination in radians
+            w [rad]: arguement of periastron
+            O [rad]: longitude of nodes - set at 0 initial value
+            m1 [Msol]: total system mass in solar masses
+            dist [pc]: distance to system
+    
+    Written by Logan Pearce, 2018
     """
     m1 = np.random.normal(m_tot[0],m_tot[1],number)
     dist = np.random.normal(d_star[0],d_star[1],number)
@@ -296,8 +333,28 @@ def draw_samples(number, m_tot, d_star, date):
     return samples
 
 def scale_and_rotate(X,Y,rho,pa,a,const,m1,dist,d):
-    ''' Generates a new semi-major axis, period, epoch of peri passage, and long of peri for each orbit
-        given the X,Y plane of the sky coordinates for the orbit at the date of the reference epoch
+    ''' 
+    Generates a new semi-major axis, period, epoch of peri passage, and long of peri for each orbit
+    given the X,Y plane of the sky coordinates for the orbit at the date of the reference epoch.
+    Called by calc_OFTI
+
+    Args:
+        X,Y (1 x N array): X and Y model predicted DEC/RA initial position in mas
+        rho (tuple, flt): observed separation and error in mas
+        pa (tuple, flt): observed position angle and error in deg
+        a (1 x N array): initial semi-major axis 
+        const (1 x N array): initial orbit fraction
+        m1: system mass
+        dist: distance to system
+        d: observation date (2015.5 for Gaia DR2)
+    
+    Returns:
+        a2 (1 x N array): scaled semi-major axis
+        T2 (1 x N array): scaled period
+        to2 (1 x N array): scaled periastron passage
+        O2 (1 x N array): rotated lon of ascending node
+
+    Written by Logan Pearce, 2018
     '''
     import numpy as np
     
@@ -338,7 +395,9 @@ def scale_and_rotate(X,Y,rho,pa,a,const,m1,dist,d):
 def calc_XYZ(a,T,to,e,i,w,O,date):
     ''' Compute projected on-sky position only of a single object on a Keplerian orbit given a 
         set of orbital elements at a single observation point. 
-        Inputs:
+        Called by calc_OFTI
+
+        Args:
             a [as]: semi-major axis
             T [yrs]: period
             to [yrs]: epoch of periastron passage (in same time structure as dates)
@@ -347,8 +406,12 @@ def calc_XYZ(a,T,to,e,i,w,O,date):
             w [rad]: argument of periastron
             O [rad]: longitude of nodes
             date [yrs]: observation date
-        Returns: X, Y, and Z coordinates [as] where +X is in the reference direction (north) and +Y is east, and +Z
-            is towards observer
+
+        Returns: 
+            X, Y, and Z coordinates [as] where +X is in the reference direction (north) and +Y is east, and +Z
+                is towards observer
+
+    Written by Logan Pearce, 2018
     '''
     n = (2*np.pi)/T
     M = n*(date-to)
@@ -369,7 +432,8 @@ def calc_velocities(a,T,to,e,i,w,O,date,dist,E):
     ''' Compute 3-d velocity of a single object on a Keplerian orbit given a 
         set of orbital elements at a single observation point.  Uses my eqns derived from Seager 
         Exoplanets Ch2.
-        Inputs:
+
+        Args:
             a [as]: semi-major axis
             T [yrs]: period
             to [yrs]: epoch of periastron passage (in same time structure as dates)
@@ -378,8 +442,13 @@ def calc_velocities(a,T,to,e,i,w,O,date,dist,E):
             w [rad]: argument of periastron
             O [rad]: longitude of nodes
             date [yrs]: observation date
-            m_tot [Msol]: total system mass
-        Returns: X dot, Y dot, Z dot three dimensional velocities [km/s]
+            dist [pc]: distance to system
+            E: eccentricity anomaly computed by calc_XYZ
+
+        Returns: 
+            X dot, Y dot, Z dot: three dimensional velocities [km/s]
+
+        Written by Logan Pearce, 2018
     '''
     #from lofti_gaiaDR2.loftifittingtools import to_si, solve
     
@@ -413,8 +482,10 @@ def calc_velocities(a,T,to,e,i,w,O,date,dist,E):
 
 def calc_accel(a,T,to,e,i,w,O,date,dist,E):
     ''' Compute 3-d acceleration of a single object on a Keplerian orbit given a 
-        set of orbital elements at a single observation point.  
-        Inputs:
+        set of orbital elements at a single observation point. 
+        Called by calc_OFTI
+
+        Args:
             a [as]: semi-major axis in as
             T [yrs]: period
             to [yrs]: epoch of periastron passage (in same time structure as dates)
@@ -424,7 +495,12 @@ def calc_accel(a,T,to,e,i,w,O,date,dist,E):
             O [rad]: longitude of nodes
             date [yrs]: observation date
             dist [pc]: distance to system in pc
-        Returns: X ddot, Y ddot, Z ddot three dimensional accelerations [m/s/yr]
+            E: eccentricity anomaly computed by calc_XYZ
+
+        Returns: 
+            X ddot, Y ddot, Z ddot: three dimensional accelerations [m/s/yr]
+
+        Written by Logan Pearce, 2018
     '''
     
     #from lofti_gaiaDR2.loftifittingtools import to_si, solve
@@ -457,22 +533,27 @@ def calc_accel(a,T,to,e,i,w,O,date,dist,E):
 def calc_OFTI(parameters,date,rho,pa):
     '''Perform OFTI steps to determine position/velocity/acceleration predictions given
        orbital elements.
-        Inputs:
-            a [as]: semi-major axis
-            T [yrs]: period
-            to [yrs]: epoch of periastron passage (in same time structure as dates)
-            e: eccentricity
-            i [rad]: inclination
-            w [rad]: argument of periastron
-            O [rad]: longitude of nodes
+
+        Args:
+            Parameters (7 x N array):
+                a [as]: semi-major axis
+                T [yrs]: period
+                to [yrs]: epoch of periastron passage (in same time structure as dates)
+                e: eccentricity
+                i [rad]: inclination
+                w [rad]: argument of periastron
+                O [rad]: longitude of nodes
+                m1 [Msun]: system mass
+                dist [pc]: distance to system in pc
             date [yrs]: observation date
-            dist [pc]: distance to system in pc
             rho [mas] (tuple, flt): separation and error
             pa [deg] (tuple, flt): position angle and error
         Returns: 
             X, Y, Z positions in plane of the sky [mas],
             X dot, Y dot, Z dot three dimensional velocities [km/s]
             X ddot, Y ddot, Z ddot 3d accelerations in [m/s/yr]
+
+        Written by Logan Pearce, 2018
     '''
     import numpy as np
     import astropy.units as u
@@ -500,6 +581,20 @@ def calc_OFTI(parameters,date,rho,pa):
     return X2,Y2,Z2,Xdot,Ydot,Zdot,Xddot,Yddot,Zddot,p
 
 def AcceptOrReject(chi2,chi_min):
+    ''' 
+    Perform rejection sampling accept/reject decision
+    
+    Args:
+        chi2 (1xN array): array of chi2 values
+        chi_min (flt): min chi2 value
+
+    Returns:
+        accepted: Array of indicies of accepted
+        lnprob: log probability of accepted orbits
+        lnrand: log of the random "dice roll" for acceptance
+
+    Written by Logan Pearce, 2020
+    '''
     nvals = len(chi2)
     lnprob = -(chi2-chi_min)/2.0
     rand = np.random.uniform(0.0,1.0,nvals)
@@ -507,9 +602,15 @@ def AcceptOrReject(chi2,chi_min):
     return accepted, lnprob, np.log(rand)
 
 def update_progress(n,max_value):
+    ''' 
+    Create a progress bar
+    
+    Args:
+        n (int): current count
+        max_value (int): ultimate values
+    
+    '''
     import sys
-    import time
-    import numpy as np
     barLength = 20 # Modify this to change the length of the progress bar
     status = ""
     progress = np.round(np.float(n/max_value),decimals=2)
@@ -532,3 +633,125 @@ def update_progress(n,max_value):
                                                   status)
     sys.stdout.write(text)
     sys.stdout.flush()
+
+###  Stats functions  ###
+def freedman_diaconis(array):
+    '''Compute the optimal number of bins for a 1-d histogram using the Freedman-Diaconis rule of thumb
+       Bin width = 2IQR/cuberoot(N)
+       Inputs:
+           array (arr): flattened array of data
+        Returns:
+           bin_width (flt): width of bin in optimal binning
+           n (int): number of bins
+    '''
+    import numpy as np
+    # Get number of observations:
+    N = np.shape(array)[0]
+    # Get interquartile range:
+    iqr = np.diff(np.quantile(array, q=[.25, .75]))
+    bin_width = (2.*iqr)/(N**(1./3.))
+    n = int(((np.max(array) - np.min(array)) / bin_width)+1)
+    return bin_width, n
+
+def Mode(array):
+    '''
+    Compute mode of an array
+    '''
+    # create histogram:
+    n, bins = np.histogram(array, freedman_diaconis(array)[1])
+    # max bin
+    max_bin = np.max(n)
+    # find inner/outer bin edges
+    bin_inner_edge = np.where(n==max_bin)[0]
+    bin_outer_edge = np.where(n==max_bin)[0]+1
+    # value in the middle of the highest bin:
+    mode=(bins[bin_outer_edge] - bins[bin_inner_edge])/2 + bins[bin_inner_edge]
+    return mode[0]
+
+def calc_min_credible_interval(x, alpha):
+    """Internal method to determine the minimum interval of a given width
+    Assumes that x is sorted numpy array.
+    From: https://github.com/aloctavodia/Doing_bayesian_data_analysis/blob/master/hpd.py
+    """
+    import numpy as np
+    n = len(x)
+    cred_mass = 1.0-alpha
+
+    interval_idx_inc = int(np.floor(cred_mass*n))
+    n_intervals = n - interval_idx_inc
+    interval_width = x[interval_idx_inc:] - x[:n_intervals]
+
+    if len(interval_width) == 0:
+        raise ValueError('Too few elements for interval calculation')
+
+    min_idx = np.argmin(interval_width)
+    hdi_min = x[min_idx]
+    hdi_max = x[min_idx+interval_idx_inc]
+    return hdi_min, hdi_max
+
+def compute_statistics(array):
+    '''
+    Compute mode of an array
+    '''
+    mean = np.mean(array)
+    median = np.median(array)
+    mode = Mode(array)
+    std = np.std(array)
+    # 68% CI:
+    sorts = np.sort(array)
+    frac=0.683
+    ci68 = calc_min_credible_interval(sorts,(1-frac))
+    # 95% CI:
+    frac=0.954
+    ci95 = calc_min_credible_interval(sorts,(1-frac))
+
+    return mean, median, mode, std, ci68, ci95
+
+def limit_to_180deg(array):
+    return array % 180
+
+def orbits_for_plotting(a1,T1,to1,e1,i1,w1,O1,t):
+    n = (2.*np.pi)/T1
+    M = n*(t-to1)
+    E = np.array([])
+    for M1 in M:
+        nextE = danby_solve(eccentricity_anomaly, M1, e1, 0.001)  
+        E = np.append(E, nextE)
+    A = a1*((cos(O1)*cos(w1))-(sin(O1)*sin(w1)*cos(i1)))
+    B = a1*((sin(O1)*cos(w1))+(cos(O1)*sin(w1)*cos(i1)))
+    F = a1*((-cos(O1)*sin(w1))-(sin(O1)*cos(w1)*cos(i1)))
+    G = a1*((-sin(O1)*sin(w1))+(cos(O1)*cos(w1)*cos(i1)))
+    xe = cos(E)-e1
+    ye = sqrt(1-e1**2)*sin(E)
+    X1 = A*xe + F*ye
+    Y1 = B*xe + G*ye
+    return X1, Y1
+
+def make_parameter_string(thing,name):
+    string = '   '.join([str(p) for p in [name,thing.mean,thing.median,\
+                thing.mode,thing.std,thing.ci68,thing.ci95]])
+    return string
+
+
+
+
+    '''k = open(filename, 'w')
+        string = 'Parameter    Mean    Median    Mode    Std    68% Min Cred Int    95% Min Cred Int'
+        k.write(string + "\n")
+        k.close()
+        for i in range(len(params)):
+            # 68% CI:
+            sorts = np.sort(params[i])
+            frac=0.683
+            ci68 = calc_min_credible_interval(sorts,(1-frac))
+            # 95% CI:
+            frac=0.954
+            ci95 = calc_min_credible_interval(sorts,(1-frac))
+            # Mode:
+            m = mode(params[i])
+            # Write it out:
+            k = open(filename, 'a')
+            string = params_names[i] + '    ' + str(np.mean(params[i])) + '    ' + str(np.median(params[i])) + '    ' +\
+            str(m) + '    ' +  str(np.std(params[i])) + '    ' + str(ci68) + '    ' + str(ci95)
+            k.write(string + "\n")
+            k.close()'''
