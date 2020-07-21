@@ -1,3 +1,2 @@
 from .lofti import *
-from .loftifittingtools import *
-from .loftiplots import *
+from .loftitools import *
