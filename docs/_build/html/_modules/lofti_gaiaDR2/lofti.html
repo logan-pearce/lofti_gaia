@@ -1,0 +1,932 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>lofti_gaiaDR2.lofti &mdash; lofti_gaiaDR2 1.0.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> lofti_gaiaDR2
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">Detailed API Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">lofti_gaiaDR2</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>lofti_gaiaDR2.lofti</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for lofti_gaiaDR2.lofti</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">astropy.units</span> <span class="k">as</span> <span class="nn">u</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">lofti_gaiaDR2.loftitools</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="c1"># Astroquery throws some warnings we can ignore:</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+
+<span class="sd">&#39;&#39;&#39;This module obtaines measurements from Gaia DR2 and runs through the LOFTI Gaia/OFTI </span>
+<span class="sd">wide stellar binary orbit fitting technique.</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<div class="viewcode-block" id="Fitter"><a class="viewcode-back" href="../../lofti.html#lofti_gaiaDR2.lofti.Fitter">[docs]</a><span class="k">class</span> <span class="nc">Fitter</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Initialize the Fitter object for the binary system, and compute observational constraints </span>
+<span class="sd">    to be used in the orbit fit.  User must provide Gaia source ids, tuples of mass estimates for </span>
+<span class="sd">    both objects, specify the number of desired orbits in posterior sample.  Fit will be</span>
+<span class="sd">    for object 2 relative to object 1.</span>
+
+<span class="sd">    Attributes are tuples of (value,uncertainty) unless otherwise indicated.  Attributes</span>
+<span class="sd">    with astropy units are retrieved from Gaia archive, attributes without units are</span>
+<span class="sd">    computed from Gaia values.  All relative values are for object 2 relative to object 1.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        sourceid1, sourceid2 (int): Gaia source ids for the two objects, fit will be for motion of \</span>
+<span class="sd">            object 2 relative to object 1</span>
+<span class="sd">        mass1, mass2 (tuple, flt): tuple os mass estimate for object 1 and 2, of the form (value, uncertainty)</span>
+<span class="sd">        Norbits (int): Number of desired orbits in posterior sample.  Default = 100000</span>
+<span class="sd">        results_filename (str): Filename for fit results files.  If none, results will be written to files \</span>
+<span class="sd">            named FitResults.yr.mo.day.hr.min.s</span>
+<span class="sd">        ruwe1, ruwe2 (flt): RUWE value from Gaia archive</span>
+<span class="sd">        ref_epoch (flt): reference epoch in decimal years. For Gaia DR2 this is 2015.5</span>
+<span class="sd">        plx1, plx2 (flt): parallax from Gaia DR2 in mas</span>
+<span class="sd">        RA1, RA2 (flt): right ascension from Gaia DR2; RA in deg, uncertainty in mas</span>
+<span class="sd">        Dec1, Dec2 (flt): declination from Gaia DR2; Dec in deg, uncertainty in mas</span>
+<span class="sd">        pmRA1, pmRA2 (flt): proper motion in RA in mas yr^-1 from Gaia DR2</span>
+<span class="sd">        pmDec1, pmDec2 (flt): proper motion in DEC in mas yr^-1 from Gaia DR2</span>
+<span class="sd">        rv1, rv2 (flt, optional): radial velocity in km s^-1 from Gaia DR2</span>
+<span class="sd">        rv (flt, optional): relative RV of 2 relative to 1, if both are present in Gaia DR2</span>
+<span class="sd">        plx (flt): weighted mean parallax for the binary system in mas</span>
+<span class="sd">        distance (flt): distance of system in pc, computed from Gaia parallax using method \</span>
+<span class="sd">            of Bailer-Jones et. al 2018.</span>
+<span class="sd">        deltaRA, deltaDec (flt): relative separation in RA and Dec directions, in mas</span>
+<span class="sd">        pmRA, pmDec (flt): relative proper motion in RA/Dec directions in km s^-1</span>
+<span class="sd">        sep (flt): total separation vector in mas</span>
+<span class="sd">        pa (flt): postion angle of separation vector in degrees from North</span>
+<span class="sd">        sep_au (flt): separation in AU</span>
+<span class="sd">        sep_km (flt): separation in km</span>
+<span class="sd">        total_vel (flt): total velocity vector in km s^-1.  If RV is available for both, \</span>
+<span class="sd">            this is the 3d velocity vector; if not it is just the plane of sky velocity. </span>
+<span class="sd">        total_planeofsky_velocity (flt): total velocity in the plane of sky in km s^-1. \</span>
+<span class="sd">            In the absence of RV this is equivalent to the total velocity vector.</span>
+<span class="sd">        deltaGmag (flt): relative contrast in Gaia G magnitude.  Does not include uncertainty.</span>
+
+<span class="sd">    Written by Logan Pearce, 2020</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sourceid1</span><span class="p">,</span> <span class="n">sourceid2</span><span class="p">,</span> <span class="n">mass1</span><span class="p">,</span> <span class="n">mass2</span><span class="p">,</span> <span class="n">Norbits</span> <span class="o">=</span> <span class="mi">100000</span><span class="p">,</span> <span class="n">results_filename</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">sourceid1</span> <span class="o">=</span> <span class="n">sourceid1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sourceid2</span> <span class="o">=</span> <span class="n">sourceid2</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mass1</span> <span class="o">=</span> <span class="n">mass1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mass1err</span> <span class="o">=</span> <span class="n">mass1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mass2</span> <span class="o">=</span> <span class="n">mass2</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mass2err</span> <span class="o">=</span> <span class="n">mass2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mtot</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">mass1</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">mass2</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">mass1err</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mass2err</span><span class="o">**</span><span class="mi">2</span><span class="p">))]</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Masses must be tuples of (value,error), ex: mass1 = (1.0,0.05)&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Norbits</span> <span class="o">=</span> <span class="n">Norbits</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">results_filename</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">results_filename</span> <span class="o">=</span> <span class="s1">&#39;FitResults.&#39;</span><span class="o">+</span><span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y.%m.</span><span class="si">%d</span><span class="s2">.%H.%M.%S&quot;</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;.txt&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stats_filename</span> <span class="o">=</span> <span class="s1">&#39;FitResults.Stats.&#39;</span><span class="o">+</span><span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y.%m.</span><span class="si">%d</span><span class="s2">.%H.%M.%S&quot;</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;.txt&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">results_filename</span> <span class="o">=</span> <span class="n">results_filename</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stats_filename</span> <span class="o">=</span> <span class="n">results_filename</span><span class="o">+</span><span class="s1">&#39;.Stats.txt&#39;</span>
+
+        <span class="c1"># Get Gaia measurements, compute needed constraints, and add to object:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">PrepareConstraints</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Fitter.PrepareConstraints"><a class="viewcode-back" href="../../lofti.html#lofti_gaiaDR2.lofti.Fitter.PrepareConstraints">[docs]</a>    <span class="k">def</span> <span class="nf">PrepareConstraints</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rv</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Retrieves parameters for both objects from Gaia DR2 archive and computes system attriubtes,</span>
+<span class="sd">        and assigns them to the Fitter object class.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            rv (bool): flag for handling the presence or absence of RV measurements for both objects \</span>
+<span class="sd">                in DR2.  Gets set to True if both objects have Gaia RV measurements. Default = False</span>
+<span class="sd">        </span>
+<span class="sd">        Written by Logan Pearce, 2020</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="kn">from</span> <span class="nn">astroquery.gaia</span> <span class="kn">import</span> <span class="n">Gaia</span>
+        <span class="n">deg_to_mas</span> <span class="o">=</span> <span class="mf">3600000.</span>
+        <span class="n">mas_to_deg</span> <span class="o">=</span> <span class="mf">1.</span><span class="o">/</span><span class="mf">3600000.</span>
+        
+        <span class="c1"># Retrieve astrometric solution from Gaia DR2</span>
+        <span class="n">job</span> <span class="o">=</span> <span class="n">Gaia</span><span class="o">.</span><span class="n">launch_job</span><span class="p">(</span><span class="s2">&quot;SELECT * FROM gaiadr2.gaia_source WHERE source_id = &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sourceid1</span><span class="p">))</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="n">job</span><span class="o">.</span><span class="n">get_results</span><span class="p">()</span>
+
+        <span class="n">job</span> <span class="o">=</span> <span class="n">Gaia</span><span class="o">.</span><span class="n">launch_job</span><span class="p">(</span><span class="s2">&quot;SELECT * FROM gaiadr2.gaia_source WHERE source_id = &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sourceid2</span><span class="p">))</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">job</span><span class="o">.</span><span class="n">get_results</span><span class="p">()</span>
+
+        <span class="c1"># Retrieve RUWE for both sources and add to object state:</span>
+        <span class="n">job</span> <span class="o">=</span> <span class="n">Gaia</span><span class="o">.</span><span class="n">launch_job</span><span class="p">(</span><span class="s2">&quot;SELECT * FROM gaiadr2.ruwe WHERE source_id = &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sourceid1</span><span class="p">))</span>
+        <span class="n">jruwe</span> <span class="o">=</span> <span class="n">job</span><span class="o">.</span><span class="n">get_results</span><span class="p">()</span>
+
+        <span class="n">job</span> <span class="o">=</span> <span class="n">Gaia</span><span class="o">.</span><span class="n">launch_job</span><span class="p">(</span><span class="s2">&quot;SELECT * FROM gaiadr2.ruwe WHERE source_id = &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sourceid2</span><span class="p">))</span>
+        <span class="n">kruwe</span> <span class="o">=</span> <span class="n">job</span><span class="o">.</span><span class="n">get_results</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ruwe1</span> <span class="o">=</span> <span class="n">jruwe</span><span class="p">[</span><span class="s1">&#39;ruwe&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ruwe2</span> <span class="o">=</span> <span class="n">kruwe</span><span class="p">[</span><span class="s1">&#39;ruwe&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c1"># Check RUWE for both objects and warn if too high:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ruwe1</span><span class="o">&gt;</span><span class="mf">1.2</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">ruwe2</span><span class="o">&gt;</span><span class="mf">1.2</span><span class="p">:</span>
+            <span class="n">yn</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;WARNING: RUWE for one or more of your solutions is greater than 1.2. This indicates </span>
+<span class="s1">            that the source might be an unresolved binary or experiencing acceleration </span>
+<span class="s1">            during the observation.  Orbit fit results may not be trustworthy.  Do you </span>
+<span class="s1">            wish to continue?</span>
+<span class="s1">            Hit enter to proceed, n to exit: &#39;&#39;&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">yn</span> <span class="o">==</span> <span class="s1">&#39;n&#39;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="c1"># reference epoch:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ref_epoch</span> <span class="o">=</span> <span class="n">j</span><span class="p">[</span><span class="s1">&#39;ref_epoch&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># parallax:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plx1</span> <span class="o">=</span> <span class="p">[</span><span class="n">j</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;parallax&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">mas</span><span class="p">,</span> <span class="n">j</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;parallax_error&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">mas</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plx2</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;parallax&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">mas</span><span class="p">,</span> <span class="n">k</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;parallax_error&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">mas</span><span class="p">]</span>
+        <span class="c1"># RA/DEC</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">RA1</span> <span class="o">=</span> <span class="p">[</span><span class="n">j</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;ra&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span> <span class="n">j</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;ra_error&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">mas_to_deg</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">RA2</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;ra&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span> <span class="n">k</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;ra_error&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">mas_to_deg</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Dec1</span> <span class="o">=</span> <span class="p">[</span><span class="n">j</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;dec&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span> <span class="n">j</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;dec_error&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">mas_to_deg</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Dec2</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;dec&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span> <span class="n">k</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;dec_error&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">mas_to_deg</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">]</span>
+        <span class="c1"># Proper motions:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pmRA1</span> <span class="o">=</span> <span class="p">[</span><span class="n">j</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;pmra&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">mas</span><span class="o">/</span><span class="n">u</span><span class="o">.</span><span class="n">yr</span><span class="p">,</span> <span class="n">j</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;pmra_error&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">mas</span><span class="o">/</span><span class="n">u</span><span class="o">.</span><span class="n">yr</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pmRA2</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;pmra&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">mas</span><span class="o">/</span><span class="n">u</span><span class="o">.</span><span class="n">yr</span><span class="p">,</span> <span class="n">k</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;pmra_error&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">mas</span><span class="o">/</span><span class="n">u</span><span class="o">.</span><span class="n">yr</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pmDec1</span> <span class="o">=</span> <span class="p">[</span><span class="n">j</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;pmdec&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">mas</span><span class="o">/</span><span class="n">u</span><span class="o">.</span><span class="n">yr</span><span class="p">,</span> <span class="n">j</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;pmdec_error&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">mas</span><span class="o">/</span><span class="n">u</span><span class="o">.</span><span class="n">yr</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pmDec2</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;pmdec&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">mas</span><span class="o">/</span><span class="n">u</span><span class="o">.</span><span class="n">yr</span><span class="p">,</span> <span class="n">k</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;pmdec_error&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">mas</span><span class="o">/</span><span class="n">u</span><span class="o">.</span><span class="n">yr</span><span class="p">]</span>
+        <span class="c1"># See if both objects have RV&#39;s in DR2:</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">k</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;radial_velocity&#39;</span><span class="p">])</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">j</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;radial_velocity&#39;</span><span class="p">])</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">:</span>
+            <span class="n">rv</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rv1</span> <span class="o">=</span> <span class="p">[</span><span class="n">j</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;radial_velocity&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">km</span><span class="o">/</span><span class="n">u</span><span class="o">.</span><span class="n">s</span><span class="p">,</span><span class="n">j</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;radial_velocity_error&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">km</span><span class="o">/</span><span class="n">u</span><span class="o">.</span><span class="n">s</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rv2</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;radial_velocity&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">km</span><span class="o">/</span><span class="n">u</span><span class="o">.</span><span class="n">s</span><span class="p">,</span><span class="n">k</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;radial_velocity_error&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">km</span><span class="o">/</span><span class="n">u</span><span class="o">.</span><span class="n">s</span><span class="p">]</span>
+            <span class="n">rv1</span> <span class="o">=</span> <span class="n">MonteCarloIt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rv1</span><span class="p">)</span>
+            <span class="n">rv2</span> <span class="o">=</span> <span class="n">MonteCarloIt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rv2</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rv</span> <span class="o">=</span> <span class="p">[</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">rv2</span><span class="o">-</span><span class="n">rv1</span><span class="p">)</span> <span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">rv2</span><span class="o">-</span><span class="n">rv1</span><span class="p">)</span> <span class="p">]</span>   <span class="c1"># km/s</span>
+            <span class="c1"># negative to relfect change in coordinate system from RV measurements to lofti</span>
+            <span class="c1"># pos RV = towards observer in this coord system</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rv</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># weighted mean of parallax values:</span>
+        <span class="n">plx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">plx1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">plx2</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">],</span> <span class="n">weights</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">plx1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">plx2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">])</span>
+        <span class="n">plxerr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">plx1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">plx2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plx</span> <span class="o">=</span> <span class="p">[</span><span class="n">plx</span><span class="p">,</span><span class="n">plxerr</span><span class="p">]</span>                         <span class="c1"># mas</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">distance</span> <span class="o">=</span> <span class="n">distance</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">plx</span><span class="p">)</span>             <span class="c1"># pc</span>
+
+        <span class="c1"># Compute separations of component 2 relative to 1:</span>
+        <span class="n">r1</span> <span class="o">=</span> <span class="n">MonteCarloIt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">RA1</span><span class="p">)</span>
+        <span class="n">r2</span> <span class="o">=</span> <span class="n">MonteCarloIt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">RA2</span><span class="p">)</span>
+        <span class="n">d1</span> <span class="o">=</span> <span class="n">MonteCarloIt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Dec1</span><span class="p">)</span>
+        <span class="n">d2</span> <span class="o">=</span> <span class="n">MonteCarloIt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Dec2</span><span class="p">)</span>
+        <span class="n">ra</span> <span class="o">=</span> <span class="p">(</span><span class="n">r2</span><span class="o">*</span><span class="n">deg_to_mas</span> <span class="o">-</span> <span class="n">r1</span><span class="o">*</span><span class="n">deg_to_mas</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">Dec1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">Dec2</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">])))</span>
+        <span class="n">dec</span> <span class="o">=</span> <span class="p">((</span><span class="n">d2</span> <span class="o">-</span> <span class="n">d1</span><span class="p">)</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">deg</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">mas</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">deltaRA</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">ra</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">ra</span><span class="p">)]</span>         <span class="c1"># mas</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">deltaDec</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dec</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">dec</span><span class="p">)]</span>      <span class="c1"># mas</span>
+
+        <span class="c1"># compute relative proper motion:</span>
+        <span class="n">pr1</span> <span class="o">=</span> <span class="n">MonteCarloIt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pmRA1</span><span class="p">)</span>
+        <span class="n">pr2</span> <span class="o">=</span> <span class="n">MonteCarloIt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pmRA2</span><span class="p">)</span>
+        <span class="n">pd1</span> <span class="o">=</span> <span class="n">MonteCarloIt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pmDec1</span><span class="p">)</span>
+        <span class="n">pd2</span> <span class="o">=</span> <span class="n">MonteCarloIt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pmDec2</span><span class="p">)</span>
+        <span class="n">pmRA</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">pr2</span> <span class="o">-</span> <span class="n">pr1</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">pr2</span><span class="o">-</span><span class="n">pr1</span><span class="p">)]</span>    <span class="c1"># mas/yr</span>
+        <span class="n">pmDec</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">pd2</span> <span class="o">-</span> <span class="n">pd1</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">pd2</span> <span class="o">-</span> <span class="n">pd1</span><span class="p">)]</span> <span class="c1"># mas/yr</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pmRA</span> <span class="o">=</span> <span class="n">masyr_to_kms</span><span class="p">(</span><span class="n">pmRA</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">plx</span><span class="p">)</span>         <span class="c1"># km/s</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pmDec</span> <span class="o">=</span> <span class="n">masyr_to_kms</span><span class="p">(</span><span class="n">pmDec</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">plx</span><span class="p">)</span>       <span class="c1"># km/s</span>
+
+        <span class="c1"># Compute separation/position angle:</span>
+        <span class="n">r</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="n">to_polar</span><span class="p">(</span><span class="n">r1</span><span class="p">,</span><span class="n">r2</span><span class="p">,</span><span class="n">d1</span><span class="p">,</span><span class="n">d2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sep</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">r</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">r</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">]</span>              <span class="c1"># mas</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pa</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">]</span>               <span class="c1"># deg</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">sep_au</span> <span class="o">=</span> <span class="p">[((</span><span class="bp">self</span><span class="o">.</span><span class="n">sep</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="mi">1000</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">distance</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">sep</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="mi">1000</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">distance</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sep_km</span> <span class="o">=</span> <span class="p">[</span> <span class="bp">self</span><span class="o">.</span><span class="n">sep_au</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">au</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">km</span><span class="p">)</span> <span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sep_au</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">au</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">km</span><span class="p">)]</span>
+
+        <span class="c1"># compute total velocities:</span>
+        <span class="k">if</span> <span class="n">rv</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">total_vel</span> <span class="o">=</span> <span class="p">[</span> <span class="n">add_in_quad</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">pmRA</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">pmDec</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">rv</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span> <span class="p">,</span> 
+                            <span class="n">add_in_quad</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">pmRA</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">pmDec</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">rv</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span> <span class="p">]</span>  <span class="c1"># km/s</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">total_planeofsky_vel</span> <span class="o">=</span> <span class="p">[</span> <span class="n">add_in_quad</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">pmRA</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">pmDec</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span> <span class="p">,</span> 
+                            <span class="n">add_in_quad</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">pmRA</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">pmDec</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span> <span class="p">]</span>             <span class="c1"># km/s</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">total_vel</span> <span class="o">=</span> <span class="p">[</span> <span class="n">add_in_quad</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">pmRA</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">pmDec</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span> <span class="p">,</span> 
+                            <span class="n">add_in_quad</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">pmRA</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">pmDec</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span> <span class="p">]</span>             <span class="c1"># km/s</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">total_planeofsky_vel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_vel</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>                       <span class="c1"># km/s</span>
+
+        <span class="c1"># compute deltamag:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">deltaGmag</span> <span class="o">=</span> <span class="n">j</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;phot_g_mean_mag&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">k</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;phot_g_mean_mag&#39;</span><span class="p">]</span></div></div>
+    
+
+<div class="viewcode-block" id="FitOrbit"><a class="viewcode-back" href="../../lofti.html#lofti_gaiaDR2.lofti.FitOrbit">[docs]</a><span class="k">class</span> <span class="nc">FitOrbit</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Object for performing an orbit fit.  Takes attributes from Fitter class.</span>
+
+<span class="sd">    ex: orbits = FitOrbit(fitterobject)</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        fitterobject (Fitter object): Fitter object initialized from the Fitter class</span>
+<span class="sd">        write_stats (bool): If True, write out summary statistics of orbit sample at \</span>
+<span class="sd">            conclusion of fit.  Default = True.</span>
+<span class="sd">        write_results (bool):  If True, write out the fit results to a pickle file \</span>
+<span class="sd">            in addition to the text file created during the fit.  Default = True.</span>
+<span class="sd">        deltaRA, deltaDec (flt): relative separation in RA and Dec directions, in mas</span>
+<span class="sd">        pmRA, pmDec (flt): relative proper motion in RA/Dec directions in km s^-1</span>
+<span class="sd">        rv (flt, optional): relative RV of 2 relative to 1, if both are present in Gaia DR2</span>
+<span class="sd">        mtot_init (flt): initial total system mass in Msun from user input</span>
+<span class="sd">        distance (flt): distance of system in pc, computed from Gaia parallax using method of Bailer-Jones et. al 2018.</span>
+<span class="sd">        sep (flt): separation vector in mas</span>
+<span class="sd">        pa (flt): postion angle of separation vector in degrees from North</span>
+<span class="sd">        ref_epoch (flt): epoch of the measurement, 2015.5 for Gaia DR2.</span>
+<span class="sd">        Norbits (int): number of desired orbit samples</span>
+<span class="sd">        write_stats (bool): if True, write summary of sample statistics to human-readable file at end of run.  Default = True</span>
+<span class="sd">        write_results (bool): if True, write out current state of sample orbits in pickle file in periodic intervals during \</span>
+<span class="sd">            run, and again at the end of the run.  RECOMMENDED.  Default = True</span>
+<span class="sd">        results_filename (str): name of file for saving pickled results to disk.  If not supplied, \</span>
+<span class="sd">            defaul name is FitResults.y.mo.d.h.m.s.pkl, saved in same directory as fit was run.</span>
+<span class="sd">        stats_filename (str): name of file for saving human-readable file of stats of sample results. If not supplied, \</span>
+<span class="sd">            defaul name is FitResults.Stats.y.mo.d.h.m.s.pkl, saved in same directory as fit was run.</span>
+<span class="sd">        run_time (flt): run time for the last fit.  astropy units object</span>
+
+
+<span class="sd">    Written by Logan Pearce, 2020</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fitterobject</span><span class="p">,</span> <span class="n">write_stats</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">write_results</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+        <span class="c1"># establish fit parameters:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">deltaRA</span> <span class="o">=</span> <span class="n">fitterobject</span><span class="o">.</span><span class="n">deltaRA</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">deltaDec</span> <span class="o">=</span> <span class="n">fitterobject</span><span class="o">.</span><span class="n">deltaDec</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pmRA</span> <span class="o">=</span> <span class="n">fitterobject</span><span class="o">.</span><span class="n">pmRA</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pmDec</span> <span class="o">=</span> <span class="n">fitterobject</span><span class="o">.</span><span class="n">pmDec</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rv</span> <span class="o">=</span> <span class="n">fitterobject</span><span class="o">.</span><span class="n">rv</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mtot_init</span> <span class="o">=</span> <span class="n">fitterobject</span><span class="o">.</span><span class="n">mtot</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">distance</span> <span class="o">=</span> <span class="n">fitterobject</span><span class="o">.</span><span class="n">distance</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sep</span> <span class="o">=</span> <span class="n">fitterobject</span><span class="o">.</span><span class="n">sep</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pa</span> <span class="o">=</span> <span class="n">fitterobject</span><span class="o">.</span><span class="n">pa</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ref_epoch</span> <span class="o">=</span> <span class="n">fitterobject</span><span class="o">.</span><span class="n">ref_epoch</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Norbits</span> <span class="o">=</span> <span class="n">fitterobject</span><span class="o">.</span><span class="n">Norbits</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_results</span> <span class="o">=</span> <span class="n">write_results</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_stats</span> <span class="o">=</span> <span class="n">write_stats</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">results_filename</span> <span class="o">=</span> <span class="n">fitterobject</span><span class="o">.</span><span class="n">results_filename</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stats_filename</span> <span class="o">=</span> <span class="n">fitterobject</span><span class="o">.</span><span class="n">stats_filename</span>
+
+        <span class="c1"># run orbit fitter:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitorbit</span><span class="p">()</span>
+
+<div class="viewcode-block" id="FitOrbit.fitorbit"><a class="viewcode-back" href="../../lofti.html#lofti_gaiaDR2.lofti.FitOrbit.fitorbit">[docs]</a>    <span class="k">def</span> <span class="nf">fitorbit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">save_results_every_X_loops</span> <span class="o">=</span> <span class="mi">100</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Run the OFTI fitting run on the Fitter object.  Called when FitOrbit object</span>
+<span class="sd">        is created.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            save_results_every_X_loops (int): on every Xth loop, save status of the \</span>
+<span class="sd">                orbit sample arrays to a pickle file, if write_results = True (Default)</span>
+
+<span class="sd">        Written by Logan Pearce, 2020</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="kn">import</span> <span class="nn">time</span> <span class="k">as</span> <span class="nn">tm</span>
+        <span class="c1">########### Perform initial run to get initial chi-squared: #############</span>
+        <span class="c1"># Draw random orbits:</span>
+        <span class="c1">#parameters = a,T,const,to,e,i,w,O,m1,dist</span>
+        <span class="n">parameters_init</span> <span class="o">=</span> <span class="n">draw_samples</span><span class="p">(</span><span class="mi">10000</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mtot_init</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">distance</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ref_epoch</span><span class="p">)</span>
+        <span class="c1"># Compute positions and velocities:</span>
+        <span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">,</span><span class="n">Z</span><span class="p">,</span><span class="n">Xdot</span><span class="p">,</span><span class="n">Ydot</span><span class="p">,</span><span class="n">Zdot</span><span class="p">,</span><span class="n">Xddot</span><span class="p">,</span><span class="n">Yddot</span><span class="p">,</span><span class="n">Zddot</span><span class="p">,</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">calc_OFTI</span><span class="p">(</span><span class="n">parameters_init</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">ref_epoch</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">sep</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">pa</span><span class="p">)</span>
+        <span class="c1"># Compute chi squared:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">measurements</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">Y</span><span class="p">,</span><span class="n">X</span><span class="p">,</span><span class="n">Ydot</span><span class="p">,</span><span class="n">Xdot</span><span class="p">,</span><span class="n">Zdot</span><span class="p">])</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">deltaRA</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">deltaDec</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pmRA</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pmDec</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rv</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">measurements</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">Y</span><span class="p">,</span><span class="n">X</span><span class="p">,</span><span class="n">Ydot</span><span class="p">,</span><span class="n">Xdot</span><span class="p">])</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">deltaRA</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">deltaDec</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pmRA</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pmDec</span><span class="p">])</span>
+        <span class="n">chi2</span> <span class="o">=</span> <span class="n">ComputeChi2</span><span class="p">(</span><span class="n">model</span><span class="p">,</span><span class="n">measurements</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chi_min</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmin</span><span class="p">(</span><span class="n">chi2</span><span class="p">)</span>
+
+        <span class="c1"># Accept/reject:</span>
+        <span class="n">accepted</span><span class="p">,</span> <span class="n">lnprob</span><span class="p">,</span> <span class="n">lnrand</span> <span class="o">=</span> <span class="n">AcceptOrReject</span><span class="p">(</span><span class="n">chi2</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">chi_min</span><span class="p">)</span>
+        <span class="c1"># count number accepted:</span>
+        <span class="n">number_orbits_accepted</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">accepted</span><span class="p">)</span>
+        <span class="c1"># tack on chi2, log probability, log random unif number to parameters array:</span>
+        <span class="n">parameters</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">parameters</span><span class="p">,</span><span class="n">chi2</span><span class="p">[</span><span class="kc">None</span><span class="p">,:],</span><span class="n">lnprob</span><span class="p">[</span><span class="kc">None</span><span class="p">,:],</span><span class="n">lnrand</span><span class="p">[</span><span class="kc">None</span><span class="p">,:]),</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="c1"># transpose:</span>
+        <span class="n">parameters</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
+        <span class="c1"># write results to file:</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">results_filename</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">params</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">[</span><span class="n">accepted</span><span class="p">]:</span>
+            <span class="n">string</span> <span class="o">=</span> <span class="s1">&#39;   &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">params</span><span class="p">])</span>
+            <span class="n">k</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">string</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">k</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        
+        <span class="c1">###### start loop ########</span>
+        <span class="c1"># initialize:</span>
+        <span class="n">loop_count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">start</span><span class="o">=</span><span class="n">tm</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        
+        <span class="k">while</span> <span class="n">number_orbits_accepted</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">Norbits</span><span class="p">:</span>
+            <span class="c1"># Draw random orbits:</span>
+            <span class="n">parameters_init</span> <span class="o">=</span> <span class="n">draw_samples</span><span class="p">(</span><span class="mi">10000</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mtot_init</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">distance</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ref_epoch</span><span class="p">)</span>
+            <span class="c1"># Compute positions and velocities and new parameters array with scaled and rotated values:</span>
+            <span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">,</span><span class="n">Z</span><span class="p">,</span><span class="n">Xdot</span><span class="p">,</span><span class="n">Ydot</span><span class="p">,</span><span class="n">Zdot</span><span class="p">,</span><span class="n">Xddot</span><span class="p">,</span><span class="n">Yddot</span><span class="p">,</span><span class="n">Zddot</span><span class="p">,</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">calc_OFTI</span><span class="p">(</span><span class="n">parameters_init</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">ref_epoch</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">sep</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">pa</span><span class="p">)</span>
+            <span class="c1"># compute chi2 for orbits:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">measurements</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">Y</span><span class="p">,</span><span class="n">X</span><span class="p">,</span><span class="n">Ydot</span><span class="p">,</span><span class="n">Xdot</span><span class="p">,</span><span class="n">Zdot</span><span class="p">])</span>
+                <span class="n">model</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">deltaRA</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">deltaDec</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pmRA</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pmDec</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rv</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">measurements</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">Y</span><span class="p">,</span><span class="n">X</span><span class="p">,</span><span class="n">Ydot</span><span class="p">,</span><span class="n">Xdot</span><span class="p">])</span>
+                <span class="n">model</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">deltaRA</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">deltaDec</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pmRA</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pmDec</span><span class="p">])</span>
+            <span class="n">chi2</span> <span class="o">=</span> <span class="n">ComputeChi2</span><span class="p">(</span><span class="n">model</span><span class="p">,</span><span class="n">measurements</span><span class="p">)</span>
+            
+            <span class="c1"># Accept/reject:</span>
+            <span class="n">accepted</span><span class="p">,</span> <span class="n">lnprob</span><span class="p">,</span> <span class="n">lnrand</span> <span class="o">=</span> <span class="n">AcceptOrReject</span><span class="p">(</span><span class="n">chi2</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">chi_min</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">accepted</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># count num accepted</span>
+                <span class="n">number_orbits_accepted</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">accepted</span><span class="p">)</span>
+                <span class="n">parameters</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">parameters</span><span class="p">,</span><span class="n">chi2</span><span class="p">[</span><span class="kc">None</span><span class="p">,:],</span><span class="n">lnprob</span><span class="p">[</span><span class="kc">None</span><span class="p">,:],</span><span class="n">lnrand</span><span class="p">[</span><span class="kc">None</span><span class="p">,:]),</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="n">parameters</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
+                
+
+                <span class="n">k</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">results_filename</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">params</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">[</span><span class="n">accepted</span><span class="p">]:</span>
+                    <span class="n">string</span> <span class="o">=</span> <span class="s1">&#39;   &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">params</span><span class="p">])</span>
+                    <span class="n">k</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">string</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">k</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmin</span><span class="p">(</span><span class="n">chi2</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">chi_min</span><span class="p">:</span>
+                <span class="c1"># If there is a new min chi2:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">chi_min</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmin</span><span class="p">(</span><span class="n">chi2</span><span class="p">)</span>
+                <span class="c1"># re-evaluate to accept/reject with new chi_min:</span>
+                
+                <span class="k">if</span> <span class="n">number_orbits_accepted</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">dat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">results_filename</span><span class="p">,</span><span class="s2">&quot;r&quot;</span><span class="p">),</span><span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;   &#39;</span><span class="p">,</span><span class="n">ndmin</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+                    <span class="n">lnprob</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">dat</span><span class="p">[:,</span><span class="mi">10</span><span class="p">]</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">chi_min</span><span class="p">)</span><span class="o">/</span><span class="mf">2.0</span>
+                    <span class="n">accepted_retest</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">lnprob</span> <span class="o">&gt;</span> <span class="n">dat</span><span class="p">[:,</span><span class="mi">12</span><span class="p">])</span>
+                    <span class="n">q</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">results_filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">dat</span><span class="p">[</span><span class="n">accepted_retest</span><span class="p">]:</span>
+                        <span class="n">string</span> <span class="o">=</span> <span class="s1">&#39;   &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">data</span><span class="p">])</span>
+                        <span class="n">q</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">string</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="n">q</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                    <span class="n">dat2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">results_filename</span><span class="p">,</span><span class="s2">&quot;r&quot;</span><span class="p">),</span><span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;   &#39;</span><span class="p">,</span><span class="n">ndmin</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+                    <span class="n">number_orbits_accepted</span><span class="o">=</span><span class="n">dat2</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            
+            <span class="n">loop_count</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="c1">#print(&#39;loop count&#39;,loop_count)</span>
+            <span class="n">update_progress</span><span class="p">(</span><span class="n">number_orbits_accepted</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">Norbits</span><span class="p">)</span>
+
+        <span class="c1"># when finished, upload results and store in object:</span>
+        <span class="n">dat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">results_filename</span><span class="p">,</span><span class="s2">&quot;r&quot;</span><span class="p">),</span><span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;   &#39;</span><span class="p">,</span><span class="n">ndmin</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="c1"># intialise results object and store accepted orbits:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">results</span> <span class="o">=</span> <span class="n">Results</span><span class="p">(</span><span class="n">orbits</span> <span class="o">=</span> <span class="n">dat</span><span class="p">,</span> <span class="n">limit_lan</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">limit_aop</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">results</span> <span class="o">=</span> <span class="n">Results</span><span class="p">(</span><span class="n">orbits</span> <span class="o">=</span> <span class="n">dat</span><span class="p">,</span> <span class="n">limit_lan</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">limit_aop</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">Update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">orbits</span><span class="p">)</span>
+
+        <span class="c1"># pickle dump the results attribute:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">write_results</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">SaveResults</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">results_filename</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.txt&quot;</span><span class="p">,</span> <span class="s2">&quot;.pkl&quot;</span><span class="p">))</span>
+        <span class="n">stop</span> <span class="o">=</span> <span class="n">tm</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">run_time</span> <span class="o">=</span> <span class="p">(</span><span class="n">stop</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span><span class="o">*</span><span class="n">u</span><span class="o">.</span><span class="n">s</span>
+        <span class="c1"># compute stats and write to file:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">stats</span> <span class="o">=</span> <span class="n">Stats</span><span class="p">(</span><span class="n">orbits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">orbits</span><span class="p">,</span> <span class="n">write_to_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">write_stats</span><span class="p">,</span> <span class="n">filename</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats_filename</span><span class="p">)</span></div></div>
+            
+<div class="viewcode-block" id="Results"><a class="viewcode-back" href="../../lofti.html#lofti_gaiaDR2.lofti.Results">[docs]</a><span class="k">class</span> <span class="nc">Results</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;A class for storing and manipulating the results of the orbit fit.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        orbits (Norbits x 13 array): array of accepted orbits from \</span>
+<span class="sd">            OFTI fit in the same order as the following attributes</span>
+<span class="sd">        sma (1 x Norbits array): semi-major axis in arcsec</span>
+<span class="sd">        period (1 x Norbits array): period in years</span>
+<span class="sd">        orbit_fraction (1 x Norbits array): fraction of orbit past periastron \</span>
+<span class="sd">            passage the observation (2015.5) occured on.  Values: [0,1)</span>
+<span class="sd">        t0 (1 x Norbits array): date of periastron passage in decimal years</span>
+<span class="sd">        ecc (1 x Norbits array): eccentricity</span>
+<span class="sd">        inc (1 x Norbits array): inclination relative to plane of the sky in deg</span>
+<span class="sd">        aop (1 x Norbits array): arguement of periastron in deg</span>
+<span class="sd">        lan (1 x Norbits array): longitude of ascending node in deg</span>
+<span class="sd">        mtot (1 x Norbits array): total system mass in Msun</span>
+<span class="sd">        distance (1 x Norbits array): distance to system in parsecs</span>
+<span class="sd">        chi2 (1 x Norbits array): chi^2 value for the orbit</span>
+<span class="sd">        lnprob (1 x Norbits array): log probability of orbit</span>
+<span class="sd">        lnrand (1 x Norbits array): log of random &quot;dice roll&quot; for \</span>
+<span class="sd">            orbit acceptance</span>
+<span class="sd">        orbits (array): the (Norbits x 13 array) array of orbit samples. </span>
+<span class="sd">        limit_aop, limit_lan (bool): In the absence of radial velocity info, \</span>
+<span class="sd">            there is a degeneracy between arg of periastron and long of ascending \</span>
+<span class="sd">            node.  Common practice is to limit one to the interval [0,180] deg. \</span>
+<span class="sd">            By default, lofti limits lan to this interval if rv = False.  The user can \</span>
+<span class="sd">            choose to limit aop instead by setting limit_aop = True, limit_lan = False. \</span>
+<span class="sd">            The orbits[:,6] (aop) and orbits[:,7] (lan) arrays preserve the original values. \</span>
+
+<span class="sd">    Written by Logan Pearce, 2020</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">orbits</span> <span class="o">=</span> <span class="p">[],</span> <span class="n">limit_aop</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">limit_lan</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">orbits</span> <span class="o">=</span> <span class="n">orbits</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">limit_lan</span> <span class="o">=</span> <span class="n">limit_lan</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">limit_aop</span> <span class="o">=</span> <span class="n">limit_aop</span>
+
+<div class="viewcode-block" id="Results.Update"><a class="viewcode-back" href="../../lofti.html#lofti_gaiaDR2.lofti.Results.Update">[docs]</a>    <span class="k">def</span> <span class="nf">Update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">orbits</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Take elements of the &quot;orbits&quot; attribute and populate</span>
+<span class="sd">        the orbital element attributes</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            orbits (arr): orbits array from Results class</span>
+
+<span class="sd">        Written by Logan Pearce, 2020</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sma</span> <span class="o">=</span> <span class="n">orbits</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">period</span> <span class="o">=</span> <span class="n">orbits</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">orbit_fraction</span> <span class="o">=</span> <span class="n">orbits</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">t0</span> <span class="o">=</span> <span class="n">orbits</span><span class="p">[:,</span><span class="mi">3</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ecc</span> <span class="o">=</span> <span class="n">orbits</span><span class="p">[:,</span><span class="mi">4</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inc</span> <span class="o">=</span> <span class="n">orbits</span><span class="p">[:,</span><span class="mi">5</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">aop</span> <span class="o">=</span> <span class="n">orbits</span><span class="p">[:,</span><span class="mi">6</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">limit_aop</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">aop</span> <span class="o">=</span> <span class="n">limit_to_180deg</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">aop</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lan</span> <span class="o">=</span> <span class="n">orbits</span><span class="p">[:,</span><span class="mi">7</span><span class="p">]</span> <span class="o">%</span> <span class="mi">360</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">limit_lan</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lan</span> <span class="o">=</span> <span class="n">limit_to_180deg</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lan</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mtot</span> <span class="o">=</span> <span class="n">orbits</span><span class="p">[:,</span><span class="mi">8</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">distance</span> <span class="o">=</span> <span class="n">orbits</span><span class="p">[:,</span><span class="mi">9</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chi2</span> <span class="o">=</span> <span class="n">orbits</span><span class="p">[:,</span><span class="mi">10</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lnprob</span> <span class="o">=</span> <span class="n">orbits</span><span class="p">[:,</span><span class="mi">11</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lnrand</span> <span class="o">=</span> <span class="n">orbits</span><span class="p">[:,</span><span class="mi">12</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Results.SaveResults"><a class="viewcode-back" href="../../lofti.html#lofti_gaiaDR2.lofti.Results.SaveResults">[docs]</a>    <span class="k">def</span> <span class="nf">SaveResults</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">write_text_file</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">text_filename</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Save the orbits and orbital parameters attributes in a pickle file</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            filename (str): filename for pickle file</span>
+<span class="sd">            write_text_file (bool): if True, also write out the accepted orbits to a \</span>
+<span class="sd">                human readable text file</span>
+<span class="sd">            text_filename (bool): if write_to_text = True, specifify filename for text file</span>
+
+<span class="sd">        Written by Logan Pearce, 2020</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span> <span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span> <span class="p">)</span> <span class="p">)</span>
+
+        <span class="c1"># write results to file:</span>
+        <span class="k">if</span> <span class="n">write_text_file</span><span class="p">:</span>
+            <span class="n">k</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">text_filename</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">params</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">orbits</span><span class="p">:</span>
+                <span class="n">string</span> <span class="o">=</span> <span class="s1">&#39;   &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">params</span><span class="p">])</span>
+                <span class="n">k</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">string</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">k</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Results.LoadResults"><a class="viewcode-back" href="../../lofti.html#lofti_gaiaDR2.lofti.Results.LoadResults">[docs]</a>    <span class="k">def</span> <span class="nf">LoadResults</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">append</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Read in the orbits and orbital parameters attributes from a pickle file</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            filename (str): filename of pickle file to load</span>
+<span class="sd">            append (bool): if True, append read in orbit samples to another Results \</span>
+<span class="sd">                object.  Default = False.</span>
+
+<span class="sd">        Written by Logan Pearce, 2020</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">results_in</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span> <span class="nb">open</span><span class="p">(</span> <span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span> <span class="p">)</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="n">append</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">orbits</span> <span class="o">=</span> <span class="n">results_in</span><span class="o">.</span><span class="n">orbits</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">orbits</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">orbits</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">orbits</span><span class="p">,</span><span class="n">results_in</span><span class="o">.</span><span class="n">orbits</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">orbits</span><span class="p">)</span></div>
+
+    <span class="c1"># plotting results:</span>
+<div class="viewcode-block" id="Results.PlotHists"><a class="viewcode-back" href="../../lofti.html#lofti_gaiaDR2.lofti.Results.PlotHists">[docs]</a>    <span class="k">def</span> <span class="nf">PlotHists</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Plot 1-d histograms of orbital elements &#39;sma&#39;,&#39;ecc&#39;,&#39;inc&#39;,&#39;aop&#39;,&#39;lan&#39;,&#39;t0&#39; from fit results.</span>
+
+<span class="sd">        Written by Logan Pearce, 2020</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sma</span> <span class="o">&lt;</span> <span class="mi">50</span><span class="p">):</span>
+            <span class="n">bins</span> <span class="o">=</span> <span class="mi">50</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">bins</span> <span class="o">=</span> <span class="s1">&#39;fd&#39;</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">))</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">sma</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">ecc</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">inc</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">aop</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">lan</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">t0</span><span class="p">])</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="s1">&#39;sma&#39;</span><span class="p">,</span><span class="s1">&#39;ecc&#39;</span><span class="p">,</span><span class="s1">&#39;inc&#39;</span><span class="p">,</span><span class="s1">&#39;aop&#39;</span><span class="p">,</span><span class="s1">&#39;lan&#39;</span><span class="p">,</span><span class="s1">&#39;t0&#39;</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">params</span><span class="p">)):</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot2grid</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">params</span><span class="p">)),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">i</span><span class="p">))</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">bins</span><span class="o">=</span><span class="n">bins</span><span class="p">,</span><span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> \
+                    <span class="n">labelleft</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">labeltop</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">labelright</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">labelbottom</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">(</span><span class="n">rotation</span><span class="o">=</span><span class="mi">45</span><span class="p">,</span> <span class="n">fontsize</span> <span class="o">=</span> <span class="mi">20</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="n">names</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">fontsize</span> <span class="o">=</span> <span class="mi">25</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">fig</span></div>
+
+<div class="viewcode-block" id="Results.PlotOrbits"><a class="viewcode-back" href="../../lofti.html#lofti_gaiaDR2.lofti.Results.PlotOrbits">[docs]</a>    <span class="k">def</span> <span class="nf">PlotOrbits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">colorbar</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">ref_epoch</span> <span class="o">=</span> <span class="mf">2015.5</span><span class="p">,</span> <span class="n">size</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span> <span class="n">plot3d</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">cmap</span> <span class="o">=</span> <span class="s1">&#39;viridis&#39;</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Plot a random selection of orbits from the sample in the plane of the sky.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            color (bool): if True, plot orbit tracks using a colormap scale to orbit fraction (phase) \</span>
+<span class="sd">                past observation date (2015.5).  If False, orbit tracks will be black.  Default = True</span>
+<span class="sd">            colorbar (bool): if True and color = True, plot colorbar for orbit phase</span>
+<span class="sd">            ref_epoch (flt): reference epoch for drawing orbits.  Default = 2015.5 </span>
+<span class="sd">            size (int): Number of orbits to plot.  Default = True</span>
+<span class="sd">            plot3d (bool): If True, return a plot of orbits in 3D space. Default = False</span>
+<span class="sd">            cmap (str): colormap for orbit phase plot</span>
+
+<span class="sd">        Written by Logan Pearce, 2020</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c1"># Random selection of orbits to plot:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sma</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">size</span><span class="p">:</span>
+            <span class="c1"># if there are more orbits than desired size, randomly select orbits from</span>
+            <span class="c1"># the posterior sample:</span>
+            <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sma</span><span class="p">)),</span><span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># if there are fewer orbits than desired size, take all of them:</span>
+            <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sma</span><span class="p">)),</span><span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">size</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sma</span><span class="p">))</span>
+
+        <span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">tan</span><span class="p">,</span> <span class="n">arctan</span><span class="p">,</span> <span class="n">sqrt</span><span class="p">,</span> <span class="n">cos</span><span class="p">,</span> <span class="n">sin</span><span class="p">,</span> <span class="n">arccos</span>
+        <span class="c1"># label for colormap axis:</span>
+        <span class="n">colorlabel</span> <span class="o">=</span> <span class="s1">&#39;Phase&#39;</span>
+        <span class="c1"># create figure:</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span> <span class="o">=</span> <span class="p">(</span><span class="mf">7.5</span><span class="p">,</span> <span class="mf">6.</span><span class="p">))</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">ls</span><span class="o">=</span><span class="s1">&#39;:&#39;</span><span class="p">)</span>
+        <span class="c1"># invert X axis for RA:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">invert_xaxis</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">plot3d</span><span class="p">:</span>
+            <span class="c1"># Make 3d axis object:</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="s1">&#39;3d&#39;</span><span class="p">)</span>
+            <span class="c1"># plot central star:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;orange&#39;</span><span class="p">,</span><span class="n">marker</span><span class="o">=</span><span class="s1">&#39;*&#39;</span><span class="p">,</span><span class="n">s</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span><span class="n">zorder</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_zlabel</span><span class="p">(</span><span class="s1">&#39;Z (&quot;)&#39;</span><span class="p">,</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># plot central star:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;orange&#39;</span><span class="p">,</span><span class="n">marker</span><span class="o">=</span><span class="s1">&#39;*&#39;</span><span class="p">,</span><span class="n">s</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span><span class="n">zorder</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+        <span class="c1"># For each orbit in the random selection from the posterior samples:</span>
+        <span class="k">for</span> <span class="n">a</span><span class="p">,</span><span class="n">T</span><span class="p">,</span><span class="n">to</span><span class="p">,</span><span class="n">e</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">w</span><span class="p">,</span><span class="n">O</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sma</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">period</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">t0</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">ecc</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inc</span><span class="p">[</span><span class="n">ind</span><span class="p">]),</span>\
+                    <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">aop</span><span class="p">[</span><span class="n">ind</span><span class="p">]),</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lan</span><span class="p">[</span><span class="n">ind</span><span class="p">])):</span>
+            <span class="c1"># define an array of times along orbit:</span>
+            <span class="n">times</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">ref_epoch</span><span class="p">,</span><span class="n">ref_epoch</span><span class="o">+</span><span class="n">T</span><span class="p">,</span><span class="mi">5000</span><span class="p">)</span>
+            <span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">,</span><span class="n">Z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([]),</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([]),</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+            <span class="n">E</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+            <span class="c1"># Compute X,Y,Z positions for each time:</span>
+            <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">times</span><span class="p">:</span>
+                <span class="n">n</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span><span class="o">/</span><span class="n">T</span>
+                <span class="n">M</span> <span class="o">=</span> <span class="n">n</span><span class="o">*</span><span class="p">(</span><span class="n">t</span><span class="o">-</span><span class="n">to</span><span class="p">)</span>
+                <span class="n">nextE</span> <span class="o">=</span> <span class="p">[</span><span class="n">danby_solve</span><span class="p">(</span><span class="n">eccentricity_anomaly</span><span class="p">,</span> <span class="n">varM</span><span class="p">,</span><span class="n">vare</span><span class="p">,</span> <span class="mf">0.001</span><span class="p">)</span> <span class="k">for</span> <span class="n">varM</span><span class="p">,</span><span class="n">vare</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">([</span><span class="n">M</span><span class="p">],[</span><span class="n">e</span><span class="p">])]</span>
+                <span class="n">E</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">E</span><span class="p">,</span><span class="n">nextE</span><span class="p">)</span>
+            <span class="n">r1</span> <span class="o">=</span> <span class="n">a</span><span class="o">*</span><span class="p">(</span><span class="mf">1.</span><span class="o">-</span><span class="n">e</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">E</span><span class="p">))</span>
+            <span class="n">f1</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span><span class="mf">1.</span><span class="o">+</span><span class="n">e</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">E</span><span class="o">/</span><span class="mf">2.</span><span class="p">)</span>
+            <span class="n">f2</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span><span class="mf">1.</span><span class="o">-</span><span class="n">e</span><span class="p">)</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">E</span><span class="o">/</span><span class="mf">2.</span><span class="p">)</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="mf">2.</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">f1</span><span class="p">,</span><span class="n">f2</span><span class="p">)</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span><span class="o">*</span><span class="p">(</span><span class="mf">1.</span><span class="o">-</span><span class="n">e</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span><span class="o">/</span><span class="p">(</span><span class="mf">1.</span><span class="o">+</span><span class="p">(</span><span class="n">e</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">f</span><span class="p">)))</span>
+            <span class="n">X1</span> <span class="o">=</span> <span class="n">r</span> <span class="o">*</span> <span class="p">(</span> <span class="n">cos</span><span class="p">(</span><span class="n">O</span><span class="p">)</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">w</span><span class="o">+</span><span class="n">f</span><span class="p">)</span> <span class="o">-</span> <span class="n">sin</span><span class="p">(</span><span class="n">O</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">w</span><span class="o">+</span><span class="n">f</span><span class="p">)</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">Y1</span> <span class="o">=</span> <span class="n">r</span> <span class="o">*</span> <span class="p">(</span> <span class="n">sin</span><span class="p">(</span><span class="n">O</span><span class="p">)</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">w</span><span class="o">+</span><span class="n">f</span><span class="p">)</span> <span class="o">+</span> <span class="n">cos</span><span class="p">(</span><span class="n">O</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">w</span><span class="o">+</span><span class="n">f</span><span class="p">)</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">Z1</span> <span class="o">=</span> <span class="n">r</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">w</span><span class="o">+</span><span class="n">f</span><span class="p">)</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">,</span><span class="n">Z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">X1</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span><span class="n">Y1</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Z</span><span class="p">,</span><span class="n">Z1</span><span class="p">)</span>
+            <span class="c1"># Plot the X,Y(Z) positions:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">plot3d</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">color</span><span class="p">:</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span><span class="n">X</span><span class="p">,</span><span class="n">c</span><span class="o">=</span><span class="p">((</span><span class="n">times</span><span class="o">-</span><span class="n">ref_epoch</span><span class="p">)</span><span class="o">/</span><span class="n">T</span><span class="p">),</span><span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span><span class="n">s</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span><span class="n">lw</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">,</span> <span class="n">adjustable</span><span class="o">=</span><span class="s1">&#39;datalim&#39;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span><span class="n">X</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">,</span> <span class="n">adjustable</span><span class="o">=</span><span class="s1">&#39;datalim&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">plot3d</span><span class="p">:</span>
+                <span class="kn">from</span> <span class="nn">mpl_toolkits.mplot3d</span> <span class="kn">import</span> <span class="n">Axes3D</span>
+                <span class="k">if</span> <span class="n">color</span><span class="p">:</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span><span class="n">X</span><span class="p">,</span><span class="n">Z</span><span class="p">,</span><span class="n">c</span><span class="o">=</span><span class="p">((</span><span class="n">times</span><span class="o">-</span><span class="n">ref_epoch</span><span class="p">)</span><span class="o">/</span><span class="n">T</span><span class="p">),</span><span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span><span class="n">s</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span><span class="n">lw</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span><span class="n">X</span><span class="p">,</span><span class="n">Z</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+        <span class="c1"># plot colorbar:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">plot3d</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">color</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">colorbar</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+                    <span class="n">cb</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span><span class="o">.</span><span class="n">set_label</span><span class="p">(</span><span class="n">colorlabel</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">labelsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Dec (&quot;)&#39;</span><span class="p">,</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;RA (&quot;)&#39;</span><span class="p">,</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">labelsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">fig</span></div>
+
+<div class="viewcode-block" id="Results.PlotSepPA"><a class="viewcode-back" href="../../lofti.html#lofti_gaiaDR2.lofti.Results.PlotSepPA">[docs]</a>    <span class="k">def</span> <span class="nf">PlotSepPA</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ref_epoch</span> <span class="o">=</span> <span class="mf">2015.5</span><span class="p">,</span> <span class="n">size</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span> <span class="n">timespan</span> <span class="o">=</span> <span class="p">[</span><span class="mi">20</span><span class="p">,</span><span class="mi">20</span><span class="p">],</span> <span class="n">orbitcolor</span> <span class="o">=</span> <span class="s1">&#39;skyblue&#39;</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Plot a random selection of orbits from the sample in separation and position angle as </span>
+<span class="sd">        a function of time.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            ref_epoch (flt): reference epoch for drawing orbits.  Default = 2015.5 </span>
+<span class="sd">            size (int): Number of orbits to plot.  Default = True</span>
+<span class="sd">            timespan (tuple, int): number of years before [0] and after [1] the ref epoch to \</span>
+<span class="sd">                plot sep and pa</span>
+<span class="sd">            orbitcolor (str): color to use to plot the orbits</span>
+
+<span class="sd">        Written by Logan Pearce, 2020</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c1"># Random selection of orbits to plot:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sma</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">size</span><span class="p">:</span>
+            <span class="c1"># if there are more orbits than desired size, randomly select orbits from</span>
+            <span class="c1"># the posterior sample:</span>
+            <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sma</span><span class="p">)),</span><span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># if there are fewer orbits than desired size, take all of them:</span>
+            <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sma</span><span class="p">)),</span><span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">size</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sma</span><span class="p">))</span>
+
+        <span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">tan</span><span class="p">,</span> <span class="n">arctan</span><span class="p">,</span> <span class="n">sqrt</span><span class="p">,</span> <span class="n">cos</span><span class="p">,</span> <span class="n">sin</span><span class="p">,</span> <span class="n">arccos</span>
+        <span class="c1"># make figure</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span> <span class="o">=</span> <span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+        <span class="c1"># define subplots:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">labelsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">ls</span><span class="o">=</span><span class="s1">&#39;:&#39;</span><span class="p">)</span>
+        <span class="c1"># define times to compute sep/pa:</span>
+        <span class="n">tmin</span><span class="p">,</span><span class="n">tmax</span> <span class="o">=</span> <span class="n">ref_epoch</span> <span class="o">-</span> <span class="n">timespan</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">ref_epoch</span> <span class="o">+</span> <span class="n">timespan</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">tmin</span><span class="p">,</span><span class="n">tmax</span><span class="p">,</span><span class="mi">2000</span><span class="p">)</span>
+        <span class="n">date_ticks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">tmin</span><span class="p">,</span><span class="n">tmax</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span>
+        <span class="c1"># for each selected orbit from the sample:</span>
+        <span class="k">for</span> <span class="n">a</span><span class="p">,</span><span class="n">T</span><span class="p">,</span><span class="n">to</span><span class="p">,</span><span class="n">e</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">w</span><span class="p">,</span><span class="n">O</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sma</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">period</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">t0</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">ecc</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inc</span><span class="p">[</span><span class="n">ind</span><span class="p">]),</span>\
+                    <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">aop</span><span class="p">[</span><span class="n">ind</span><span class="p">]),</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lan</span><span class="p">[</span><span class="n">ind</span><span class="p">])):</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+            <span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+            <span class="c1"># compute X,Y at each time point:</span>
+            <span class="n">X1</span><span class="p">,</span><span class="n">Y1</span> <span class="o">=</span> <span class="n">orbits_for_plotting</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">T</span><span class="p">,</span><span class="n">to</span><span class="p">,</span><span class="n">e</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">w</span><span class="p">,</span><span class="n">O</span><span class="p">,</span><span class="n">t</span><span class="p">)</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">X1</span><span class="p">)</span>
+            <span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span><span class="n">Y1</span><span class="p">)</span>
+            <span class="c1"># compute sep:</span>
+            <span class="n">r</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">X</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="p">(</span><span class="n">Y</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+            <span class="c1"># plot sep in mas:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">r</span><span class="o">*</span><span class="mi">1000</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="n">orbitcolor</span><span class="p">,</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\rho$ (mas)&#39;</span><span class="p">,</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+
+        <span class="c1"># next suplot:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">ls</span><span class="o">=</span><span class="s1">&#39;:&#39;</span><span class="p">)</span>
+        <span class="c1"># for each selected orbit from the sample:</span>
+        <span class="k">for</span> <span class="n">a</span><span class="p">,</span><span class="n">T</span><span class="p">,</span><span class="n">to</span><span class="p">,</span><span class="n">e</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">w</span><span class="p">,</span><span class="n">O</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sma</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">period</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">t0</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">ecc</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inc</span><span class="p">[</span><span class="n">ind</span><span class="p">]),</span>\
+                    <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">aop</span><span class="p">[</span><span class="n">ind</span><span class="p">]),</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lan</span><span class="p">[</span><span class="n">ind</span><span class="p">])):</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+            <span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+            <span class="n">X1</span><span class="p">,</span><span class="n">Y1</span> <span class="o">=</span> <span class="n">orbits_for_plotting</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">T</span><span class="p">,</span><span class="n">to</span><span class="p">,</span><span class="n">e</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">w</span><span class="p">,</span><span class="n">O</span><span class="p">,</span><span class="n">t</span><span class="p">)</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">X1</span><span class="p">)</span>
+            <span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span><span class="n">Y1</span><span class="p">)</span>
+            <span class="c1"># compute pa:</span>
+            <span class="n">theta</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="o">-</span><span class="n">Y</span><span class="p">)</span>
+            <span class="n">theta</span><span class="o">=</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span><span class="o">+</span><span class="mf">270.</span><span class="p">)</span><span class="o">%</span><span class="mi">360</span>
+            <span class="c1"># plot it:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">theta</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="n">orbitcolor</span><span class="p">,</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;P.A. (deg)&#39;</span><span class="p">,</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">19</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Years&#39;</span><span class="p">,</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">19</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">labelsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">fig</span></div></div>
+            
+<div class="viewcode-block" id="Stats"><a class="viewcode-back" href="../../lofti.html#lofti_gaiaDR2.lofti.Stats">[docs]</a><span class="k">class</span> <span class="nc">Stats</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;A class for storing and manipulating the statistics of the results of the orbit fit.</span>
+
+<span class="sd">    For every parameter, there is a series of stats computed and saved as stats.param.stat</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        stats.sma.mean = mean of semimajor axis</span>
+<span class="sd">        stats.ecc.ci68 = 68% confidence interval for eccentricity</span>
+<span class="sd">        stats.aop.std = standard deviation of arg of periastron</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        orbits (Norbits x 13 array): array of accepted orbits from \</span>
+<span class="sd">            OFTI fit in the same order as the following attributes</span>
+<span class="sd">        param.mean (flt): mean of parameter computed using np.mean</span>
+<span class="sd">        param.median (flt): np.median of parameter</span>
+<span class="sd">        param.mode (flt): mode of parameter</span>
+<span class="sd">        param.std (flt): standard deviation from np.std</span>
+<span class="sd">        param.ci68 (tuple,flt): 68% minimum credible interval of form (lower bound, upper bound)</span>
+<span class="sd">        param.ci95 (tuple,flt): 95% minimum credible interval</span>
+<span class="sd">        write_to_file (bool): If True, write stats to a human-readbale text file.</span>
+<span class="sd">        filename (str): filename for saving stats file.  If not supplied, default \</span>
+<span class="sd">            name is FitResults.Stats.y.mo.d.h.m.s.pkl, saved in same directory as fit was run.</span>
+
+<span class="sd">        </span>
+<span class="sd">    Written by Logan Pearce, 2020</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">orbits</span> <span class="o">=</span> <span class="p">[],</span> <span class="n">write_to_file</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">filename</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">orbits</span> <span class="o">=</span> <span class="n">orbits</span>
+        <span class="c1"># Compute stats on parameter arrays and save as attributes:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sma</span> <span class="o">=</span> <span class="n">StatsSubclass</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">orbits</span><span class="p">[:,</span><span class="mi">0</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">period</span> <span class="o">=</span> <span class="n">StatsSubclass</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">orbits</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">orbit_fraction</span> <span class="o">=</span> <span class="n">StatsSubclass</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">orbits</span><span class="p">[:,</span><span class="mi">2</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">t0</span> <span class="o">=</span> <span class="n">StatsSubclass</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">orbits</span><span class="p">[:,</span><span class="mi">3</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ecc</span> <span class="o">=</span> <span class="n">StatsSubclass</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">orbits</span><span class="p">[:,</span><span class="mi">4</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inc</span> <span class="o">=</span> <span class="n">StatsSubclass</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">orbits</span><span class="p">[:,</span><span class="mi">5</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">aop</span> <span class="o">=</span> <span class="n">StatsSubclass</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">orbits</span><span class="p">[:,</span><span class="mi">6</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lan</span> <span class="o">=</span> <span class="n">StatsSubclass</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">orbits</span><span class="p">[:,</span><span class="mi">7</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mtot</span> <span class="o">=</span> <span class="n">StatsSubclass</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">orbits</span><span class="p">[:,</span><span class="mi">8</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">distance</span> <span class="o">=</span> <span class="n">StatsSubclass</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">orbits</span><span class="p">[:,</span><span class="mi">9</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">write_to_file</span><span class="p">:</span>
+            <span class="n">params</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">sma</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">period</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">orbit_fraction</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">t0</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">ecc</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">inc</span><span class="p">,</span>\
+                <span class="bp">self</span><span class="o">.</span><span class="n">aop</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">lan</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">mtot</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">distance</span><span class="p">])</span>
+            <span class="n">names</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="s1">&#39;sma&#39;</span><span class="p">,</span><span class="s1">&#39;period&#39;</span><span class="p">,</span><span class="s1">&#39;orbit fraction&#39;</span><span class="p">,</span><span class="s1">&#39;t0&#39;</span><span class="p">,</span><span class="s1">&#39;ecc&#39;</span><span class="p">,</span><span class="s1">&#39;inc&#39;</span><span class="p">,</span><span class="s1">&#39;aop&#39;</span><span class="p">,</span><span class="s1">&#39;lan&#39;</span><span class="p">,</span><span class="s1">&#39;mtot&#39;</span><span class="p">,</span><span class="s1">&#39;distance&#39;</span><span class="p">])</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">filename</span><span class="p">:</span>
+                <span class="n">filename</span> <span class="o">=</span> <span class="s1">&#39;FitResults.Stats.&#39;</span><span class="o">+</span><span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y.%m.</span><span class="si">%d</span><span class="s2">.%H.%M.%S&quot;</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;.txt&#39;</span>
+            <span class="n">k</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+            <span class="n">string</span> <span class="o">=</span> <span class="s1">&#39;Parameter    Mean    Median    Mode    Std    68% Min Cred Int    95% Min Cred Int&#39;</span>
+            <span class="n">k</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">string</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">params</span><span class="p">)):</span>
+                <span class="n">string</span> <span class="o">=</span> <span class="n">make_parameter_string</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">names</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                <span class="n">k</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">string</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">k</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="StatsSubclass"><a class="viewcode-back" href="../../lofti.html#lofti_gaiaDR2.lofti.StatsSubclass">[docs]</a><span class="k">class</span> <span class="nc">StatsSubclass</span><span class="p">(</span><span class="n">Stats</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Subclass for computing and storing statistics</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        array (arr): array for which to compute statistics</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">median</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">mode</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">std</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">ci68</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">ci95</span> <span class="o">=</span> <span class="n">compute_statistics</span><span class="p">(</span><span class="n">array</span><span class="p">)</span></div>
+
+
+
+
+
+        
+        
+
+
+
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Logan Pearce
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

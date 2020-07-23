@@ -1,0 +1,853 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>loftitools &mdash; lofti_gaiaDR2 1.0.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="lofti" href="lofti.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> lofti_gaiaDR2
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="api.html">Detailed API Documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="lofti.html">lofti</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">loftitools</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">lofti_gaiaDR2</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="api.html">Detailed API Documentation</a> &raquo;</li>
+        
+      <li>loftitools</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/loftitools.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="loftitools">
+<span id="id1"></span><h1>loftitools<a class="headerlink" href="#loftitools" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="module-lofti_gaiaDR2"></span><span class="target" id="module-lofti_gaiaDR2.loftitools"></span><dl class="py function">
+<dt id="lofti_gaiaDR2.loftitools.AcceptOrReject">
+<code class="sig-prename descclassname">lofti_gaiaDR2.loftitools.</code><code class="sig-name descname">AcceptOrReject</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">chi2</span></em>, <em class="sig-param"><span class="n">chi_min</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lofti_gaiaDR2/loftitools.html#AcceptOrReject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lofti_gaiaDR2.loftitools.AcceptOrReject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform rejection sampling accept/reject decision</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>chi2</strong> (<em>1xN array</em>) – array of chi2 values</p></li>
+<li><p><strong>chi_min</strong> (<em>flt</em>) – min chi2 value</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p>accepted: Array of indicies of accepted</p>
+<p>lnprob: log probability of accepted orbits</p>
+<p>lnrand: log of the random “dice roll” for acceptance</p>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>3-tuple</p>
+</dd>
+</dl>
+<p>Written by Logan Pearce, 2020</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="lofti_gaiaDR2.loftitools.ComputeChi2">
+<code class="sig-prename descclassname">lofti_gaiaDR2.loftitools.</code><code class="sig-name descname">ComputeChi2</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">array</span></em>, <em class="sig-param"><span class="n">model</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lofti_gaiaDR2/loftitools.html#ComputeChi2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lofti_gaiaDR2.loftitools.ComputeChi2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cumpute the Chi2 for an array of model predictions and measurements</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>array</strong> (<em>2 x N array</em>) – array of observations, row [0] = value, row [1] = errors</p></li>
+<li><p><strong>model</strong> (<em>1 x N array</em>) – array of model predicitons</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Chi^2 value</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>flt</p>
+</dd>
+</dl>
+<p>Written by Logan Pearce, 2020</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="lofti_gaiaDR2.loftitools.Mode">
+<code class="sig-prename descclassname">lofti_gaiaDR2.loftitools.</code><code class="sig-name descname">Mode</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">array</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lofti_gaiaDR2/loftitools.html#Mode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lofti_gaiaDR2.loftitools.Mode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute mode of an array</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>array</strong> (<em>arr</em><em>, </em><em>flt</em>) – array to compute the mode</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>mode</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>flt</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="lofti_gaiaDR2.loftitools.MonteCarloIt">
+<code class="sig-prename descclassname">lofti_gaiaDR2.loftitools.</code><code class="sig-name descname">MonteCarloIt</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">thing</span></em>, <em class="sig-param"><span class="n">N</span><span class="o">=</span><span class="default_value">10000</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lofti_gaiaDR2/loftitools.html#MonteCarloIt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lofti_gaiaDR2.loftitools.MonteCarloIt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a random sample of size = N from a
+Gaussian centered at thing[0] with std thing[1]</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>thing</strong> (<em>tuple</em><em>, </em><em>flt</em>) – tuple of (value,uncertainty).  Can be either astropy units object             or float</p></li>
+<li><p><strong>N</strong> (<em>int</em>) – number of samples</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>N random samples from a Gaussian.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>array</p>
+</dd>
+</dl>
+<p>Written by Logan Pearce, 2020</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="lofti_gaiaDR2.loftitools.add_in_quad">
+<code class="sig-prename descclassname">lofti_gaiaDR2.loftitools.</code><code class="sig-name descname">add_in_quad</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">thing</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lofti_gaiaDR2/loftitools.html#add_in_quad"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lofti_gaiaDR2.loftitools.add_in_quad" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add elements of an array of things in quadrature</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>thing</strong> (<em>arr</em><em>, </em><em>flt</em>) – array of things to add in quadrature</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>single value of things added in quadrature</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>flt</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="lofti_gaiaDR2.loftitools.calc_OFTI">
+<code class="sig-prename descclassname">lofti_gaiaDR2.loftitools.</code><code class="sig-name descname">calc_OFTI</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parameters</span></em>, <em class="sig-param"><span class="n">date</span></em>, <em class="sig-param"><span class="n">rho</span></em>, <em class="sig-param"><span class="n">pa</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lofti_gaiaDR2/loftitools.html#calc_OFTI"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lofti_gaiaDR2.loftitools.calc_OFTI" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform OFTI steps to determine position/velocity/acceleration predictions given
+orbital elements.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Parameters</strong> (<em>9 x N array</em>) – </p></li>
+<li><p><strong>a</strong> (<em>flt</em>) – semi-major axis, as</p></li>
+<li><p><strong>T</strong> (<em>flt</em>) – period, yrs</p></li>
+<li><p><strong>to</strong> (<em>flt</em>) – epoch of periastron passage (in same time structure as dates), yrs</p></li>
+<li><p><strong>e</strong> (<em>flt</em>) – eccentricity</p></li>
+<li><p><strong>i</strong> (<em>flt</em>) – inclination, rad</p></li>
+<li><p><strong>w</strong> (<em>flt</em>) – argument of periastron, rad</p></li>
+<li><p><strong>O</strong> (<em>flt</em>) – longitude of nodes, rad</p></li>
+<li><p><strong>m1</strong> (<em>flt</em>) – system mass, Msun</p></li>
+<li><p><strong>dist</strong> (<em>flt</em>) – distance to system in pc, pc</p></li>
+<li><p><strong>date</strong> (<em>flt</em>) – observation date, yrs</p></li>
+<li><p><strong>rho</strong> (<em>tuple</em><em>, </em><em>flt</em>) – separation and error, mas</p></li>
+<li><p><strong>pa</strong> (<em>tuple</em><em>, </em><em>flt</em>) – position angle and error, deg</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p>X, Y, Z:  positions in plane of the sky in mas</p>
+<p>X dot, Y dot, Z dot:  three dimensional velocities in km/s</p>
+<p>X ddot, Y ddot, Z ddot: 3d accelerations in m/s/yr</p>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>9-tuple</p>
+</dd>
+</dl>
+<p>Written by Logan Pearce, 2018</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="lofti_gaiaDR2.loftitools.calc_XYZ">
+<code class="sig-prename descclassname">lofti_gaiaDR2.loftitools.</code><code class="sig-name descname">calc_XYZ</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">a</span></em>, <em class="sig-param"><span class="n">T</span></em>, <em class="sig-param"><span class="n">to</span></em>, <em class="sig-param"><span class="n">e</span></em>, <em class="sig-param"><span class="n">i</span></em>, <em class="sig-param"><span class="n">w</span></em>, <em class="sig-param"><span class="n">O</span></em>, <em class="sig-param"><span class="n">date</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lofti_gaiaDR2/loftitools.html#calc_XYZ"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lofti_gaiaDR2.loftitools.calc_XYZ" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute projected on-sky position only of a single object on a Keplerian orbit given a
+set of orbital elements at a single observation point.
+Called by calc_OFTI</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>a</strong> (<em>flt</em>) – semi-major axis, as</p></li>
+<li><p><strong>T</strong> (<em>flt</em>) – period, yrs</p></li>
+<li><p><strong>to</strong> (<em>flt</em>) – epoch of periastron passage (in same time structure as dates), yrs</p></li>
+<li><p><strong>e</strong> (<em>flt</em>) – eccentricity</p></li>
+<li><p><strong>i</strong> (<em>flt</em>) – inclination, rad</p></li>
+<li><p><strong>w</strong> (<em>flt</em>) – argument of periastron, rad</p></li>
+<li><p><strong>O</strong> (<em>flt</em>) – longitude of nodes, rad</p></li>
+<li><p><strong>m1</strong> (<em>flt</em>) – system mass, Msun</p></li>
+<li><p><strong>date</strong> (<em>flt</em>) – observation date, yrs</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>X, Y, Z: 3d positions in mas</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>3-tuple</p>
+</dd>
+</dl>
+<p>Written by Logan Pearce, 2018</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="lofti_gaiaDR2.loftitools.calc_accel">
+<code class="sig-prename descclassname">lofti_gaiaDR2.loftitools.</code><code class="sig-name descname">calc_accel</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">a</span></em>, <em class="sig-param"><span class="n">T</span></em>, <em class="sig-param"><span class="n">to</span></em>, <em class="sig-param"><span class="n">e</span></em>, <em class="sig-param"><span class="n">i</span></em>, <em class="sig-param"><span class="n">w</span></em>, <em class="sig-param"><span class="n">O</span></em>, <em class="sig-param"><span class="n">date</span></em>, <em class="sig-param"><span class="n">dist</span></em>, <em class="sig-param"><span class="n">E</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lofti_gaiaDR2/loftitools.html#calc_accel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lofti_gaiaDR2.loftitools.calc_accel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute 3-d acceleration of a single object on a Keplerian orbit given a
+set of orbital elements at a single observation point.
+Called by calc_OFTI</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>a</strong> (<em>flt</em>) – semi-major axis, as</p></li>
+<li><p><strong>T</strong> (<em>flt</em>) – period, yrs</p></li>
+<li><p><strong>to</strong> (<em>flt</em>) – epoch of periastron passage (in same time structure as dates), yrs</p></li>
+<li><p><strong>e</strong> (<em>flt</em>) – eccentricity</p></li>
+<li><p><strong>i</strong> (<em>flt</em>) – inclination, rad</p></li>
+<li><p><strong>w</strong> (<em>flt</em>) – argument of periastron, rad</p></li>
+<li><p><strong>O</strong> (<em>flt</em>) – longitude of nodes, rad</p></li>
+<li><p><strong>m1</strong> (<em>flt</em>) – system mass, Msun</p></li>
+<li><p><strong>dist</strong> (<em>flt</em>) – distance to system in pc, pc</p></li>
+<li><p><strong>date</strong> (<em>flt</em>) – observation date, yrs</p></li>
+<li><p><strong>E</strong> (<em>flt</em>) – eccentricity anomaly, computed in <cite>calc_XYZ</cite></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>X ddot, Y ddot, Z ddot: 3d accelerations in m/s/yr</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>3-tuple</p>
+</dd>
+</dl>
+<p>Written by Logan Pearce, 2018</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="lofti_gaiaDR2.loftitools.calc_min_credible_interval">
+<code class="sig-prename descclassname">lofti_gaiaDR2.loftitools.</code><code class="sig-name descname">calc_min_credible_interval</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">alpha</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lofti_gaiaDR2/loftitools.html#calc_min_credible_interval"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lofti_gaiaDR2.loftitools.calc_min_credible_interval" title="Permalink to this definition">¶</a></dt>
+<dd><p>Internal method to determine the minimum interval of a given width
+Assumes that x is sorted numpy array.
+From: <a class="reference external" href="https://github.com/aloctavodia/Doing_bayesian_data_analysis/blob/master/hpd.py">https://github.com/aloctavodia/Doing_bayesian_data_analysis/blob/master/hpd.py</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>arr</em><em>, </em><em>flt</em>) – array of values for which to compute Min Cred Int</p></li>
+<li><p><strong>alpha</strong> (<em>flt</em>) – statistical alpha value; 1-alpha is the interval. Ex: alpha = 0.05 -&gt; 95% min cred int.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>hdi_min, hdi_max (flt): min and max values of interval encompassing (1-alpha)% of of the data</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+<p>Written by Logan Pearce, 2019</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="lofti_gaiaDR2.loftitools.calc_velocities">
+<code class="sig-prename descclassname">lofti_gaiaDR2.loftitools.</code><code class="sig-name descname">calc_velocities</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">a</span></em>, <em class="sig-param"><span class="n">T</span></em>, <em class="sig-param"><span class="n">to</span></em>, <em class="sig-param"><span class="n">e</span></em>, <em class="sig-param"><span class="n">i</span></em>, <em class="sig-param"><span class="n">w</span></em>, <em class="sig-param"><span class="n">O</span></em>, <em class="sig-param"><span class="n">date</span></em>, <em class="sig-param"><span class="n">dist</span></em>, <em class="sig-param"><span class="n">E</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lofti_gaiaDR2/loftitools.html#calc_velocities"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lofti_gaiaDR2.loftitools.calc_velocities" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute 3-d velocity of a single object on a Keplerian orbit given a
+set of orbital elements at a single observation point.  Uses my eqns derived from Seager
+Exoplanets Ch2.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>a</strong> (<em>flt</em>) – semi-major axis, as</p></li>
+<li><p><strong>T</strong> (<em>flt</em>) – period, yrs</p></li>
+<li><p><strong>to</strong> (<em>flt</em>) – epoch of periastron passage (in same time structure as dates), yrs</p></li>
+<li><p><strong>e</strong> (<em>flt</em>) – eccentricity</p></li>
+<li><p><strong>i</strong> (<em>flt</em>) – inclination, rad</p></li>
+<li><p><strong>w</strong> (<em>flt</em>) – argument of periastron, rad</p></li>
+<li><p><strong>O</strong> (<em>flt</em>) – longitude of nodes, rad</p></li>
+<li><p><strong>m1</strong> (<em>flt</em>) – system mass, Msun</p></li>
+<li><p><strong>dist</strong> (<em>flt</em>) – distance to system in pc, pc</p></li>
+<li><p><strong>date</strong> (<em>flt</em>) – observation date, yrs</p></li>
+<li><p><strong>E</strong> (<em>flt</em>) – eccentricity anomaly, computed in <cite>calc_XYZ</cite></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>X dot, Y dot, Z dot: 3d velocities in km/s</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>3-tuple</p>
+</dd>
+</dl>
+<p>Written by Logan Pearce, 2018</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="lofti_gaiaDR2.loftitools.compute_statistics">
+<code class="sig-prename descclassname">lofti_gaiaDR2.loftitools.</code><code class="sig-name descname">compute_statistics</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">array</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lofti_gaiaDR2/loftitools.html#compute_statistics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lofti_gaiaDR2.loftitools.compute_statistics" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute summary statistics of an array</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>array</strong> (<em>arr</em><em>, </em><em>flt</em>) – array to compute the mode</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p>mean (flt): mean of array from np.mean</p>
+<p>median (flt): median of array from np.median</p>
+<p>mode (flt): mode of array</p>
+<p>std (flt): standard deviation from np.std</p>
+<p>ci68 (tuple, flt): 68% minimum credible interval</p>
+<p>ci95 (tuple, flt): 95% minimum credible interval</p>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="lofti_gaiaDR2.loftitools.danby_solve">
+<code class="sig-prename descclassname">lofti_gaiaDR2.loftitools.</code><code class="sig-name descname">danby_solve</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">f</span></em>, <em class="sig-param"><span class="n">M0</span></em>, <em class="sig-param"><span class="n">e</span></em>, <em class="sig-param"><span class="n">h</span></em>, <em class="sig-param"><span class="n">maxnum</span><span class="o">=</span><span class="default_value">50</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lofti_gaiaDR2/loftitools.html#danby_solve"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lofti_gaiaDR2.loftitools.danby_solve" title="Permalink to this definition">¶</a></dt>
+<dd><p>Newton-Raphson solver for eccentricity anomaly based on “Danby” method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>f</strong> (<em>function</em>) – function to solve (transcendental ecc. anomaly function)</p></li>
+<li><p><strong>M0</strong> (<em>float</em>) – mean anomaly</p></li>
+<li><p><strong>e</strong> (<em>float</em>) – eccentricity</p></li>
+<li><p><strong>h</strong> (<em>float</em>) – termination criteria for solver</p></li>
+<li><p><strong>maxnum</strong> (<em>int</em>) – if it takes more than maxnum iterations,             use the Mikkola solver instead.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>converged solution for eccentric anomaly</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>flt</p>
+</dd>
+</dl>
+<p>Written by Logan Pearce, 2019</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="lofti_gaiaDR2.loftitools.distance">
+<code class="sig-prename descclassname">lofti_gaiaDR2.loftitools.</code><code class="sig-name descname">distance</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parallax</span></em>, <em class="sig-param"><span class="n">parallax_error</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lofti_gaiaDR2/loftitools.html#distance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lofti_gaiaDR2.loftitools.distance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes distance from Gaia parallaxes using the Bayesian method of Bailer-Jones 2015.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>parallax error</strong> (<em>parallax</em><em>,</em>) – parallax in mas</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p>distance (flt): distance to systems in pc</p>
+<p>sigma (flt): 1-sigma uncertainty in distance</p>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple, flt</p>
+</dd>
+</dl>
+<p>Written by Logan Pearce, 2018</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="lofti_gaiaDR2.loftitools.draw_samples">
+<code class="sig-prename descclassname">lofti_gaiaDR2.loftitools.</code><code class="sig-name descname">draw_samples</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">number</span></em>, <em class="sig-param"><span class="n">m_tot</span></em>, <em class="sig-param"><span class="n">d_star</span></em>, <em class="sig-param"><span class="n">date</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lofti_gaiaDR2/loftitools.html#draw_samples"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lofti_gaiaDR2.loftitools.draw_samples" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draw a set of orbital elements from proability distribution functions.</p>
+<p>Parameters are drawn from the probability distributions:</p>
+<blockquote>
+<div><p>-a: single value for semi-major axis due to scale and rotate</p>
+<p>-const: unif [0,1]</p>
+<p>-e: unif [0,1)</p>
+<p>-cos(i): unif [0,1]</p>
+<p>-w: unif [0,360] deg</p>
+<p>-O: single value fixed at 0 due to scale and rotate</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>number</strong> (<em>int</em>) – number of orbits desired to draw elements for. Typically 10000</p></li>
+<li><p><strong>m_tot</strong> (<em>tuple</em><em>, </em><em>flt</em>) – total system mass[0] and error[1] in solar masses</p></li>
+<li><p><strong>d_star</strong> (<em>tuple</em><em>, </em><em>flt</em>) – distance to system in pc</p></li>
+<li><p><strong>date</strong> (<em>flt</em>) – observation date.  2015.5 for Gaia DR2</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p>a (flt): semi-major axis, as</p>
+<p>T (flt): period, yrs</p>
+<p>to (flt): epoch of periastron passage (in same time structure as dates), yrs</p>
+<p>e (flt): eccentricity</p>
+<p>i (flt): inclination, rad</p>
+<p>w (flt): argument of periastron, rad</p>
+<p>O (flt): longitude of nodes, rad</p>
+<p>m1 (flt): system mass, Msun</p>
+<p>dist (flt): distance to system</p>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>array</p>
+</dd>
+</dl>
+<p>Written by Logan Pearce, 2018</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="lofti_gaiaDR2.loftitools.eccentricity_anomaly">
+<code class="sig-prename descclassname">lofti_gaiaDR2.loftitools.</code><code class="sig-name descname">eccentricity_anomaly</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">E</span></em>, <em class="sig-param"><span class="n">e</span></em>, <em class="sig-param"><span class="n">M</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lofti_gaiaDR2/loftitools.html#eccentricity_anomaly"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lofti_gaiaDR2.loftitools.eccentricity_anomaly" title="Permalink to this definition">¶</a></dt>
+<dd><p>Eccentric anomaly function</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="lofti_gaiaDR2.loftitools.freedman_diaconis">
+<code class="sig-prename descclassname">lofti_gaiaDR2.loftitools.</code><code class="sig-name descname">freedman_diaconis</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">array</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lofti_gaiaDR2/loftitools.html#freedman_diaconis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lofti_gaiaDR2.loftitools.freedman_diaconis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the optimal number of bins for a 1-d histogram using the Freedman-Diaconis rule of thumb
+Bin width = 2IQR/cuberoot(N)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>array</strong> (<em>arr</em>) – flattened array of data</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p>bin_width (flt): width of bin in optimal binning</p>
+<p>n (int): number of bins</p>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="lofti_gaiaDR2.loftitools.limit_to_180deg">
+<code class="sig-prename descclassname">lofti_gaiaDR2.loftitools.</code><code class="sig-name descname">limit_to_180deg</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">array</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lofti_gaiaDR2/loftitools.html#limit_to_180deg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lofti_gaiaDR2.loftitools.limit_to_180deg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Limit elements of array to [0,180] degrees</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="lofti_gaiaDR2.loftitools.make_parameter_string">
+<code class="sig-prename descclassname">lofti_gaiaDR2.loftitools.</code><code class="sig-name descname">make_parameter_string</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">thing</span></em>, <em class="sig-param"><span class="n">name</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lofti_gaiaDR2/loftitools.html#make_parameter_string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lofti_gaiaDR2.loftitools.make_parameter_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make a string of stats for writing to txt file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>thing</strong> (<em>arr</em><em>, </em><em>flt</em>) – Stats parameter object. Ex: results.stats.sma</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – name of parameter</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="lofti_gaiaDR2.loftitools.mas_to_km">
+<code class="sig-prename descclassname">lofti_gaiaDR2.loftitools.</code><code class="sig-name descname">mas_to_km</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mas</span></em>, <em class="sig-param"><span class="n">plx</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lofti_gaiaDR2/loftitools.html#mas_to_km"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lofti_gaiaDR2.loftitools.mas_to_km" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert from mas -&gt; km</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mas</strong> (<em>array</em><em>, </em><em>flt</em>) – sep in mas</p></li>
+<li><p><strong>plx</strong> (<em>tuple</em><em>, </em><em>flt</em>) – parallax, tuple of (plx,plx error) in mas</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>separation in km</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>array</p>
+</dd>
+</dl>
+<p>Written by Logan Pearce, 2019</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="lofti_gaiaDR2.loftitools.mas_to_km2">
+<code class="sig-prename descclassname">lofti_gaiaDR2.loftitools.</code><code class="sig-name descname">mas_to_km2</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">arcsec</span></em>, <em class="sig-param"><span class="n">dist</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lofti_gaiaDR2/loftitools.html#mas_to_km2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lofti_gaiaDR2.loftitools.mas_to_km2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert from mas -&gt; km using the distance rather than parallax.  Does not
+compute errors on separation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>arcsec</strong> (<em>array</em><em>, </em><em>flt</em>) – sep in arcsec</p></li>
+<li><p><strong>dist</strong> (<em>array</em><em>, </em><em>flt</em>) – distance in parsecs</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>separation in km</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>array</p>
+</dd>
+</dl>
+<p>Written by Logan Pearce, 2019</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="lofti_gaiaDR2.loftitools.masyr_to_kms">
+<code class="sig-prename descclassname">lofti_gaiaDR2.loftitools.</code><code class="sig-name descname">masyr_to_kms</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mas_yr</span></em>, <em class="sig-param"><span class="n">plx</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lofti_gaiaDR2/loftitools.html#masyr_to_kms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lofti_gaiaDR2.loftitools.masyr_to_kms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert from mas/yr -&gt; km/s</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mas_yr</strong> (<em>array</em>) – velocity in mas/yr</p></li>
+<li><p><strong>plx</strong> (<em>tuple</em><em>,</em><em>float</em>) – parallax, tuple of (plx,plx error)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>velocity in km/s</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>array</p>
+</dd>
+</dl>
+<p>Written by Logan Pearce, 2019</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="lofti_gaiaDR2.loftitools.mikkola_solve">
+<code class="sig-prename descclassname">lofti_gaiaDR2.loftitools.</code><code class="sig-name descname">mikkola_solve</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">M</span></em>, <em class="sig-param"><span class="n">e</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lofti_gaiaDR2/loftitools.html#mikkola_solve"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lofti_gaiaDR2.loftitools.mikkola_solve" title="Permalink to this definition">¶</a></dt>
+<dd><p>Analytic solver for eccentricity anomaly from Mikkola 1987. Most efficient
+when M near 0/2pi and e &gt;= 0.95.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>M</strong> (<em>float</em>) – mean anomaly</p></li>
+<li><p><strong>e</strong> (<em>float</em>) – eccentricity</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>eccentric anomaly</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>flt</p>
+</dd>
+</dl>
+<p>Written by Logan Pearce, 2019</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="lofti_gaiaDR2.loftitools.orbits_for_plotting">
+<code class="sig-prename descclassname">lofti_gaiaDR2.loftitools.</code><code class="sig-name descname">orbits_for_plotting</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">a1</span></em>, <em class="sig-param"><span class="n">T1</span></em>, <em class="sig-param"><span class="n">to1</span></em>, <em class="sig-param"><span class="n">e1</span></em>, <em class="sig-param"><span class="n">i1</span></em>, <em class="sig-param"><span class="n">w1</span></em>, <em class="sig-param"><span class="n">O1</span></em>, <em class="sig-param"><span class="n">t</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lofti_gaiaDR2/loftitools.html#orbits_for_plotting"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lofti_gaiaDR2.loftitools.orbits_for_plotting" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute inputs specifically for plotting functions</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>[</strong><strong>as</strong><strong>]</strong> (<em>a</em>) – semi-major axis</p></li>
+<li><p><strong>[</strong><strong>yrs</strong><strong>]</strong> (<em>to</em>) – period</p></li>
+<li><p><strong>[</strong><strong>yrs</strong><strong>]</strong> – epoch of periastron passage (in same time structure as dates)</p></li>
+<li><p><strong>e</strong> – eccentricity</p></li>
+<li><p><strong>[</strong><strong>rad</strong><strong>]</strong> (<em>O</em>) – inclination</p></li>
+<li><p><strong>[</strong><strong>rad</strong><strong>]</strong> – argument of periastron</p></li>
+<li><p><strong>[</strong><strong>rad</strong><strong>]</strong> – longitude of nodes</p></li>
+<li><p><strong>t</strong> (<em>flt</em>) – time at which to compute the position</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>X, Y (flt): positions in plane of the sky [mas]</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+<p>Written by Logan Pearce, 2020</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="lofti_gaiaDR2.loftitools.scale_and_rotate">
+<code class="sig-prename descclassname">lofti_gaiaDR2.loftitools.</code><code class="sig-name descname">scale_and_rotate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">Y</span></em>, <em class="sig-param"><span class="n">rho</span></em>, <em class="sig-param"><span class="n">pa</span></em>, <em class="sig-param"><span class="n">a</span></em>, <em class="sig-param"><span class="n">const</span></em>, <em class="sig-param"><span class="n">m1</span></em>, <em class="sig-param"><span class="n">dist</span></em>, <em class="sig-param"><span class="n">d</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lofti_gaiaDR2/loftitools.html#scale_and_rotate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lofti_gaiaDR2.loftitools.scale_and_rotate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a new semi-major axis, period, epoch of peri passage, and long of peri for each orbit
+given the X,Y plane of the sky coordinates for the orbit at the date of the reference epoch.
+Called by calc_OFTI</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong><strong>,</strong><strong>Y</strong> (<em>1 x N array</em>) – X and Y model predicted DEC/RA initial position in mas</p></li>
+<li><p><strong>rho</strong> (<em>tuple</em><em>, </em><em>flt</em>) – observed separation and error in mas</p></li>
+<li><p><strong>pa</strong> (<em>tuple</em><em>, </em><em>flt</em>) – observed position angle and error in deg</p></li>
+<li><p><strong>a</strong> (<em>1 x N array</em>) – initial semi-major axis</p></li>
+<li><p><strong>const</strong> (<em>1 x N array</em>) – initial orbit fraction</p></li>
+<li><p><strong>m1</strong> – system mass</p></li>
+<li><p><strong>dist</strong> – distance to system</p></li>
+<li><p><strong>d</strong> – observation date (2015.5 for Gaia DR2)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p>a2 (1 x N array): scaled semi-major axis</p>
+<p>T2 (1 x N array): scaled period</p>
+<p>to2 (1 x N array): scaled periastron passage</p>
+<p>O2 (1 x N array): rotated lon of ascending node</p>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(4 x N array)</p>
+</dd>
+</dl>
+<p>Written by Logan Pearce, 2018</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="lofti_gaiaDR2.loftitools.solve">
+<code class="sig-prename descclassname">lofti_gaiaDR2.loftitools.</code><code class="sig-name descname">solve</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">f</span></em>, <em class="sig-param"><span class="n">M0</span></em>, <em class="sig-param"><span class="n">e</span></em>, <em class="sig-param"><span class="n">h</span></em>, <em class="sig-param"><span class="n">maxnum</span><span class="o">=</span><span class="default_value">50</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lofti_gaiaDR2/loftitools.html#solve"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lofti_gaiaDR2.loftitools.solve" title="Permalink to this definition">¶</a></dt>
+<dd><p>Newton-Raphson solver for eccentricity anomaly
+from <a class="reference external" href="https://stackoverflow.com/questions/20659456/python-implementing-a-numerical-equation-solver-newton-raphson">https://stackoverflow.com/questions/20659456/python-implementing-a-numerical-equation-solver-newton-raphson</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>f</strong> (<em>function</em>) – function to solve (transcendental ecc. anomaly function)</p></li>
+<li><p><strong>M0</strong> (<em>float</em>) – mean anomaly</p></li>
+<li><p><strong>e</strong> (<em>float</em>) – eccentricity</p></li>
+<li><p><strong>h</strong> (<em>float</em>) – termination criteria for solver</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>converged solution for eccentric anomaly</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>flt</p>
+</dd>
+</dl>
+<p>Written by Logan Pearce, 2017</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="lofti_gaiaDR2.loftitools.to_polar">
+<code class="sig-prename descclassname">lofti_gaiaDR2.loftitools.</code><code class="sig-name descname">to_polar</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">RAa</span></em>, <em class="sig-param"><span class="n">RAb</span></em>, <em class="sig-param"><span class="n">Deca</span></em>, <em class="sig-param"><span class="n">Decb</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lofti_gaiaDR2/loftitools.html#to_polar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lofti_gaiaDR2.loftitools.to_polar" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Converts RA/Dec [deg] of two binary components into separation and position angle of B relative</dt><dd><p>to A [mas, deg]</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>RAb</strong><strong>, </strong><strong>Deca</strong><strong>, </strong><strong>Decb</strong> (<em>RAa</em><em>,</em>) – RA/Dec of each object in deg</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>separation in mas and position angle in degrees from North</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple, flt</p>
+</dd>
+</dl>
+<p>Written by Logan Pearce, 2019</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="lofti_gaiaDR2.loftitools.update_progress">
+<code class="sig-prename descclassname">lofti_gaiaDR2.loftitools.</code><code class="sig-name descname">update_progress</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">n</span></em>, <em class="sig-param"><span class="n">max_value</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lofti_gaiaDR2/loftitools.html#update_progress"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lofti_gaiaDR2.loftitools.update_progress" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a progress bar</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n</strong> (<em>int</em>) – current count</p></li>
+<li><p><strong>max_value</strong> (<em>int</em>) – ultimate values</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="lofti.html" class="btn btn-neutral float-left" title="lofti" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Logan Pearce
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

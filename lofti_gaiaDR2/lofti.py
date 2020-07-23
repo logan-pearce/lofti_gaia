@@ -7,25 +7,28 @@ import matplotlib.pyplot as plt
 # Astroquery throws some warnings we can ignore:
 import warnings
 warnings.filterwarnings("ignore")
-'''
-This module obtaines measurements from Gaia DR2 and runs through the LOFTI Gaia/OFTI 
+
+'''This module obtaines measurements from Gaia DR2 and runs through the LOFTI Gaia/OFTI 
 wide stellar binary orbit fitting technique.
 '''
 
 class Fitter(object):
-    ''' 
-    Master object for all lofti functions and results.
+    '''Initialize the Fitter object for the binary system, and compute observational constraints 
+    to be used in the orbit fit.  User must provide Gaia source ids, tuples of mass estimates for 
+    both objects, specify the number of desired orbits in posterior sample.  Fit will be
+    for object 2 relative to object 1.
 
     Attributes are tuples of (value,uncertainty) unless otherwise indicated.  Attributes
     with astropy units are retrieved from Gaia archive, attributes without units are
     computed from Gaia values.  All relative values are for object 2 relative to object 1.
 
-    Attributes:
-        sourceid1, sourceid2 (int): Gaia DR2 source IDs for the two objects to be fit.
-            Fit will be performed for sourceid2 relative to sourceid1
-        mass1, mass2 (flt): Tuple of (mass,unceertainty) for object 1 and object 2
-            in solar masses
-        Nsamples (int): Number of desired sample orbits.
+    Args:
+        sourceid1, sourceid2 (int): Gaia source ids for the two objects, fit will be for motion of \
+            object 2 relative to object 1
+        mass1, mass2 (tuple, flt): tuple os mass estimate for object 1 and 2, of the form (value, uncertainty)
+        Norbits (int): Number of desired orbits in posterior sample.  Default = 100000
+        results_filename (str): Filename for fit results files.  If none, results will be written to files \
+            named FitResults.yr.mo.day.hr.min.s
         ruwe1, ruwe2 (flt): RUWE value from Gaia archive
         ref_epoch (flt): reference epoch in decimal years. For Gaia DR2 this is 2015.5
         plx1, plx2 (flt): parallax from Gaia DR2 in mas
@@ -36,7 +39,7 @@ class Fitter(object):
         rv1, rv2 (flt, optional): radial velocity in km s^-1 from Gaia DR2
         rv (flt, optional): relative RV of 2 relative to 1, if both are present in Gaia DR2
         plx (flt): weighted mean parallax for the binary system in mas
-        distance (flt): distance of system in pc, computed from Gaia parallax using method
+        distance (flt): distance of system in pc, computed from Gaia parallax using method \
             of Bailer-Jones et. al 2018.
         deltaRA, deltaDec (flt): relative separation in RA and Dec directions, in mas
         pmRA, pmDec (flt): relative proper motion in RA/Dec directions in km s^-1
@@ -44,15 +47,16 @@ class Fitter(object):
         pa (flt): postion angle of separation vector in degrees from North
         sep_au (flt): separation in AU
         sep_km (flt): separation in km
-        total_vel (flt): total velocity vector in km s^-1.  If RV is available for both,
-            this is the 3d velocity vector; if not it is just the plane of sky velocity.
-        total_planeofsky_velocity (flt): total velocity in the plane of sky in km s^-1. 
+        total_vel (flt): total velocity vector in km s^-1.  If RV is available for both, \
+            this is the 3d velocity vector; if not it is just the plane of sky velocity. 
+        total_planeofsky_velocity (flt): total velocity in the plane of sky in km s^-1. \
             In the absence of RV this is equivalent to the total velocity vector.
         deltaGmag (flt): relative contrast in Gaia G magnitude.  Does not include uncertainty.
 
     Written by Logan Pearce, 2020
     '''
     def __init__(self, sourceid1, sourceid2, mass1, mass2, Norbits = 100000, results_filename = None):
+        
         self.sourceid1 = sourceid1
         self.sourceid2 = sourceid2
         try:
@@ -71,19 +75,19 @@ class Fitter(object):
             self.results_filename = results_filename
             self.stats_filename = results_filename+'.Stats.txt'
 
-        # Get Gaia measurements, compute needed cosntraints, and add to object:
+        # Get Gaia measurements, compute needed constraints, and add to object:
         self.PrepareConstraints()
 
     def PrepareConstraints(self, rv=False):
-        '''
-        Retrieves parameters for both objects from Gaia DR2 archive and computes system attriubtes,
+        '''Retrieves parameters for both objects from Gaia DR2 archive and computes system attriubtes,
         and assigns them to the Fitter object class.
         
         Args:
-            rv (bool): flag for handling the presence or absence of RV measurements for both objects
+            rv (bool): flag for handling the presence or absence of RV measurements for both objects \
                 in DR2.  Gets set to True if both objects have Gaia RV measurements. Default = False
         
         Written by Logan Pearce, 2020
+
         '''
         from astroquery.gaia import Gaia
         deg_to_mas = 3600000.
@@ -194,34 +198,37 @@ class Fitter(object):
     
 
 class FitOrbit(object):
-    '''
-    Object for performing an orbit fit.  Takes attributes from Fitter class.
+    ''' Object for performing an orbit fit.  Takes attributes from Fitter class.
 
     ex: orbits = FitOrbit(fitterobject)
 
-    Attributes:
+    Args:
+        fitterobject (Fitter object): Fitter object initialized from the Fitter class
+        write_stats (bool): If True, write out summary statistics of orbit sample at \
+            conclusion of fit.  Default = True.
+        write_results (bool):  If True, write out the fit results to a pickle file \
+            in addition to the text file created during the fit.  Default = True.
         deltaRA, deltaDec (flt): relative separation in RA and Dec directions, in mas
         pmRA, pmDec (flt): relative proper motion in RA/Dec directions in km s^-1
         rv (flt, optional): relative RV of 2 relative to 1, if both are present in Gaia DR2
         mtot_init (flt): initial total system mass in Msun from user input
-        distance (flt): distance of system in pc, computed from Gaia parallax using method
-            of Bailer-Jones et. al 2018.
+        distance (flt): distance of system in pc, computed from Gaia parallax using method of Bailer-Jones et. al 2018.
         sep (flt): separation vector in mas
         pa (flt): postion angle of separation vector in degrees from North
         ref_epoch (flt): epoch of the measurement, 2015.5 for Gaia DR2.
         Norbits (int): number of desired orbit samples
-        write_stats (bool): if True, write summary of sample statistics to human-readable file at
-            end of run.  Default = True
-        write_results (bool): if True, write out current state of sample orbits in pickle file in 
-            periodic intervals during run, and again at the end of the run.  RECOMMENDED.  
-            Default = True
-        results_filename (str): name of file for saving pickled results to disk.  If not supplied,
+        write_stats (bool): if True, write summary of sample statistics to human-readable file at end of run.  Default = True
+        write_results (bool): if True, write out current state of sample orbits in pickle file in periodic intervals during \
+            run, and again at the end of the run.  RECOMMENDED.  Default = True
+        results_filename (str): name of file for saving pickled results to disk.  If not supplied, \
             defaul name is FitResults.y.mo.d.h.m.s.pkl, saved in same directory as fit was run.
-        stats_filename (str): name of file for saving human-readable file of stats of sample results. If not supplied,
+        stats_filename (str): name of file for saving human-readable file of stats of sample results. If not supplied, \
             defaul name is FitResults.Stats.y.mo.d.h.m.s.pkl, saved in same directory as fit was run.
         run_time (flt): run time for the last fit.  astropy units object
 
+
     Written by Logan Pearce, 2020
+
     '''
     def __init__(self, fitterobject, write_stats = True, write_results = True):
         # establish fit parameters:
@@ -245,15 +252,15 @@ class FitOrbit(object):
         self.fitorbit()
 
     def fitorbit(self, save_results_every_X_loops = 100):
-        '''
-        Run the OFTI fitting run on the Fitter object.  Called when FitOrbit object
+        '''Run the OFTI fitting run on the Fitter object.  Called when FitOrbit object
         is created.
 
         Args:
-            save_results_every_X_loops (int): on every Xth loop, save status of the 
+            save_results_every_X_loops (int): on every Xth loop, save status of the \
                 orbit sample arrays to a pickle file, if write_results = True (Default)
 
         Written by Logan Pearce, 2020
+
         '''
         import time as tm
         ########### Perform initial run to get initial chi-squared: #############
@@ -362,50 +369,51 @@ class FitOrbit(object):
         self.results.stats = Stats(orbits = self.results.orbits, write_to_file = self.write_stats, filename = self.stats_filename)
             
 class Results(object):
+    '''A class for storing and manipulating the results of the orbit fit.
+
+    Args:
+        orbits (Norbits x 13 array): array of accepted orbits from \
+            OFTI fit in the same order as the following attributes
+        sma (1 x Norbits array): semi-major axis in arcsec
+        period (1 x Norbits array): period in years
+        orbit_fraction (1 x Norbits array): fraction of orbit past periastron \
+            passage the observation (2015.5) occured on.  Values: [0,1)
+        t0 (1 x Norbits array): date of periastron passage in decimal years
+        ecc (1 x Norbits array): eccentricity
+        inc (1 x Norbits array): inclination relative to plane of the sky in deg
+        aop (1 x Norbits array): arguement of periastron in deg
+        lan (1 x Norbits array): longitude of ascending node in deg
+        mtot (1 x Norbits array): total system mass in Msun
+        distance (1 x Norbits array): distance to system in parsecs
+        chi2 (1 x Norbits array): chi^2 value for the orbit
+        lnprob (1 x Norbits array): log probability of orbit
+        lnrand (1 x Norbits array): log of random "dice roll" for \
+            orbit acceptance
+        orbits (array): the (Norbits x 13 array) array of orbit samples. 
+        limit_aop, limit_lan (bool): In the absence of radial velocity info, \
+            there is a degeneracy between arg of periastron and long of ascending \
+            node.  Common practice is to limit one to the interval [0,180] deg. \
+            By default, lofti limits lan to this interval if rv = False.  The user can \
+            choose to limit aop instead by setting limit_aop = True, limit_lan = False. \
+            The orbits[:,6] (aop) and orbits[:,7] (lan) arrays preserve the original values. \
+
+    Written by Logan Pearce, 2020
+
+    '''
     def __init__(self, orbits = [], limit_aop = False, limit_lan = True):
-        '''
-        A class for storing and manipulating the results of the orbit fit.
-
-        Attributes:
-            orbits (Norbits x 13 array): array of accepted orbits from
-                OFTI fit in the same order as the following attributes
-            sma (1 x Norbits array): semi-major axis in arcsec
-            period (1 x Norbits array): period in years
-            orbit_fraction (1 x Norbits array): fraction of orbit past periastron 
-                passage the observation (2015.5) occured on.  Values: [0,1)
-            t0 (1 x Norbits array): date of periastron passage in decimal years
-            ecc (1 x Norbits array): eccentricity
-            inc (1 x Norbits array): inclination relative to plane of the sky in deg
-            aop (1 x Norbits array): arguement of periastron in deg
-            lan (1 x Norbits array): longitude of ascending node in deg
-            mtot (1 x Norbits array): total system mass in Msun
-            distance (1 x Norbits array): distance to system in parsecs
-            chi2 (1 x Norbits array): chi^2 value for the orbit
-            lnprob (1 x Norbits array): log probability of orbit
-            lnrand (1 x Norbits array): log of random "dice roll" for 
-                orbit acceptance
-        
-        Args:
-            orbits (array): the (Norbits x 13 array) array of orbit samples.
-            limit_aop, limit_lan (bool): In the absence of radial velocity info,
-                there is a degeneracy between arg of periastron and long of ascending
-                node.  Common practice is to limit one to the interval [0,180] deg. 
-                By default, lofti limits lan to this interval if rv = False.  The user can 
-                choose to limit aop instead by setting limit_aop = True, limit_lan = False.
-                The orbits[:,6] (aop) and orbits[:,7] (lan) arrays preserve the original values.
-
-        Written by Logan Pearce, 2020
-        '''
         self.orbits = orbits
         self.limit_lan = limit_lan
         self.limit_aop = limit_aop
 
     def Update(self, orbits):
-        '''
-        Take elements of the "orbits" attribute and populate
+        '''Take elements of the "orbits" attribute and populate
         the orbital element attributes
 
+        Args:
+            orbits (arr): orbits array from Results class
+
         Written by Logan Pearce, 2020
+
         '''
         self.sma = orbits[:,0]
         self.period = orbits[:,1]
@@ -426,13 +434,16 @@ class Results(object):
         self.lnrand = orbits[:,12]
 
     def SaveResults(self, filename, write_text_file = False, text_filename = None):
-        '''
-        Save the orbits and orbital parameters attributes in a pickle file
+        '''Save the orbits and orbital parameters attributes in a pickle file
 
         Args:
             filename (str): filename for pickle file
+            write_text_file (bool): if True, also write out the accepted orbits to a \
+                human readable text file
+            text_filename (bool): if write_to_text = True, specifify filename for text file
 
         Written by Logan Pearce, 2020
+
         '''
         pickle.dump(self, open( filename, "wb" ) )
 
@@ -445,15 +456,15 @@ class Results(object):
             k.close()
 
     def LoadResults(self, filename, append = False):
-        '''
-        Read in the orbits and orbital parameters attributes from a pickle file
+        '''Read in the orbits and orbital parameters attributes from a pickle file
 
         Args:
             filename (str): filename of pickle file to load
-            append (bool): if True, append read in orbit samples to another Results 
+            append (bool): if True, append read in orbit samples to another Results \
                 object.  Default = False.
 
         Written by Logan Pearce, 2020
+
         '''
         results_in = pickle.load( open( filename, "rb" ) )
         if append == False:
@@ -465,10 +476,10 @@ class Results(object):
 
     # plotting results:
     def PlotHists(self):
-        '''
-        Plot 1-d histograms of orbital elements 'sma','ecc','inc','aop','lan','t0' from fit results.
+        '''Plot 1-d histograms of orbital elements 'sma','ecc','inc','aop','lan','t0' from fit results.
 
         Written by Logan Pearce, 2020
+
         '''
         if len(self.sma < 50):
             bins = 50
@@ -488,11 +499,10 @@ class Results(object):
         return fig
 
     def PlotOrbits(self, color = True, colorbar = True, ref_epoch = 2015.5, size = 100, plot3d = False, cmap = 'viridis'):
-        '''
-        Plot a random selection of orbits from the sample in the plane of the sky.
+        '''Plot a random selection of orbits from the sample in the plane of the sky.
 
         Args:
-            color (bool): if True, plot orbit tracks using a colormap scale to orbit fraction (phase) 
+            color (bool): if True, plot orbit tracks using a colormap scale to orbit fraction (phase) \
                 past observation date (2015.5).  If False, orbit tracks will be black.  Default = True
             colorbar (bool): if True and color = True, plot colorbar for orbit phase
             ref_epoch (flt): reference epoch for drawing orbits.  Default = 2015.5 
@@ -501,6 +511,7 @@ class Results(object):
             cmap (str): colormap for orbit phase plot
 
         Written by Logan Pearce, 2020
+
         '''
         # Random selection of orbits to plot:
         if len(self.sma) > size:
@@ -578,18 +589,18 @@ class Results(object):
         return fig
 
     def PlotSepPA(self, ref_epoch = 2015.5, size = 100, timespan = [20,20], orbitcolor = 'skyblue'):
-        '''
-        Plot a random selection of orbits from the sample in separation and position angle as 
+        '''Plot a random selection of orbits from the sample in separation and position angle as 
         a function of time.
 
         Args:
             ref_epoch (flt): reference epoch for drawing orbits.  Default = 2015.5 
             size (int): Number of orbits to plot.  Default = True
-            timespan (tuple, int): number of years before [0] and after [1] the ref epoch to
+            timespan (tuple, int): number of years before [0] and after [1] the ref epoch to \
                 plot sep and pa
             orbitcolor (str): color to use to plot the orbits
 
         Written by Logan Pearce, 2020
+
         '''
         # Random selection of orbits to plot:
         if len(self.sma) > size:
@@ -649,31 +660,32 @@ class Results(object):
         return fig
             
 class Stats(object):
+    '''A class for storing and manipulating the statistics of the results of the orbit fit.
+
+    For every parameter, there is a series of stats computed and saved as stats.param.stat
+
+    Examples:
+        stats.sma.mean = mean of semimajor axis
+        stats.ecc.ci68 = 68% confidence interval for eccentricity
+        stats.aop.std = standard deviation of arg of periastron
+
+    Args:
+        orbits (Norbits x 13 array): array of accepted orbits from \
+            OFTI fit in the same order as the following attributes
+        param.mean (flt): mean of parameter computed using np.mean
+        param.median (flt): np.median of parameter
+        param.mode (flt): mode of parameter
+        param.std (flt): standard deviation from np.std
+        param.ci68 (tuple,flt): 68% minimum credible interval of form (lower bound, upper bound)
+        param.ci95 (tuple,flt): 95% minimum credible interval
+        write_to_file (bool): If True, write stats to a human-readbale text file.
+        filename (str): filename for saving stats file.  If not supplied, default \
+            name is FitResults.Stats.y.mo.d.h.m.s.pkl, saved in same directory as fit was run.
+
+        
+    Written by Logan Pearce, 2020
+
     '''
-        A class for storing and manipulating the statistics of the results of the orbit fit.
-
-        For every parameter, there is a series of stats computed and saved as stats.param.stat
-        ex: stats.sma.mean = mean of semimajor axis
-            stats.ecc.ci68 = 68% confidence interval for eccentricity
-            stats.aop.std = standard deviation of arg of periastron
-
-        Attributes:
-            orbits (Norbits x 13 array): array of accepted orbits from
-                OFTI fit in the same order as the following attributes
-            param.mean (flt): mean of parameter computed using np.mean
-            param.median (flt): np.median of parameter
-            param.mode (flt): mode of parameter
-            param.std (flt): standard deviation from np.std
-            param.ci68 (tuple,flt): 68% minimum credible interval of form (lower bound, upper bound)
-            param.ci95 (tuple,flt): 95% minimum credible interval
-
-        Args:
-            write_to_file (bool): If True, write stats to a human-readbale text file.
-            filename (str): filename for saving stats file.  If not supplied, default 
-                name is FitResults.Stats.y.mo.d.h.m.s.pkl, saved in same directory as fit was run.
-
-        Written by Logan Pearce, 2020
-        '''
     def __init__(self, orbits = [], write_to_file = False, filename = None):
         self.orbits = orbits
         # Compute stats on parameter arrays and save as attributes:
@@ -703,10 +715,12 @@ class Stats(object):
             k.close()
 
 class StatsSubclass(Stats):
+    '''Subclass for computing and storing statistics
+
+    Args:
+        array (arr): array for which to compute statistics
+    '''
     def __init__(self, array):
-        '''
-        Subclass for computing and storing statistics
-        '''
         self.mean,self.median,self.mode,self.std,self.ci68,self.ci95 = compute_statistics(array)
 
 

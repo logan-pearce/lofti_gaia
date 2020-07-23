@@ -1,0 +1,498 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>lofti &mdash; lofti_gaiaDR2 1.0.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="loftitools" href="loftitools.html" />
+    <link rel="prev" title="Detailed API Documentation" href="api.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> lofti_gaiaDR2
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="api.html">Detailed API Documentation</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">lofti</a></li>
+<li class="toctree-l2"><a class="reference internal" href="loftitools.html">loftitools</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">lofti_gaiaDR2</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="api.html">Detailed API Documentation</a> &raquo;</li>
+        
+      <li>lofti</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/lofti.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="lofti">
+<span id="id1"></span><h1>lofti<a class="headerlink" href="#lofti" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="module-lofti_gaiaDR2"></span><span class="target" id="module-lofti_gaiaDR2.lofti"></span><dl class="py class">
+<dt id="lofti_gaiaDR2.lofti.FitOrbit">
+<em class="property">class </em><code class="sig-prename descclassname">lofti_gaiaDR2.lofti.</code><code class="sig-name descname">FitOrbit</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fitterobject</span></em>, <em class="sig-param"><span class="n">write_stats</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">write_results</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lofti_gaiaDR2/lofti.html#FitOrbit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lofti_gaiaDR2.lofti.FitOrbit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Object for performing an orbit fit.  Takes attributes from Fitter class.</p>
+<p>ex: orbits = FitOrbit(fitterobject)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fitterobject</strong> (<em>Fitter object</em>) – Fitter object initialized from the Fitter class</p></li>
+<li><p><strong>write_stats</strong> (<em>bool</em>) – If True, write out summary statistics of orbit sample at             conclusion of fit.  Default = True.</p></li>
+<li><p><strong>write_results</strong> (<em>bool</em>) – If True, write out the fit results to a pickle file             in addition to the text file created during the fit.  Default = True.</p></li>
+<li><p><strong>deltaDec</strong> (<em>deltaRA</em><em>,</em>) – relative separation in RA and Dec directions, in mas</p></li>
+<li><p><strong>pmDec</strong> (<em>pmRA</em><em>,</em>) – relative proper motion in RA/Dec directions in km s^-1</p></li>
+<li><p><strong>rv</strong> (<em>flt</em><em>, </em><em>optional</em>) – relative RV of 2 relative to 1, if both are present in Gaia DR2</p></li>
+<li><p><strong>mtot_init</strong> (<em>flt</em>) – initial total system mass in Msun from user input</p></li>
+<li><p><strong>distance</strong> (<em>flt</em>) – distance of system in pc, computed from Gaia parallax using method of Bailer-Jones et. al 2018.</p></li>
+<li><p><strong>sep</strong> (<em>flt</em>) – separation vector in mas</p></li>
+<li><p><strong>pa</strong> (<em>flt</em>) – postion angle of separation vector in degrees from North</p></li>
+<li><p><strong>ref_epoch</strong> (<em>flt</em>) – epoch of the measurement, 2015.5 for Gaia DR2.</p></li>
+<li><p><strong>Norbits</strong> (<em>int</em>) – number of desired orbit samples</p></li>
+<li><p><strong>write_stats</strong> – if True, write summary of sample statistics to human-readable file at end of run.  Default = True</p></li>
+<li><p><strong>write_results</strong> – if True, write out current state of sample orbits in pickle file in periodic intervals during             run, and again at the end of the run.  RECOMMENDED.  Default = True</p></li>
+<li><p><strong>results_filename</strong> (<em>str</em>) – name of file for saving pickled results to disk.  If not supplied,             defaul name is FitResults.y.mo.d.h.m.s.pkl, saved in same directory as fit was run.</p></li>
+<li><p><strong>stats_filename</strong> (<em>str</em>) – name of file for saving human-readable file of stats of sample results. If not supplied,             defaul name is FitResults.Stats.y.mo.d.h.m.s.pkl, saved in same directory as fit was run.</p></li>
+<li><p><strong>run_time</strong> (<em>flt</em>) – run time for the last fit.  astropy units object</p></li>
+</ul>
+</dd>
+</dl>
+<p>Written by Logan Pearce, 2020</p>
+<dl class="py method">
+<dt id="lofti_gaiaDR2.lofti.FitOrbit.fitorbit">
+<code class="sig-name descname">fitorbit</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">save_results_every_X_loops</span><span class="o">=</span><span class="default_value">100</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lofti_gaiaDR2/lofti.html#FitOrbit.fitorbit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lofti_gaiaDR2.lofti.FitOrbit.fitorbit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run the OFTI fitting run on the Fitter object.  Called when FitOrbit object
+is created.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>save_results_every_X_loops</strong> (<em>int</em>) – on every Xth loop, save status of the                 orbit sample arrays to a pickle file, if write_results = True (Default)</p>
+</dd>
+</dl>
+<p>Written by Logan Pearce, 2020</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="lofti_gaiaDR2.lofti.Fitter">
+<em class="property">class </em><code class="sig-prename descclassname">lofti_gaiaDR2.lofti.</code><code class="sig-name descname">Fitter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sourceid1</span></em>, <em class="sig-param"><span class="n">sourceid2</span></em>, <em class="sig-param"><span class="n">mass1</span></em>, <em class="sig-param"><span class="n">mass2</span></em>, <em class="sig-param"><span class="n">Norbits</span><span class="o">=</span><span class="default_value">100000</span></em>, <em class="sig-param"><span class="n">results_filename</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lofti_gaiaDR2/lofti.html#Fitter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lofti_gaiaDR2.lofti.Fitter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the Fitter object for the binary system, and compute observational constraints
+to be used in the orbit fit.  User must provide Gaia source ids, tuples of mass estimates for
+both objects, specify the number of desired orbits in posterior sample.  Fit will be
+for object 2 relative to object 1.</p>
+<p>Attributes are tuples of (value,uncertainty) unless otherwise indicated.  Attributes
+with astropy units are retrieved from Gaia archive, attributes without units are
+computed from Gaia values.  All relative values are for object 2 relative to object 1.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sourceid2</strong> (<em>sourceid1</em><em>,</em>) – Gaia source ids for the two objects, fit will be for motion of             object 2 relative to object 1</p></li>
+<li><p><strong>mass2</strong> (<em>mass1</em><em>,</em>) – tuple os mass estimate for object 1 and 2, of the form (value, uncertainty)</p></li>
+<li><p><strong>Norbits</strong> (<em>int</em>) – Number of desired orbits in posterior sample.  Default = 100000</p></li>
+<li><p><strong>results_filename</strong> (<em>str</em>) – Filename for fit results files.  If none, results will be written to files             named FitResults.yr.mo.day.hr.min.s</p></li>
+<li><p><strong>ruwe2</strong> (<em>ruwe1</em><em>,</em>) – RUWE value from Gaia archive</p></li>
+<li><p><strong>ref_epoch</strong> (<em>flt</em>) – reference epoch in decimal years. For Gaia DR2 this is 2015.5</p></li>
+<li><p><strong>plx2</strong> (<em>plx1</em><em>,</em>) – parallax from Gaia DR2 in mas</p></li>
+<li><p><strong>RA2</strong> (<em>RA1</em><em>,</em>) – right ascension from Gaia DR2; RA in deg, uncertainty in mas</p></li>
+<li><p><strong>Dec2</strong> (<em>Dec1</em><em>,</em>) – declination from Gaia DR2; Dec in deg, uncertainty in mas</p></li>
+<li><p><strong>pmRA2</strong> (<em>pmRA1</em><em>,</em>) – proper motion in RA in mas yr^-1 from Gaia DR2</p></li>
+<li><p><strong>pmDec2</strong> (<em>pmDec1</em><em>,</em>) – proper motion in DEC in mas yr^-1 from Gaia DR2</p></li>
+<li><p><strong>rv2</strong> (<em>rv1</em><em>,</em>) – radial velocity in km s^-1 from Gaia DR2</p></li>
+<li><p><strong>rv</strong> (<em>flt</em><em>, </em><em>optional</em>) – relative RV of 2 relative to 1, if both are present in Gaia DR2</p></li>
+<li><p><strong>plx</strong> (<em>flt</em>) – weighted mean parallax for the binary system in mas</p></li>
+<li><p><strong>distance</strong> (<em>flt</em>) – distance of system in pc, computed from Gaia parallax using method             of Bailer-Jones et. al 2018.</p></li>
+<li><p><strong>deltaDec</strong> (<em>deltaRA</em><em>,</em>) – relative separation in RA and Dec directions, in mas</p></li>
+<li><p><strong>pmDec</strong> (<em>pmRA</em><em>,</em>) – relative proper motion in RA/Dec directions in km s^-1</p></li>
+<li><p><strong>sep</strong> (<em>flt</em>) – total separation vector in mas</p></li>
+<li><p><strong>pa</strong> (<em>flt</em>) – postion angle of separation vector in degrees from North</p></li>
+<li><p><strong>sep_au</strong> (<em>flt</em>) – separation in AU</p></li>
+<li><p><strong>sep_km</strong> (<em>flt</em>) – separation in km</p></li>
+<li><p><strong>total_vel</strong> (<em>flt</em>) – total velocity vector in km s^-1.  If RV is available for both,             this is the 3d velocity vector; if not it is just the plane of sky velocity.</p></li>
+<li><p><strong>total_planeofsky_velocity</strong> (<em>flt</em>) – total velocity in the plane of sky in km s^-1.             In the absence of RV this is equivalent to the total velocity vector.</p></li>
+<li><p><strong>deltaGmag</strong> (<em>flt</em>) – relative contrast in Gaia G magnitude.  Does not include uncertainty.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Written by Logan Pearce, 2020</p>
+<dl class="py method">
+<dt id="lofti_gaiaDR2.lofti.Fitter.PrepareConstraints">
+<code class="sig-name descname">PrepareConstraints</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">rv</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lofti_gaiaDR2/lofti.html#Fitter.PrepareConstraints"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lofti_gaiaDR2.lofti.Fitter.PrepareConstraints" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieves parameters for both objects from Gaia DR2 archive and computes system attriubtes,
+and assigns them to the Fitter object class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>rv</strong> (<em>bool</em>) – flag for handling the presence or absence of RV measurements for both objects                 in DR2.  Gets set to True if both objects have Gaia RV measurements. Default = False</p>
+</dd>
+</dl>
+<p>Written by Logan Pearce, 2020</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="lofti_gaiaDR2.lofti.Results">
+<em class="property">class </em><code class="sig-prename descclassname">lofti_gaiaDR2.lofti.</code><code class="sig-name descname">Results</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">orbits</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">limit_aop</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">limit_lan</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lofti_gaiaDR2/lofti.html#Results"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lofti_gaiaDR2.lofti.Results" title="Permalink to this definition">¶</a></dt>
+<dd><p>A class for storing and manipulating the results of the orbit fit.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>orbits</strong> (<em>array</em>) – array of accepted orbits from             OFTI fit in the same order as the following attributes</p></li>
+<li><p><strong>sma</strong> (<em>1 x Norbits array</em>) – semi-major axis in arcsec</p></li>
+<li><p><strong>period</strong> (<em>1 x Norbits array</em>) – period in years</p></li>
+<li><p><strong>orbit_fraction</strong> (<em>1 x Norbits array</em>) – fraction of orbit past periastron             passage the observation (2015.5) occured on.  Values: [0,1)</p></li>
+<li><p><strong>t0</strong> (<em>1 x Norbits array</em>) – date of periastron passage in decimal years</p></li>
+<li><p><strong>ecc</strong> (<em>1 x Norbits array</em>) – eccentricity</p></li>
+<li><p><strong>inc</strong> (<em>1 x Norbits array</em>) – inclination relative to plane of the sky in deg</p></li>
+<li><p><strong>aop</strong> (<em>1 x Norbits array</em>) – arguement of periastron in deg</p></li>
+<li><p><strong>lan</strong> (<em>1 x Norbits array</em>) – longitude of ascending node in deg</p></li>
+<li><p><strong>mtot</strong> (<em>1 x Norbits array</em>) – total system mass in Msun</p></li>
+<li><p><strong>distance</strong> (<em>1 x Norbits array</em>) – distance to system in parsecs</p></li>
+<li><p><strong>chi2</strong> (<em>1 x Norbits array</em>) – chi^2 value for the orbit</p></li>
+<li><p><strong>lnprob</strong> (<em>1 x Norbits array</em>) – log probability of orbit</p></li>
+<li><p><strong>lnrand</strong> (<em>1 x Norbits array</em>) – log of random “dice roll” for             orbit acceptance</p></li>
+<li><p><strong>orbits</strong> – the (Norbits x 13 array) array of orbit samples.</p></li>
+<li><p><strong>limit_lan</strong> (<em>limit_aop</em><em>,</em>) – In the absence of radial velocity info,             there is a degeneracy between arg of periastron and long of ascending             node.  Common practice is to limit one to the interval [0,180] deg.             By default, lofti limits lan to this interval if rv = False.  The user can             choose to limit aop instead by setting limit_aop = True, limit_lan = False.             The orbits[:,6] (aop) and orbits[:,7] (lan) arrays preserve the original values.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Written by Logan Pearce, 2020</p>
+<dl class="py method">
+<dt id="lofti_gaiaDR2.lofti.Results.LoadResults">
+<code class="sig-name descname">LoadResults</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">append</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lofti_gaiaDR2/lofti.html#Results.LoadResults"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lofti_gaiaDR2.lofti.Results.LoadResults" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read in the orbits and orbital parameters attributes from a pickle file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<em>str</em>) – filename of pickle file to load</p></li>
+<li><p><strong>append</strong> (<em>bool</em>) – if True, append read in orbit samples to another Results                 object.  Default = False.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Written by Logan Pearce, 2020</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="lofti_gaiaDR2.lofti.Results.PlotHists">
+<code class="sig-name descname">PlotHists</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/lofti_gaiaDR2/lofti.html#Results.PlotHists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lofti_gaiaDR2.lofti.Results.PlotHists" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot 1-d histograms of orbital elements ‘sma’,’ecc’,’inc’,’aop’,’lan’,’t0’ from fit results.</p>
+<p>Written by Logan Pearce, 2020</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="lofti_gaiaDR2.lofti.Results.PlotOrbits">
+<code class="sig-name descname">PlotOrbits</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">color</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">colorbar</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">ref_epoch</span><span class="o">=</span><span class="default_value">2015.5</span></em>, <em class="sig-param"><span class="n">size</span><span class="o">=</span><span class="default_value">100</span></em>, <em class="sig-param"><span class="n">plot3d</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">cmap</span><span class="o">=</span><span class="default_value">'viridis'</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lofti_gaiaDR2/lofti.html#Results.PlotOrbits"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lofti_gaiaDR2.lofti.Results.PlotOrbits" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot a random selection of orbits from the sample in the plane of the sky.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>color</strong> (<em>bool</em>) – if True, plot orbit tracks using a colormap scale to orbit fraction (phase)                 past observation date (2015.5).  If False, orbit tracks will be black.  Default = True</p></li>
+<li><p><strong>colorbar</strong> (<em>bool</em>) – if True and color = True, plot colorbar for orbit phase</p></li>
+<li><p><strong>ref_epoch</strong> (<em>flt</em>) – reference epoch for drawing orbits.  Default = 2015.5</p></li>
+<li><p><strong>size</strong> (<em>int</em>) – Number of orbits to plot.  Default = True</p></li>
+<li><p><strong>plot3d</strong> (<em>bool</em>) – If True, return a plot of orbits in 3D space. Default = False</p></li>
+<li><p><strong>cmap</strong> (<em>str</em>) – colormap for orbit phase plot</p></li>
+</ul>
+</dd>
+</dl>
+<p>Written by Logan Pearce, 2020</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="lofti_gaiaDR2.lofti.Results.PlotSepPA">
+<code class="sig-name descname">PlotSepPA</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ref_epoch</span><span class="o">=</span><span class="default_value">2015.5</span></em>, <em class="sig-param"><span class="n">size</span><span class="o">=</span><span class="default_value">100</span></em>, <em class="sig-param"><span class="n">timespan</span><span class="o">=</span><span class="default_value">[20, 20]</span></em>, <em class="sig-param"><span class="n">orbitcolor</span><span class="o">=</span><span class="default_value">'skyblue'</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lofti_gaiaDR2/lofti.html#Results.PlotSepPA"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lofti_gaiaDR2.lofti.Results.PlotSepPA" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot a random selection of orbits from the sample in separation and position angle as
+a function of time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ref_epoch</strong> (<em>flt</em>) – reference epoch for drawing orbits.  Default = 2015.5</p></li>
+<li><p><strong>size</strong> (<em>int</em>) – Number of orbits to plot.  Default = True</p></li>
+<li><p><strong>timespan</strong> (<em>tuple</em><em>, </em><em>int</em>) – number of years before [0] and after [1] the ref epoch to                 plot sep and pa</p></li>
+<li><p><strong>orbitcolor</strong> (<em>str</em>) – color to use to plot the orbits</p></li>
+</ul>
+</dd>
+</dl>
+<p>Written by Logan Pearce, 2020</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="lofti_gaiaDR2.lofti.Results.SaveResults">
+<code class="sig-name descname">SaveResults</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">write_text_file</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">text_filename</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lofti_gaiaDR2/lofti.html#Results.SaveResults"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lofti_gaiaDR2.lofti.Results.SaveResults" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save the orbits and orbital parameters attributes in a pickle file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<em>str</em>) – filename for pickle file</p></li>
+<li><p><strong>write_text_file</strong> (<em>bool</em>) – if True, also write out the accepted orbits to a                 human readable text file</p></li>
+<li><p><strong>text_filename</strong> (<em>bool</em>) – if write_to_text = True, specifify filename for text file</p></li>
+</ul>
+</dd>
+</dl>
+<p>Written by Logan Pearce, 2020</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="lofti_gaiaDR2.lofti.Results.Update">
+<code class="sig-name descname">Update</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">orbits</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lofti_gaiaDR2/lofti.html#Results.Update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lofti_gaiaDR2.lofti.Results.Update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Take elements of the “orbits” attribute and populate
+the orbital element attributes</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>orbits</strong> (<em>arr</em>) – orbits array from Results class</p>
+</dd>
+</dl>
+<p>Written by Logan Pearce, 2020</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="lofti_gaiaDR2.lofti.Stats">
+<em class="property">class </em><code class="sig-prename descclassname">lofti_gaiaDR2.lofti.</code><code class="sig-name descname">Stats</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">orbits</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">write_to_file</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">filename</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lofti_gaiaDR2/lofti.html#Stats"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lofti_gaiaDR2.lofti.Stats" title="Permalink to this definition">¶</a></dt>
+<dd><p>A class for storing and manipulating the statistics of the results of the orbit fit.</p>
+<p>For every parameter, there is a series of stats computed and saved as stats.param.stat</p>
+<p class="rubric">Examples</p>
+<p>stats.sma.mean = mean of semimajor axis
+stats.ecc.ci68 = 68% confidence interval for eccentricity
+stats.aop.std = standard deviation of arg of periastron</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>orbits</strong> (<em>Norbits x 13 array</em>) – array of accepted orbits from             OFTI fit in the same order as the following attributes</p></li>
+<li><p><strong>param.mean</strong> (<em>flt</em>) – mean of parameter computed using np.mean</p></li>
+<li><p><strong>param.median</strong> (<em>flt</em>) – np.median of parameter</p></li>
+<li><p><strong>param.mode</strong> (<em>flt</em>) – mode of parameter</p></li>
+<li><p><strong>param.std</strong> (<em>flt</em>) – standard deviation from np.std</p></li>
+<li><p><strong>param.ci68</strong> (<em>tuple</em><em>,</em><em>flt</em>) – 68% minimum credible interval of form (lower bound, upper bound)</p></li>
+<li><p><strong>param.ci95</strong> (<em>tuple</em><em>,</em><em>flt</em>) – 95% minimum credible interval</p></li>
+<li><p><strong>write_to_file</strong> (<em>bool</em>) – If True, write stats to a human-readbale text file.</p></li>
+<li><p><strong>filename</strong> (<em>str</em>) – filename for saving stats file.  If not supplied, default             name is FitResults.Stats.y.mo.d.h.m.s.pkl, saved in same directory as fit was run.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Written by Logan Pearce, 2020</p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="lofti_gaiaDR2.lofti.StatsSubclass">
+<em class="property">class </em><code class="sig-prename descclassname">lofti_gaiaDR2.lofti.</code><code class="sig-name descname">StatsSubclass</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">array</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lofti_gaiaDR2/lofti.html#StatsSubclass"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lofti_gaiaDR2.lofti.StatsSubclass" title="Permalink to this definition">¶</a></dt>
+<dd><p>Subclass for computing and storing statistics</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>array</strong> (<em>arr</em>) – array for which to compute statistics</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="loftitools.html" class="btn btn-neutral float-right" title="loftitools" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="api.html" class="btn btn-neutral float-left" title="Detailed API Documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Logan Pearce
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
