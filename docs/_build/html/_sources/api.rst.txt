@@ -1,7 +1,7 @@
 .. _api:
 
-Detailed API Documentation
-==========================
+API Documentation
+=================
 
 .. toctree::
    :titlesonly:
