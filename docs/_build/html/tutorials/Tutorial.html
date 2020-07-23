@@ -1,0 +1,1114 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Detailed Tutorial &mdash; lofti_gaiaDR2 1.0.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="API Documentation" href="../api.html" />
+    <link rel="prev" title="Quick Start Guide" href="QuickStart.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> lofti_gaiaDR2
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../tutorials.html">Tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="QuickStart.html">Quick Start Guide</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Detailed Tutorial</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#About-LOFTI-Gaia-DR2">About LOFTI Gaia DR2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Initialize-the-fitter">Initialize the fitter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Run-the-fit">Run the fit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Working-with-fit-results">Working with fit results</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#On-limiting-aop-and-lan:">On limiting aop and lan:</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#Plotting">Plotting</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">lofti_gaiaDR2</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../tutorials.html">Tutorials</a> &raquo;</li>
+        
+      <li>Detailed Tutorial</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/tutorials/Tutorial.ipynb.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput.container,
+div.nbinput.container div.prompt,
+div.nbinput.container div.input_area,
+div.nbinput.container div[class*=highlight],
+div.nbinput.container div[class*=highlight] pre,
+div.nboutput.container,
+div.nboutput.container div.prompt,
+div.nboutput.container div.output_area,
+div.nboutput.container div[class*=highlight],
+div.nboutput.container div[class*=highlight] pre {
+    background: none;
+    border: none;
+    padding: 0 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+/* avoid gaps between output lines */
+div.nboutput.container div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput.container,
+div.nboutput.container {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput.container,
+    div.nboutput.container {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput.container {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast.container {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput.container div.prompt pre {
+    color: #307FC1;
+}
+
+/* output prompt */
+div.nboutput.container div.prompt pre {
+    color: #BF5B3D;
+}
+
+/* all prompts */
+div.nbinput.container div.prompt,
+div.nboutput.container div.prompt {
+    width: 4.5ex;
+    padding-top: 5px;
+    position: relative;
+    user-select: none;
+}
+
+div.nbinput.container div.prompt > div,
+div.nboutput.container div.prompt > div {
+    position: absolute;
+    right: 0;
+    margin-right: 0.3ex;
+}
+
+@media (max-width: 540px) {
+    div.nbinput.container div.prompt,
+    div.nboutput.container div.prompt {
+        width: unset;
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput.container div.prompt.empty {
+        padding: 0;
+    }
+
+    div.nbinput.container div.prompt > div,
+    div.nboutput.container div.prompt > div {
+        position: unset;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput.container div.prompt pre,
+div.nboutput.container div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput.container div.input_area,
+div.nboutput.container div.output_area {
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput.container div.input_area,
+    div.nboutput.container div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput.container div.input_area {
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
+    background: #f5f5f5;
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput.container div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.imgmath center alignment in output cells */
+div.nboutput.container div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput.container div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+
+
+div.nbinput.container div.input_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight].math,
+div.nboutput.container div.output_area.rendered_html,
+div.nboutput.container div.output_area > div.output_javascript,
+div.nboutput.container div.output_area:not(.rendered_html) > img{
+    padding: 5px;
+}
+
+/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
+div.nbinput.container div.input_area > div[class^='highlight'],
+div.nboutput.container div.output_area > div[class^='highlight']{
+    overflow-y: hidden;
+}
+
+/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
+.prompt a.copybtn {
+    display: none;
+}
+
+/* Some additional styling taken form the Jupyter notebook CSS */
+div.rendered_html table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: black;
+  font-size: 12px;
+  table-layout: fixed;
+}
+div.rendered_html thead {
+  border-bottom: 1px solid black;
+  vertical-align: bottom;
+}
+div.rendered_html tr,
+div.rendered_html th,
+div.rendered_html td {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+div.rendered_html th {
+  font-weight: bold;
+}
+div.rendered_html tbody tr:nth-child(odd) {
+  background: #f5f5f5;
+}
+div.rendered_html tbody tr:hover {
+  background: rgba(66, 165, 245, 0.2);
+}
+
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="Detailed-Tutorial">
+<h1>Detailed Tutorial<a class="headerlink" href="#Detailed-Tutorial" title="Permalink to this headline">¶</a></h1>
+<p>The LOFTI-Gaia package will fit orbital elements to the astrometry provided by Gaia DR2 only.</p>
+<p>Written by Logan A. Pearce, 2020 If you use LOFTI in your work please cite Pearce et al. 2020</p>
+<div class="section" id="About-LOFTI-Gaia-DR2">
+<h2>About LOFTI Gaia DR2<a class="headerlink" href="#About-LOFTI-Gaia-DR2" title="Permalink to this headline">¶</a></h2>
+<p>LOFTI Gaia DR2 uses measurements from Gaia of resolved stellar binaries to provide loose constraint of orbital parameters for the pair. It makes use of the Orbits for the Impatient (OFTI) methodology to accomplish the fit. Care should be taken to understand the quality of the astrometric solution of the two objects before trying to apply the method. It will give you answers, you should be sure the answers are somewhat reliable before trying to use the results. Garbage in garbage out, as it were.
+For a detailed discussion of when LOFTI results are and are not trustworthy, and how to approach making this assessment, please review Pearce et al. 2020 (<a class="reference external" href="https://ui.adsabs.harvard.edu/abs/2020ApJ">https://ui.adsabs.harvard.edu/abs/2020ApJ</a>…894..115P/abstract)</p>
+</div>
+<div class="section" id="Initialize-the-fitter">
+<h2>Initialize the fitter<a class="headerlink" href="#Initialize-the-fitter" title="Permalink to this headline">¶</a></h2>
+<p>And retrieve Gaia observational constraints</p>
+<p>LOFTI takes only the Gaia DR2 source IDs of the two objects and their mass estimates as input parameters. Mass is not taken as a free parameter and must be estimated via outside means.</p>
+<p>For our test case, let’s look at DS Tuc AB system. DS Tuc A has a transiting exoplanet, as reported in Newton et al 2019 (<a class="reference external" href="https://ui.adsabs.harvard.edu/abs/2019ApJ">https://ui.adsabs.harvard.edu/abs/2019ApJ</a>…880L..17N/abstract). Both DS Tuc A and B are well resolved in Gaia DR2, and both have radial velocity measurements as well. It is an excellent demonstration case. LOFTI was used in Newton et al. 2019 to show the binary orbit is broadly aligned with the transiting planet. DS Tuc AB was used as the main demonstration case for the method
+in Pearce et al. 2020.</p>
+<p>First we initialize the <code class="docutils literal notranslate"><span class="pre">Fitter</span></code> object. This creates an object retrieves all the Gaia measurements for the system, computes the relative parameters for fitting the orbit, and some additional parameters for the system.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Gaia DR2 source ids:</span>
+<span class="n">DSTucA</span> <span class="o">=</span> <span class="mi">6387058411482257536</span>
+<span class="n">DSTucB</span> <span class="o">=</span> <span class="mi">6387058411482257280</span>
+<span class="c1"># Mass estimates, must be a tuple of (value,uncertainty)</span>
+<span class="c1"># in solar masses:</span>
+<span class="n">massA</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.97</span><span class="p">,</span> <span class="mf">0.04</span><span class="p">)</span>
+<span class="n">massB</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.87</span><span class="p">,</span> <span class="mf">0.04</span><span class="p">)</span>
+
+<span class="c1"># Import the Fitter and FitOrbit objects:</span>
+<span class="kn">from</span> <span class="nn">lofti_redesign</span> <span class="kn">import</span> <span class="n">Fitter</span><span class="p">,</span> <span class="n">FitOrbit</span>
+
+<span class="c1"># Initialize the fitter object:</span>
+<span class="n">fitterobject</span> <span class="o">=</span> <span class="n">Fitter</span><span class="p">(</span><span class="n">DSTucA</span><span class="p">,</span>           <span class="c1"># source id object 1</span>
+                      <span class="n">DSTucB</span><span class="p">,</span>           <span class="c1"># source id object 2</span>
+                      <span class="n">massA</span><span class="p">,</span>            <span class="c1"># mass object 1</span>
+                      <span class="n">massB</span><span class="p">,</span>            <span class="c1"># mass object 2</span>
+                      <span class="n">Norbits</span> <span class="o">=</span> <span class="mi">100</span>     <span class="c1"># number of desired accepted orbits for the posterior orbit sample</span>
+                     <span class="p">)</span>
+
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Created TAP+ (v1.2.1) - Connection:
+        Host: gea.esac.esa.int
+        Use HTTPS: True
+        Port: 443
+        SSL Port: 443
+Created TAP+ (v1.2.1) - Connection:
+        Host: geadata.esac.esa.int
+        Use HTTPS: True
+        Port: 443
+        SSL Port: 443
+</pre></div></div>
+</div>
+<p>We can examine properties of the system by calling on the <code class="docutils literal notranslate"><span class="pre">Fitter</span></code> object. All measurements are tuples of the form (value, uncertainty) For example:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Proper motion of B relative to A in RA in km s^-1:</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">fitterobject</span><span class="o">.</span><span class="n">pmRA</span><span class="p">)</span>
+<span class="c1"># Distance to system in pc:</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">fitterobject</span><span class="o">.</span><span class="n">distance</span><span class="p">)</span>
+<span class="c1"># Relative separation in mas:</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">fitterobject</span><span class="o">.</span><span class="n">sep</span><span class="p">)</span>
+<span class="c1"># Relative separation in AU:</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">fitterobject</span><span class="o">.</span><span class="n">sep_au</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[-0.3016117396092139, 0.020378972692737377]
+(44.13270628610624, 0.06890982448718509)
+[5364.611925541039, 0.031174475323228305]
+[236.75484244884555, 0.0013758139630635016]
+</pre></div></div>
+</div>
+<p>The RUWE parameter quantifies the quality of the astrometric solution. If one of the objects has an RUWE &gt; 1.2, the code will ask if you wish to proceed. Results from fitting with RUWE &gt;~ 1.2 should be interpretted with caution, and RUWE &gt; 1.4 should not be relied upon to be accurate.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">GL896A</span> <span class="o">=</span> <span class="mi">2824770686019003904</span>
+<span class="n">GL896B</span> <span class="o">=</span> <span class="mi">2824770686019004032</span>
+<span class="n">GL896fitterobject</span> <span class="o">=</span> <span class="n">Fitter</span><span class="p">(</span><span class="n">GL896A</span><span class="p">,</span><span class="n">GL896B</span><span class="p">,</span><span class="n">massA</span><span class="p">,</span><span class="n">massB</span><span class="p">,</span><span class="n">Norbits</span> <span class="o">=</span> <span class="mi">10</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">GL896fitterobject</span><span class="o">.</span><span class="n">ruwe1</span><span class="p">,</span><span class="n">GL896fitterobject</span><span class="o">.</span><span class="n">ruwe2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+1.1731006 1.4600381
+</pre></div></div>
+</div>
+<p>A complete list of the system parameters is found in the documentation for the Fitter object.</p>
+</div>
+<div class="section" id="Run-the-fit">
+<h2>Run the fit<a class="headerlink" href="#Run-the-fit" title="Permalink to this headline">¶</a></h2>
+<p>Next, run the actual fit by calling <code class="docutils literal notranslate"><span class="pre">FitOrbit</span></code> and giving the <code class="docutils literal notranslate"><span class="pre">Fitter</span></code> object you just created as input. The <code class="docutils literal notranslate"><span class="pre">FitOrbit</span></code> object will give a progress bar updating the progress towards reaching Norbits orbits in the sample. The <code class="docutils literal notranslate"><span class="pre">FitOrbit</span></code> object contains the posterior orbit sample from the fit.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># run orbit fit:</span>
+<span class="n">orbits</span> <span class="o">=</span> <span class="n">FitOrbit</span><span class="p">(</span><span class="n">fitterobject</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+100% (100 of 100): |####################|  Done...
+</pre></div></div>
+</div>
+<p>Three files are written out during the fit: - 1. FitResults.yr.mo.day.hr.min.s.txt : this is a human readable file of accepted orbits in order: semimajoraxis(arcsec), period(yrs]), t_o(yr), ecc, incl(deg), argofperiastron(deg]), posangleofnodes(deg), chisquaredvalue, proboforbit, randnum - 2. FitResults.yr.mo.day.hr.min.s.pkl : machine readable binary file of orbit results which can be read using the LoadResults function (more below) - 3. FitResults.Stats.yr.mo.day.hr.min.s.txt : a human
+readable text file of summary statistics from the sample posterior.</p>
+<p>You can choose your own filename for these outputs with the <code class="docutils literal notranslate"><span class="pre">results_filename</span></code> attribute in the Fitter object.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># The orbit object contains the parameters used in the fit.  For example, the initial total system mass used</span>
+<span class="c1"># in the fit was:</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">orbits</span><span class="o">.</span><span class="n">mtot_init</span><span class="p">)</span>
+<span class="c1"># The reference observation used in the fit was:</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">orbits</span><span class="o">.</span><span class="n">ref_epoch</span><span class="p">)</span>
+<span class="c1"># (The Gaia DR2 reference date)</span>
+<span class="c1"># How many orbits were requested:</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">orbits</span><span class="o">.</span><span class="n">Norbits</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[1.8399999999999999, 0.0565685424949238]
+2015.5
+100
+</pre></div></div>
+</div>
+</div>
+<div class="section" id="Working-with-fit-results">
+<h2>Working with fit results<a class="headerlink" href="#Working-with-fit-results" title="Permalink to this headline">¶</a></h2>
+<p>Get the results by calling <code class="docutils literal notranslate"><span class="pre">orbits.results</span></code>:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># get fit results:</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">orbits</span><span class="o">.</span><span class="n">results</span>
+</pre></div>
+</div>
+</div>
+<p>This is the <code class="docutils literal notranslate"><span class="pre">Results</span></code> object that contains all the results from the fit. We’ll show here just a few things in the <code class="docutils literal notranslate"><span class="pre">Results</span></code> object class. Full documentation can be found in the <code class="docutils literal notranslate"><span class="pre">Results</span></code> class.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># How long did it take to do that run?</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">run_time</span><span class="p">,</span><span class="n">results</span><span class="o">.</span><span class="n">run_time</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">min</span><span class="p">),</span><span class="n">results</span><span class="o">.</span><span class="n">run_time</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">hr</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+184.97420382499695 s 3.0829033970832826 min 0.051381723284721376 h
+</pre></div></div>
+</div>
+<p>We can examine the posterior orbital elements with dot notation on the <code class="docutils literal notranslate"><span class="pre">results</span></code> object. The <code class="docutils literal notranslate"><span class="pre">results</span></code> orbital parameters are: - sma: semi-major axis in arcsec - period: period in years - orbit_fraction: fraction of orbit past periastron passage the observation (2015.5) occured on. Values: [0,1) - t0: date of periastron passage in decimal years - ecc: eccentricity - inc: inclination relative to plane of the sky in deg - aop: arguement of periastron in deg - lan: longitude of ascending node
+in deg - mtot: total system mass in Msun - distance: distance to system in parsecs - chi2: chi^2 value for the orbit - lnprob: log probability of orbit - lnrand: log of random “dice roll” for orbit acceptance</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="nb">print</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">sma</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">ecc</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[ 5.54893702  4.35542484  3.50198847  5.6410168   5.6887166  13.21388572
+  3.48786846  8.93830978  4.91348824  4.11496996]
+[0.49751779 0.2888284  0.67136817 0.36339305 0.3836009  0.75343447
+ 0.9229093  0.40985976 0.87122107 0.98965694]
+</pre></div></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">results</span></code> object also contains a <code class="docutils literal notranslate"><span class="pre">Stats</span></code> subclass that holds summary statistics of the posterior distributions for each parameter. Each parameter contains the following summary statistics:</p>
+<ul class="simple">
+<li><p>param.mean: mean of parameter computed using np.mean</p></li>
+<li><p>param.median: np.median of parameter</p></li>
+<li><p>param.mode: mode of parameter</p></li>
+<li><p>param.std: standard deviation from np.std</p></li>
+<li><p>param.ci68: 68% minimum credible interval of form (lower bound, upper bound)</p></li>
+<li><p>param.ci95: 95% minimum credible interval</p></li>
+</ul>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="nb">print</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">sma</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">aop</span><span class="o">.</span><span class="n">ci68</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+5.940460589259442
+(95.23906808328863, 253.9314959592835)
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">results</span><span class="o">.</span><span class="n">SaveResults</span><span class="p">(</span><span class="s1">&#39;saving_results_test_file.pkl&#39;</span><span class="p">)</span>
+
+<span class="n">results</span><span class="o">.</span><span class="n">SaveResults</span><span class="p">(</span><span class="n">write_text_file</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">text_filename</span> <span class="o">=</span> <span class="s1">&#39;saving_results_test_file.txt&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>You can load results from a previous run using <code class="docutils literal notranslate"><span class="pre">LoadResults</span></code>. First you must make a new <code class="docutils literal notranslate"><span class="pre">Results</span></code> object, then load the pickle file into that object. You can also compute summary statistics on the loaded results and write to txt file.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">lofti_redesign</span> <span class="kn">import</span> <span class="n">Results</span><span class="p">,</span> <span class="n">Stats</span>
+<span class="c1"># Make a new results object and load previous results:</span>
+<span class="n">loaded_results</span> <span class="o">=</span> <span class="n">Results</span><span class="p">()</span>
+<span class="n">loaded_results</span><span class="o">.</span><span class="n">LoadResults</span><span class="p">(</span><span class="s2">&quot;FitResults.from.a.previous.run.pkl&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Loaded results sma:&#39;</span><span class="p">,</span><span class="n">loaded_results</span><span class="o">.</span><span class="n">sma</span><span class="p">)</span>
+
+<span class="c1"># make a stats object, compute the stats, and write out automatically</span>
+<span class="n">loaded_results</span><span class="o">.</span><span class="n">stats</span> <span class="o">=</span> <span class="n">Stats</span><span class="p">(</span><span class="n">orbits</span> <span class="o">=</span> <span class="n">loaded_results</span><span class="o">.</span><span class="n">orbits</span><span class="p">,</span> <span class="n">write_to_file</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">filename</span> <span class="o">=</span>\
+    <span class="s2">&quot;FitResults.Stats.from.a.previous.run.txt&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Loaded results sma mean:&#39;</span><span class="p">,</span><span class="n">loaded_results</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">sma</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Loaded results lan 68% CI:&#39;</span><span class="p">,</span><span class="n">loaded_results</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">lan</span><span class="o">.</span><span class="n">ci68</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Loaded results sma: [4.24437603 3.89329871 3.9528082  4.89930919 3.4578694  8.3085165
+ 2.94485287 5.09772675 3.10962108 3.46766074]
+Loaded results sma mean: 4.337603948353685
+Loaded results lan 68% CI: (-2.5633711675828863, 346.8904533913395)
+</pre></div></div>
+</div>
+<p>Or you can append the loaded results to the results of a current run. Useful if your run is interupted prematurely.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Length of results before load:&#39;</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">sma</span><span class="p">))</span>
+<span class="c1"># call the results object from the last run:</span>
+<span class="n">results</span><span class="o">.</span><span class="n">LoadResults</span><span class="p">(</span><span class="s2">&quot;FitResults.from.a.previous.run.pkl&quot;</span><span class="p">,</span> <span class="n">append</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+<span class="c1"># now the loaded results are appended to that run&#39;s results.</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Length of results after load:&#39;</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">sma</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Length of results before load: 100
+Length of results after load: 110
+</pre></div></div>
+</div>
+<div class="section" id="On-limiting-aop-and-lan:">
+<h3>On limiting aop and lan:<a class="headerlink" href="#On-limiting-aop-and-lan:" title="Permalink to this headline">¶</a></h3>
+<p>In the absence of radial velocity information, a degeneracy exists between argument of periastron and longitude of ascending node. It is standard practice to limit one of those parameters to the range [0,180] deg. LOFTI by default limits longitude of nodes if both objects do not have RVs in Gaia. (A future upgrade is planned to allow user RV inputs). Within the results class, there is an orbits attribute that contains the full orbital parameter arrays in a (13 x Norbits) array, with parameters
+in the same order as listed above. The orbits attribute retains the original values, while the lan or aop attributes are on the limited range.</p>
+<p>DS Tuc has RV in Gaia though, so we should not see it limited:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="nb">print</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">lan</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">orbits</span><span class="p">[:,</span><span class="mi">7</span><span class="p">]</span> <span class="o">%</span> <span class="mi">360</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[349.6445183  347.68277885 344.04329673 345.03595426 344.67567363
+ 338.69790303 356.79596766 347.55416804 358.07424932  51.08801196]
+[349.6445183  347.68277885 344.04329673 345.03595426 344.67567363
+ 338.69790303 356.79596766 347.55416804 358.07424932  51.08801196]
+</pre></div></div>
+</div>
+<p>GL 896 does not have RV info in Gaia DR2. If we load some results from a fit of GL 896, we will see that the orbits attribute is not limited, while the lan attribute is.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># But if there is no RV info, lan is by default limited to [0,180] deg interval.  The orbits attribute preserved</span>
+<span class="c1"># the original value, but the lan attribute is the limited value:</span>
+<span class="kn">from</span> <span class="nn">lofti_redesign</span> <span class="kn">import</span> <span class="n">Results</span>
+<span class="n">GL896results</span> <span class="o">=</span> <span class="n">Results</span><span class="p">()</span>
+<span class="n">GL896results</span><span class="o">.</span><span class="n">LoadResults</span><span class="p">(</span><span class="s2">&quot;FitResults.from.a.previous.run.GL896.pkl&quot;</span><span class="p">)</span>
+<span class="c1"># The lan attribute is limited to [0,180]:</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">GL896results</span><span class="o">.</span><span class="n">lan</span><span class="p">)</span>
+<span class="c1"># The lan column of the orbits attribute is not:</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">GL896results</span><span class="o">.</span><span class="n">orbits</span><span class="p">[:,</span><span class="mi">7</span><span class="p">]</span> <span class="o">%</span> <span class="mi">360</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[103.51916925  79.43607227  69.44309748 153.85043033  11.1353334
+ 114.86241257 152.97298379  79.06314597  37.5787509   78.32546499]
+[283.51916925 259.43607227  69.44309748 153.85043033  11.1353334
+ 114.86241257 152.97298379 259.06314597  37.5787509   78.32546499]
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># If we decide we don&#39;t want that, we can reset the lan attribute (mod 360 to remove negative values):</span>
+<span class="n">GL896results</span><span class="o">.</span><span class="n">lan</span> <span class="o">=</span> <span class="n">GL896results</span><span class="o">.</span><span class="n">orbits</span><span class="p">[:,</span><span class="mi">7</span><span class="p">]</span> <span class="o">%</span> <span class="mi">360</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">GL896results</span><span class="o">.</span><span class="n">lan</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[283.51916925 259.43607227  69.44309748 153.85043033  11.1353334
+ 114.86241257 152.97298379 259.06314597  37.5787509   78.32546499]
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># If we decide to limit aop instead, we can replace .aop with orbits[:,6] % 180, or we can add it as a keyword</span>
+<span class="c1"># when we create the Results object:</span>
+<span class="n">GL896results</span> <span class="o">=</span> <span class="n">Results</span><span class="p">(</span><span class="n">limit_aop</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+<span class="n">GL896results</span><span class="o">.</span><span class="n">LoadResults</span><span class="p">(</span><span class="s2">&quot;FitResults.from.a.previous.run.GL896.pkl&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">GL896results</span><span class="o">.</span><span class="n">aop</span><span class="p">)</span>
+<span class="c1"># but the orbits attribute still preserves the original values:</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">GL896results</span><span class="o">.</span><span class="n">orbits</span><span class="p">[:,</span><span class="mi">6</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[ 41.69068997  63.00417452 147.84648818  83.79366542 107.76567041
+  64.71041604  79.51135996   2.05808274 124.46578454 178.71563349]
+[ 41.69068997  63.00417452 147.84648818 263.79366542 107.76567041
+ 244.71041604 259.51135996   2.05808274 124.46578454 178.71563349]
+</pre></div></div>
+</div>
+</div>
+</div>
+<div class="section" id="Plotting">
+<h2>Plotting<a class="headerlink" href="#Plotting" title="Permalink to this headline">¶</a></h2>
+<p>Although you can use the attributes provided through the package to produce any number of your own plots, several plotting tools are provided with LOFTI. They are contained within the <code class="docutils literal notranslate"><span class="pre">Results</span></code> class.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s1">&#39;default&#39;</span><span class="p">)</span>
+<span class="n">hists</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">PlotHists</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_Tutorial_35_0.png" src="../_images/tutorials_Tutorial_35_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># You can make adjustments to the histograms by calling the individual histogram axes:</span>
+<span class="kn">from</span> <span class="nn">matplotlib.ticker</span> <span class="kn">import</span> <span class="n">FormatStrFormatter</span>
+<span class="c1"># For example, change t0 to scientific notation:</span>
+<span class="n">hists</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">FormatStrFormatter</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%.1e</span><span class="s1">&#39;</span><span class="p">))</span>
+<span class="n">hists</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_Tutorial_36_0.svg" src="../_images/tutorials_Tutorial_36_0.svg" /></div>
+</div>
+<p>Plot plane-of-sky orbits using <code class="docutils literal notranslate"><span class="pre">PlotOrbits</span></code>. If the orbit sample results are larger than 100, <code class="docutils literal notranslate"><span class="pre">PlotOrbits</span></code> will randomly select 100 orbits from the posterior sample to plot.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">plotorbits</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">PlotOrbits</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_Tutorial_38_0.png" src="../_images/tutorials_Tutorial_38_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># If I want to plot fewer orbits, change the size keyword:</span>
+<span class="n">plotorbits</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">PlotOrbits</span><span class="p">(</span><span class="n">size</span> <span class="o">=</span> <span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_Tutorial_39_0.png" src="../_images/tutorials_Tutorial_39_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># the tick labels looks small</span>
+<span class="c1"># on the colorbar:</span>
+<span class="n">plotorbits</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">labelsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+<span class="c1"># what if I don&#39;t want the grid lines?</span>
+<span class="n">plotorbits</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">b</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">plotorbits</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_Tutorial_40_0.png" src="../_images/tutorials_Tutorial_40_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># What if I want a different color map?</span>
+<span class="n">plotorbits</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">PlotOrbits</span><span class="p">(</span><span class="n">cmap</span> <span class="o">=</span> <span class="s1">&#39;inferno&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_Tutorial_41_0.png" src="../_images/tutorials_Tutorial_41_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Or no colormap at all?</span>
+<span class="n">plotorbits</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">PlotOrbits</span><span class="p">(</span><span class="n">color</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_Tutorial_42_0.png" src="../_images/tutorials_Tutorial_42_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># You can make a 3d plot with the plot3d keyword:</span>
+<span class="kn">from</span> <span class="nn">lofti_redesign</span> <span class="kn">import</span> <span class="n">Results</span>
+<span class="n">loaded_results</span> <span class="o">=</span> <span class="n">Results</span><span class="p">(</span><span class="n">limit_lan</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span>
+<span class="n">loaded_results</span><span class="o">.</span><span class="n">LoadResults</span><span class="p">(</span><span class="s2">&quot;FitResults.from.a.previous.run.pkl&quot;</span><span class="p">)</span>
+<span class="n">plotorbits3d</span> <span class="o">=</span> <span class="n">loaded_results</span><span class="o">.</span><span class="n">PlotOrbits</span><span class="p">(</span><span class="n">plot3d</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_Tutorial_43_0.png" src="../_images/tutorials_Tutorial_43_0.png" />
+</div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">PlotSepPA</span></code> plots the orbits in separation and position angle vs time.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">lofti_redesign</span> <span class="kn">import</span> <span class="n">Results</span>
+<span class="n">loaded_results</span> <span class="o">=</span> <span class="n">Results</span><span class="p">(</span><span class="n">limit_lan</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span>
+<span class="n">loaded_results</span><span class="o">.</span><span class="n">LoadResults</span><span class="p">(</span><span class="s2">&quot;FitResults.from.a.previous.run.pkl&quot;</span><span class="p">)</span>
+<span class="n">plotseppa</span> <span class="o">=</span> <span class="n">loaded_results</span><span class="o">.</span><span class="n">PlotSepPA</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_Tutorial_45_0.png" src="../_images/tutorials_Tutorial_45_0.png" />
+</div>
+</div>
+<p>You can added scatter plot of astrometric points to the plot. To reproduce Fig 1b in Pearce et al. 2020 of DS Tuc AB Gaia fit compared to WDS astrometry points, read in the included csv of WDS astrometry and add to the plot:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Read in WDS astrometry:</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="n">WDS</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;WDS_DSTuc.csv&#39;</span><span class="p">)</span>
+<span class="c1"># Adjust the time span of the plot to cover the range of WDS dates:</span>
+<span class="n">plotseppa</span> <span class="o">=</span> <span class="n">loaded_results</span><span class="o">.</span><span class="n">PlotSepPA</span><span class="p">(</span><span class="n">timespan</span><span class="o">=</span><span class="p">[</span><span class="mi">130</span><span class="p">,</span><span class="mi">20</span><span class="p">])</span>
+<span class="c1"># Add the WDS scatter plot and error bars to the separation plot:</span>
+<span class="n">plotseppa</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">errorbar</span><span class="p">(</span><span class="n">WDS</span><span class="p">[</span><span class="s1">&#39;dates&#39;</span><span class="p">],</span><span class="n">WDS</span><span class="p">[</span><span class="s1">&#39;r&#39;</span><span class="p">],</span> <span class="n">yerr</span> <span class="o">=</span> <span class="n">WDS</span><span class="p">[</span><span class="s1">&#39;rerr&#39;</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">)</span>
+<span class="n">plotseppa</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">WDS</span><span class="p">[</span><span class="s1">&#39;dates&#39;</span><span class="p">],</span><span class="n">WDS</span><span class="p">[</span><span class="s1">&#39;r&#39;</span><span class="p">],</span> <span class="n">color</span> <span class="o">=</span> <span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span><span class="n">zorder</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="c1"># Add to the position angle plot</span>
+<span class="n">plotseppa</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">errorbar</span><span class="p">(</span><span class="n">WDS</span><span class="p">[</span><span class="s1">&#39;dates&#39;</span><span class="p">],</span><span class="n">WDS</span><span class="p">[</span><span class="s1">&#39;PA&#39;</span><span class="p">],</span> <span class="n">yerr</span> <span class="o">=</span> <span class="n">WDS</span><span class="p">[</span><span class="s1">&#39;PAerr&#39;</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">)</span>
+<span class="n">plotseppa</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">WDS</span><span class="p">[</span><span class="s1">&#39;dates&#39;</span><span class="p">],</span><span class="n">WDS</span><span class="p">[</span><span class="s1">&#39;PA&#39;</span><span class="p">],</span> <span class="n">color</span> <span class="o">=</span> <span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span><span class="n">zorder</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;matplotlib.collections.PathCollection at 0x102d80c518&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_Tutorial_47_1.png" src="../_images/tutorials_Tutorial_47_1.png" />
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../api.html" class="btn btn-neutral float-right" title="API Documentation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="QuickStart.html" class="btn btn-neutral float-left" title="Quick Start Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Logan Pearce
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
