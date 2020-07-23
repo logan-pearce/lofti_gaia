@@ -605,6 +605,7 @@ readable text file of summary statistics from the sample posterior.</p>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="c1"># How long did it take to do that run?</span>
+<span class="kn">import</span> <span class="nn">astropy.units</span> <span class="k">as</span> <span class="nn">u</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">run_time</span><span class="p">,</span><span class="n">results</span><span class="o">.</span><span class="n">run_time</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">min</span><span class="p">),</span><span class="n">results</span><span class="o">.</span><span class="n">run_time</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">hr</span><span class="p">))</span>
 </pre></div>
 </div>
@@ -668,6 +669,7 @@ in deg - mtot: total system mass in Msun - distance: distance to system in parse
 (95.23906808328863, 253.9314959592835)
 </pre></div></div>
 </div>
+<p>You can save results with the <code class="docutils literal notranslate"><span class="pre">SaveResults</span></code> function:</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
@@ -692,8 +694,8 @@ in deg - mtot: total system mass in Msun - distance: distance to system in parse
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Loaded results sma:&#39;</span><span class="p">,</span><span class="n">loaded_results</span><span class="o">.</span><span class="n">sma</span><span class="p">)</span>
 
 <span class="c1"># make a stats object, compute the stats, and write out automatically</span>
-<span class="n">loaded_results</span><span class="o">.</span><span class="n">stats</span> <span class="o">=</span> <span class="n">Stats</span><span class="p">(</span><span class="n">orbits</span> <span class="o">=</span> <span class="n">loaded_results</span><span class="o">.</span><span class="n">orbits</span><span class="p">,</span> <span class="n">write_to_file</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">filename</span> <span class="o">=</span>\
-    <span class="s2">&quot;FitResults.Stats.from.a.previous.run.txt&quot;</span><span class="p">)</span>
+<span class="n">loaded_results</span><span class="o">.</span><span class="n">stats</span> <span class="o">=</span> <span class="n">Stats</span><span class="p">(</span><span class="n">orbits</span> <span class="o">=</span> <span class="n">loaded_results</span><span class="o">.</span><span class="n">orbits</span><span class="p">,</span> <span class="n">write_to_file</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">filename</span> <span class="o">=</span><span class="s2">&quot;FitResults.Stats.from.a.previous.run.txt&quot;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Loaded results sma mean:&#39;</span><span class="p">,</span><span class="n">loaded_results</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">sma</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Loaded results lan 68% CI:&#39;</span><span class="p">,</span><span class="n">loaded_results</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">lan</span><span class="o">.</span><span class="n">ci68</span><span class="p">)</span>
 </pre></div>
@@ -788,13 +790,13 @@ in the same order as listed above. The orbits attribute retains the original val
  114.86241257 152.97298379 259.06314597  37.5787509   78.32546499]
 </pre></div></div>
 </div>
+<p>If we decide we don’t want that, we can reset the lan attribute (mod 360 to remove negative values):</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># If we decide we don&#39;t want that, we can reset the lan attribute (mod 360 to remove negative values):</span>
-<span class="n">GL896results</span><span class="o">.</span><span class="n">lan</span> <span class="o">=</span> <span class="n">GL896results</span><span class="o">.</span><span class="n">orbits</span><span class="p">[:,</span><span class="mi">7</span><span class="p">]</span> <span class="o">%</span> <span class="mi">360</span>
+<span></span><span class="n">GL896results</span><span class="o">.</span><span class="n">lan</span> <span class="o">=</span> <span class="n">GL896results</span><span class="o">.</span><span class="n">orbits</span><span class="p">[:,</span><span class="mi">7</span><span class="p">]</span> <span class="o">%</span> <span class="mi">360</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">GL896results</span><span class="o">.</span><span class="n">lan</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -808,14 +810,13 @@ in the same order as listed above. The orbits attribute retains the original val
  114.86241257 152.97298379 259.06314597  37.5787509   78.32546499]
 </pre></div></div>
 </div>
+<p>If we decide to limit aop instead, we can replace .aop with <code class="docutils literal notranslate"><span class="pre">orbits[:,6]</span> <span class="pre">%</span> <span class="pre">180</span></code>, or we can add it as a keyword when we create the Results object:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># If we decide to limit aop instead, we can replace .aop with orbits[:,6] % 180, or we can add it as a keyword</span>
-<span class="c1"># when we create the Results object:</span>
-<span class="n">GL896results</span> <span class="o">=</span> <span class="n">Results</span><span class="p">(</span><span class="n">limit_aop</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+<span></span><span class="n">GL896results</span> <span class="o">=</span> <span class="n">Results</span><span class="p">(</span><span class="n">limit_aop</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
 <span class="n">GL896results</span><span class="o">.</span><span class="n">LoadResults</span><span class="p">(</span><span class="s2">&quot;FitResults.from.a.previous.run.GL896.pkl&quot;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">GL896results</span><span class="o">.</span><span class="n">aop</span><span class="p">)</span>
 <span class="c1"># but the orbits attribute still preserves the original values:</span>
@@ -853,16 +854,16 @@ in the same order as listed above. The orbits attribute retains the original val
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/tutorials_Tutorial_35_0.png" src="../_images/tutorials_Tutorial_35_0.png" />
+<img alt="../_images/tutorials_Tutorial_38_0.png" src="../_images/tutorials_Tutorial_38_0.png" />
 </div>
 </div>
+<p>You can make adjustments to the histograms by calling the individual histogram axes:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># You can make adjustments to the histograms by calling the individual histogram axes:</span>
-<span class="kn">from</span> <span class="nn">matplotlib.ticker</span> <span class="kn">import</span> <span class="n">FormatStrFormatter</span>
+<span></span><span class="kn">from</span> <span class="nn">matplotlib.ticker</span> <span class="kn">import</span> <span class="n">FormatStrFormatter</span>
 <span class="c1"># For example, change t0 to scientific notation:</span>
 <span class="n">hists</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">FormatStrFormatter</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%.1e</span><span class="s1">&#39;</span><span class="p">))</span>
 <span class="n">hists</span>
@@ -874,7 +875,7 @@ in the same order as listed above. The orbits attribute retains the original val
 </pre></div>
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/tutorials_Tutorial_36_0.svg" src="../_images/tutorials_Tutorial_36_0.svg" /></div>
+<img alt="../_images/tutorials_Tutorial_40_0.svg" src="../_images/tutorials_Tutorial_40_0.svg" /></div>
 </div>
 <p>Plot plane-of-sky orbits using <code class="docutils literal notranslate"><span class="pre">PlotOrbits</span></code>. If the orbit sample results are larger than 100, <code class="docutils literal notranslate"><span class="pre">PlotOrbits</span></code> will randomly select 100 orbits from the posterior sample to plot.</p>
 <div class="nbinput docutils container">
@@ -890,16 +891,16 @@ in the same order as listed above. The orbits attribute retains the original val
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/tutorials_Tutorial_38_0.png" src="../_images/tutorials_Tutorial_38_0.png" />
+<img alt="../_images/tutorials_Tutorial_42_0.png" src="../_images/tutorials_Tutorial_42_0.png" />
 </div>
 </div>
+<p>If I want to plot fewer orbits, change the size keyword:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># If I want to plot fewer orbits, change the size keyword:</span>
-<span class="n">plotorbits</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">PlotOrbits</span><span class="p">(</span><span class="n">size</span> <span class="o">=</span> <span class="mi">3</span><span class="p">)</span>
+<span></span><span class="n">plotorbits</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">PlotOrbits</span><span class="p">(</span><span class="n">size</span> <span class="o">=</span> <span class="mi">3</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -907,7 +908,7 @@ in the same order as listed above. The orbits attribute retains the original val
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/tutorials_Tutorial_39_0.png" src="../_images/tutorials_Tutorial_39_0.png" />
+<img alt="../_images/tutorials_Tutorial_44_0.png" src="../_images/tutorials_Tutorial_44_0.png" />
 </div>
 </div>
 <div class="nbinput docutils container">
@@ -916,7 +917,7 @@ in the same order as listed above. The orbits attribute retains the original val
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="c1"># the tick labels looks small</span>
-<span class="c1"># on the colorbar:</span>
+<span class="c1"># on the colorbar, let&#39;s make them bigger:</span>
 <span class="n">plotorbits</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">labelsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
 <span class="c1"># what if I don&#39;t want the grid lines?</span>
 <span class="n">plotorbits</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">b</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -929,7 +930,7 @@ in the same order as listed above. The orbits attribute retains the original val
 </pre></div>
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/tutorials_Tutorial_40_0.png" src="../_images/tutorials_Tutorial_40_0.png" />
+<img alt="../_images/tutorials_Tutorial_45_0.png" src="../_images/tutorials_Tutorial_45_0.png" />
 </div>
 </div>
 <div class="nbinput docutils container">
@@ -946,7 +947,7 @@ in the same order as listed above. The orbits attribute retains the original val
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/tutorials_Tutorial_41_0.png" src="../_images/tutorials_Tutorial_41_0.png" />
+<img alt="../_images/tutorials_Tutorial_46_0.png" src="../_images/tutorials_Tutorial_46_0.png" />
 </div>
 </div>
 <div class="nbinput docutils container">
@@ -963,16 +964,16 @@ in the same order as listed above. The orbits attribute retains the original val
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/tutorials_Tutorial_42_0.png" src="../_images/tutorials_Tutorial_42_0.png" />
+<img alt="../_images/tutorials_Tutorial_47_0.png" src="../_images/tutorials_Tutorial_47_0.png" />
 </div>
 </div>
+<p>You can make a 3d plot with the plot3d keyword:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># You can make a 3d plot with the plot3d keyword:</span>
-<span class="kn">from</span> <span class="nn">lofti_redesign</span> <span class="kn">import</span> <span class="n">Results</span>
+<span></span><span class="kn">from</span> <span class="nn">lofti_redesign</span> <span class="kn">import</span> <span class="n">Results</span>
 <span class="n">loaded_results</span> <span class="o">=</span> <span class="n">Results</span><span class="p">(</span><span class="n">limit_lan</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span>
 <span class="n">loaded_results</span><span class="o">.</span><span class="n">LoadResults</span><span class="p">(</span><span class="s2">&quot;FitResults.from.a.previous.run.pkl&quot;</span><span class="p">)</span>
 <span class="n">plotorbits3d</span> <span class="o">=</span> <span class="n">loaded_results</span><span class="o">.</span><span class="n">PlotOrbits</span><span class="p">(</span><span class="n">plot3d</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
@@ -983,7 +984,7 @@ in the same order as listed above. The orbits attribute retains the original val
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/tutorials_Tutorial_43_0.png" src="../_images/tutorials_Tutorial_43_0.png" />
+<img alt="../_images/tutorials_Tutorial_49_0.png" src="../_images/tutorials_Tutorial_49_0.png" />
 </div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">PlotSepPA</span></code> plots the orbits in separation and position angle vs time.</p>
@@ -1003,7 +1004,7 @@ in the same order as listed above. The orbits attribute retains the original val
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/tutorials_Tutorial_45_0.png" src="../_images/tutorials_Tutorial_45_0.png" />
+<img alt="../_images/tutorials_Tutorial_51_0.png" src="../_images/tutorials_Tutorial_51_0.png" />
 </div>
 </div>
 <p>You can added scatter plot of astrometric points to the plot. To reproduce Fig 1b in Pearce et al. 2020 of DS Tuc AB Gaia fit compared to WDS astrometry points, read in the included csv of WDS astrometry and add to the plot:</p>
@@ -1040,7 +1041,7 @@ in the same order as listed above. The orbits attribute retains the original val
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/tutorials_Tutorial_47_1.png" src="../_images/tutorials_Tutorial_47_1.png" />
+<img alt="../_images/tutorials_Tutorial_53_1.png" src="../_images/tutorials_Tutorial_53_1.png" />
 </div>
 </div>
 <div class="nbinput nblast docutils container">

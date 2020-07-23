@@ -15,6 +15,8 @@ It assumes the two components are bound in an elliptical orbit.
 
 Also included are some suggested basic statistics and plotting tools to examining the output from the fitter.
 
+For questions email loganpearce1@email.arizona.edu
+
 Caution:
 ++++++++
 

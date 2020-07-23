@@ -244,6 +244,7 @@
    ],
    "source": [
     "# How long did it take to do that run?\n",
+    "import astropy.units as u\n",
     "print(results.run_time,results.run_time.to(u.min),results.run_time.to(u.hr))"
    ]
   },
@@ -251,20 +252,20 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "We can examine the posterior orbital elements with dot notation on the ```results``` object.  The ```results``` orbital parameters are: \n",
-    "- sma: semi-major axis in arcsec\n",
-    "- period: period in years\n",
-    "- orbit_fraction: fraction of orbit past periastron \n",
-    "    passage the observation (2015.5) occured on.  Values: [0,1)\n",
-    "- t0: date of periastron passage in decimal years\n",
-    "- ecc: eccentricity\n",
-    "- inc: inclination relative to plane of the sky in deg\n",
-    "- aop: arguement of periastron in deg\n",
-    "- lan: longitude of ascending node in deg\n",
-    "- mtot: total system mass in Msun\n",
-    "- distance: distance to system in parsecs\n",
-    "- chi2: chi^2 value for the orbit\n",
-    "- lnprob: log probability of orbit\n",
+    "We can examine the posterior orbital elements with dot notation on the ```results``` object.  The ```results``` orbital parameters are: <br>\n",
+    "- sma: semi-major axis in arcsec<br><br>\n",
+    "- period: period in years<br>\n",
+    "- orbit_fraction: fraction of orbit past periastron <br>\n",
+    "    passage the observation (2015.5) occured on.  Values: [0,1)<br>\n",
+    "- t0: date of periastron passage in decimal years<br>\n",
+    "- ecc: eccentricity<br>\n",
+    "- inc: inclination relative to plane of the sky in deg<br>\n",
+    "- aop: arguement of periastron in deg<br>\n",
+    "- lan: longitude of ascending node in deg<br>\n",
+    "- mtot: total system mass in Msun<br>\n",
+    "- distance: distance to system in parsecs<br>\n",
+    "- chi2: chi^2 value for the orbit<br>\n",
+    "- lnprob: log probability of orbit<br>\n",
     "- lnrand: log of random \"dice roll\" for \n",
     "    orbit acceptance"
    ]
@@ -296,14 +297,14 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "The ```results``` object also contains a ```Stats``` subclass that holds summary statistics of the posterior distributions for each parameter.  Each parameter contains the following summary statistics:\n",
+    "The ```results``` object also contains a ```Stats``` subclass that holds summary statistics of the posterior distributions for each parameter.  Each parameter contains the following summary statistics:<br><br>\n",
     "\n",
-    "- param.mean: mean of parameter computed using np.mean\n",
-    "- param.median: np.median of parameter\n",
-    "- param.mode: mode of parameter\n",
-    "- param.std: standard deviation from np.std\n",
-    "- param.ci68: 68% minimum credible interval of form (lower bound, upper bound)\n",
-    "- param.ci95: 95% minimum credible interval\n"
+    "- param.mean: mean of parameter computed using np.mean<br>\n",
+    "- param.median: np.median of parameter<br>\n",
+    "- param.mode: mode of parameter<br>\n",
+    "- param.std: standard deviation from np.std<br>\n",
+    "- param.ci68: 68% minimum credible interval of form (lower bound, upper bound)<br>\n",
+    "- param.ci95: 95% minimum credible interval<br>\n"
    ]
   },
   {
@@ -325,6 +326,13 @@
    "source": [
     "print(results.stats.sma.mean)\n",
     "print(results.stats.aop.ci68)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "You can save results with the ```SaveResults``` function:"
    ]
   },
   {
@@ -369,8 +377,8 @@
     "print('Loaded results sma:',loaded_results.sma)\n",
     "\n",
     "# make a stats object, compute the stats, and write out automatically\n",
-    "loaded_results.stats = Stats(orbits = loaded_results.orbits, write_to_file = True, filename =\\\n",
-    "    \"FitResults.Stats.from.a.previous.run.txt\")\n",
+    "loaded_results.stats = Stats(orbits = loaded_results.orbits, write_to_file = True, \n",
+    "    filename =\"FitResults.Stats.from.a.previous.run.txt\")\n",
     "print('Loaded results sma mean:',loaded_results.stats.sma.mean)\n",
     "print('Loaded results lan 68% CI:',loaded_results.stats.lan.ci68)"
    ]
@@ -475,6 +483,13 @@
    ]
   },
   {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "If we decide we don't want that, we can reset the lan attribute (mod 360 to remove negative values):"
+   ]
+  },
+  {
    "cell_type": "code",
    "execution_count": 20,
    "metadata": {
@@ -491,9 +506,16 @@
     }
    ],
    "source": [
-    "# If we decide we don't want that, we can reset the lan attribute (mod 360 to remove negative values):\n",
     "GL896results.lan = GL896results.orbits[:,7] % 360\n",
     "print(GL896results.lan)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "If we decide to limit aop instead, we can replace .aop with ```orbits[:,6] % 180```, or we can add it as a keyword\n",
+    "when we create the Results object:"
    ]
   },
   {
@@ -515,8 +537,6 @@
     }
    ],
    "source": [
-    "# If we decide to limit aop instead, we can replace .aop with orbits[:,6] % 180, or we can add it as a keyword\n",
-    "# when we create the Results object:\n",
     "GL896results = Results(limit_aop = True)\n",
     "GL896results.LoadResults(\"FitResults.from.a.previous.run.GL896.pkl\")\n",
     "print(GL896results.aop)\n",
@@ -557,6 +577,13 @@
    "source": [
     "plt.style.use('default')\n",
     "hists = results.PlotHists()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "You can make adjustments to the histograms by calling the individual histogram axes:"
    ]
   },
   {
@@ -4627,7 +4654,6 @@
     }
    ],
    "source": [
-    "# You can make adjustments to the histograms by calling the individual histogram axes:\n",
     "from matplotlib.ticker import FormatStrFormatter\n",
     "# For example, change t0 to scientific notation:\n",
     "hists.axes[-1].xaxis.set_major_formatter(FormatStrFormatter('%.1e'))\n",
@@ -4662,6 +4688,13 @@
    ]
   },
   {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "If I want to plot fewer orbits, change the size keyword:"
+   ]
+  },
+  {
    "cell_type": "code",
    "execution_count": 26,
    "metadata": {},
@@ -4678,7 +4711,6 @@
     }
    ],
    "source": [
-    "# If I want to plot fewer orbits, change the size keyword:\n",
     "plotorbits = results.PlotOrbits(size = 3)"
    ]
   },
@@ -4701,7 +4733,7 @@
    ],
    "source": [
     "# the tick labels looks small\n",
-    "# on the colorbar:\n",
+    "# on the colorbar, let's make them bigger:\n",
     "plotorbits.axes[1].tick_params(labelsize=14)\n",
     "# what if I don't want the grid lines?\n",
     "plotorbits.axes[0].grid(b=False)\n",
@@ -4751,6 +4783,13 @@
    ]
   },
   {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "You can make a 3d plot with the plot3d keyword:"
+   ]
+  },
+  {
    "cell_type": "code",
    "execution_count": 30,
    "metadata": {},
@@ -4767,7 +4806,6 @@
     }
    ],
    "source": [
-    "# You can make a 3d plot with the plot3d keyword:\n",
     "from lofti_redesign import Results\n",
     "loaded_results = Results(limit_lan = False)\n",
     "loaded_results.LoadResults(\"FitResults.from.a.previous.run.pkl\")\n",
