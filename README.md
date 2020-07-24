@@ -3,7 +3,7 @@
 Written by Logan A. Pearce, 2019<br>
 If you use LOFTI in your work please cite Pearce et al. 2020
 
-## Complete documentation at https://lofti-gaiadr2.readthedocs.io/en/latest/
+## Complete documentation at lofti-gaiadr2.rtfd.io
 
 ### To install lofti_gaiaDR2:
     pip install lofti_gaiaDR2
