@@ -491,7 +491,7 @@ def calc_XYZ(a,T,to,e,i,w,O,date):
     Z = r * sin(w+f)*sin(i)
     return X,Y,Z,E
 
-def calc_velocities(a,T,to,e,i,w,O,date,dist,E):
+def calc_velocities(a,T,to,e,i,w,O,dist,E):
     ''' Compute 3-d velocity of a single object on a Keplerian orbit given a 
     set of orbital elements at a single observation point.  Uses my eqns derived from Seager 
     Exoplanets Ch2.
@@ -635,7 +635,7 @@ def calc_OFTI(parameters,date,rho,pa):
     # convert units:
     X2,Y2,Z2 = (X2*u.arcsec).to(u.mas).value, (Y2*u.arcsec).to(u.mas).value, (Z2*u.arcsec).to(u.mas).value
     # Compute velocities at observation date:
-    Xdot,Ydot,Zdot = calc_velocities(a2,T2,to2,e,i,w,O2,date,dist,E2)
+    Xdot,Ydot,Zdot = calc_velocities(a2,T2,to2,e,i,w,O2,dist,E2)
     # Compute accelerations at observation date:
     Xddot,Yddot,Zddot = calc_accel(a2,T2,to2,e,i,w,O2,date,dist,E2)
     # Convert to degrees for output:
