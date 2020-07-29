@@ -78,11 +78,6 @@ rv = {'rv':np.array([-2.02, -1.67, -1.63, -1.92, -1.41]),
         'dates':np.array([2007.39, 2018.87, 2018.88, 2018.88, 2018.88,])
         }
 
-rv = {'rv':np.array([-1.67]),
-        'rverr':np.array([0.53,]),
-        'dates':np.array([2018.87,])
-        }
-
 # Initialize the fitter object:
 fitterobject = Fitter(DSTucA,           # source id object 1
                       DSTucB,           # source id object 2
