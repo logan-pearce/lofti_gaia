@@ -56,6 +56,10 @@ Planned Updates:
 Change Log:
 +++++++++++
 
+**1.0.1 (08-12-2020)**
+
+- Changed ecc prior to np.random.random_sample to exclude e = 1.0 from the prior
+
 **1.0.0 (07-22-2020)**
 
 - Moved from fully functional to object oriented basic structure

@@ -375,7 +375,7 @@ def draw_samples(number, m_tot, d_star, date):
     to = date-(const*T)
 
     # Eccentricity:
-    e = np.random.uniform(0.0,1.0,number)
+    e = np.random.random_sample(number)
     # Inclination in radians:
     cosi = np.random.uniform(-1.0,1.0,number)  #Draws sin(i) from a uniform distribution.  Inclination
     # is computed as the arccos of cos(i):
