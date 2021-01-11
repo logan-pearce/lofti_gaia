@@ -7,7 +7,7 @@ def get_requires():
     return reqs
 
 setup(name='lofti_gaiaDR2',
-      version='1.0.0',
+      version='1.0.1',
       description='Orbit fitting with Gaia astrometry',
       url='https://github.com/logan-pearce/lofti_gaiaDR2',
       download_url='https://github.com/logan-pearce/lofti_gaiaDR2/archive/1.0.0.tar.gz',

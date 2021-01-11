@@ -1,6 +1,7 @@
 import astropy.units as u
 import numpy as np
-from lofti_gaiaDR2.loftitools import *
+#from lofti_gaiaDR2.loftitools import *
+from loftitools import *
 import pickle
 import time
 import matplotlib.pyplot as plt
@@ -29,6 +30,12 @@ class Fitter(object):
         Norbits (int): Number of desired orbits in posterior sample.  Default = 100000
         results_filename (str): Filename for fit results files.  If none, results will be written to files \
             named FitResults.yr.mo.day.hr.min.s
+        astrometry (dict): User-supplied astrometric measurements. Must be dictionary or table or pandas dataframe with\
+            column names "sep,seperr,pa,paerr,dates" or "ra,raerr,dec,decerr,dates". May be same as the rv table. \
+            Default = None
+        user_rv (dict): User-supplied radial velocity measurements. Must be dictionary or table or pandas dataframe with\
+            column names "rv,rverr,dates". May be as the astrometry table. Default = None.
+        catalog (str): name of Gaia catalog to query. Default = 'gaiaedr3.gaia_source' 
         ruwe1, ruwe2 (flt): RUWE value from Gaia archive
         ref_epoch (flt): reference epoch in decimal years. For Gaia DR2 this is 2015.5
         plx1, plx2 (flt): parallax from Gaia DR2 in mas
@@ -55,7 +62,12 @@ class Fitter(object):
 
     Written by Logan Pearce, 2020
     '''
-    def __init__(self, sourceid1, sourceid2, mass1, mass2, Norbits = 100000, results_filename = None):
+    def __init__(self, sourceid1, sourceid2, mass1, mass2, Norbits = 100000, \
+        results_filename = None, 
+        astrometry = None,
+        user_rv = None,
+        catalog = 'gaiaedr3.gaia_source'
+        ):
         
         self.sourceid1 = sourceid1
         self.sourceid2 = sourceid2
@@ -75,16 +87,70 @@ class Fitter(object):
             self.results_filename = results_filename
             self.stats_filename = results_filename+'.Stats.txt'
 
-        # Get Gaia measurements, compute needed constraints, and add to object:
-        self.PrepareConstraints()
+        self.astrometry = False
+        # check if user supplied astrometry:
+        if astrometry is not None:
+            # if so, set astrometric flag to True:
+            self.astrometry = True
+            # store observation dates:
+            self.astrometric_dates = astrometry['dates']
+            # if in sep/pa, convert to ra/dec:
+            if 'sep' in astrometry:
+                try:
+                    astr_ra = [MonteCarloIt([astrometry['sep'][i],astrometry['seperr'][i]]) * \
+                        np.sin(np.radians(MonteCarloIt([astrometry['pa'][i],astrometry['paerr'][i]]))) \
+                        for i in range(len(astrometry['sep']))]
+                    astr_dec = [MonteCarloIt([astrometry['sep'][i],astrometry['seperr'][i]]) * \
+                        np.cos(np.radians(MonteCarloIt([astrometry['pa'][i],astrometry['paerr'][i]]))) \
+                        for i in range(len(astrometry['sep']))]
 
-    def PrepareConstraints(self, rv=False):
+                    self.astrometric_ra = np.array([
+                        [np.mean(astr_ra[i]) for i in range(len(astrometry['sep']))],
+                        [np.std(astr_ra[i]) for i in range(len(astrometry['sep']))]
+                        ])
+                    self.astrometric_dec = np.array([
+                        [np.mean(astr_dec[i]) for i in range(len(astrometry['sep']))],
+                        [np.std(astr_dec[i]) for i in range(len(astrometry['sep']))]
+                        ])
+                except:
+                    raise ValueError('Astrometry keys not recognized. Please provide dictionary or table or pandas dataframe with\
+                     column names "sep,seperr,pa,paerr,dates" or "ra,raerr,dec,decerr,dates"')
+            elif 'ra' in astrometry:
+                # else store the ra/dec as attributes:
+                try:
+                    self.astrometric_ra = np.array([astrometry['ra'], astrometry['raerr']])
+                    self.astrometric_dec = np.array([astrometry['dec'], astrometry['decerr']])
+                except:
+                    raise ValueError('Astrometry keys not recognized. Please provide dictionary or table or pandas dataframe with\
+                     column names "sep,seperr,pa,paerr,dates" or "ra,raerr,dec,decerr,dates"')
+            else:
+                raise ValueError('Astrometry keys not recognized. Please provide dictionary or table or pandas dataframe with\
+                     column names "sep,seperr,pa,paerr,dates" or "ra,raerr,dec,decerr,dates"')
+
+        # Check if user supplied rv:
+        self.use_user_rv = False
+        if user_rv is not None:
+            # set user rv flag to true:
+            self.use_user_rv = True
+            try:
+                # set attributes; multiply rv by -1 due to difference in coordinate systems:
+                self.user_rv = np.array([user_rv['rv']*-1,user_rv['rverr']])
+                self.user_rv_dates = np.array(user_rv['dates'])
+            except:
+                raise ValueError('RV keys not recognized.  Please use column names "rv,rverr,dates"')
+        self.catalog = catalog
+
+        # Get Gaia measurements, compute needed constraints, and add to object:
+        self.PrepareConstraints(catalog = self.catalog)
+
+    def PrepareConstraints(self, rv=False, catalog='gaiaedr3.gaia_source'):
         '''Retrieves parameters for both objects from Gaia DR2 archive and computes system attriubtes,
         and assigns them to the Fitter object class.
         
         Args:
             rv (bool): flag for handling the presence or absence of RV measurements for both objects \
                 in DR2.  Gets set to True if both objects have Gaia RV measurements. Default = False
+            catalog (str): name of Gaia catalog to query. Default = 'gaiaedr3.gaia_source'
         
         Written by Logan Pearce, 2020
 
@@ -94,17 +160,17 @@ class Fitter(object):
         mas_to_deg = 1./3600000.
         
         # Retrieve astrometric solution from Gaia DR2
-        job = Gaia.launch_job("SELECT * FROM gaiadr2.gaia_source WHERE source_id = "+str(self.sourceid1))
+        job = Gaia.launch_job("SELECT * FROM "+catalog+" WHERE source_id = "+str(self.sourceid1))
         j = job.get_results()
 
-        job = Gaia.launch_job("SELECT * FROM gaiadr2.gaia_source WHERE source_id = "+str(self.sourceid2))
+        job = Gaia.launch_job("SELECT * FROM "+catalog+" WHERE source_id = "+str(self.sourceid2))
         k = job.get_results()
 
         # Retrieve RUWE for both sources and add to object state:
-        job = Gaia.launch_job("SELECT * FROM gaiadr2.ruwe WHERE source_id = "+str(self.sourceid1))
+        job = Gaia.launch_job("SELECT * FROM "+catalog+" WHERE source_id = "+str(self.sourceid1))
         jruwe = job.get_results()
 
-        job = Gaia.launch_job("SELECT * FROM gaiadr2.ruwe WHERE source_id = "+str(self.sourceid2))
+        job = Gaia.launch_job("SELECT * FROM "+catalog+" WHERE source_id = "+str(self.sourceid2))
         kruwe = job.get_results()
 
         self.ruwe1 = jruwe['ruwe'][0]
@@ -136,10 +202,16 @@ class Fitter(object):
         self.pmDec1 = [j[0]['pmdec']*u.mas/u.yr, j[0]['pmdec_error']*u.mas/u.yr]
         self.pmDec2 = [k[0]['pmdec']*u.mas/u.yr, k[0]['pmdec_error']*u.mas/u.yr]
         # See if both objects have RV's in DR2:
-        if type(k[0]['radial_velocity']) == np.float64 and type(j[0]['radial_velocity']) == np.float64:
+        if catalog == 'gaiaedr3.gaia_source':
+            key = 'dr2_radial_velocity'
+            error_key = 'dr2_radial_velocity_error'
+        elif catalog == 'gaiadr2.gaia_source':
+            key = 'radial_velocity'
+            error_key = 'radial_velocity_error'
+        if type(k[0][key]) == np.float64 and type(j[0][key]) == np.float64:
             rv = True
-            self.rv1 = [j[0]['radial_velocity']*u.km/u.s,j[0]['radial_velocity_error']*u.km/u.s]
-            self.rv2 = [k[0]['radial_velocity']*u.km/u.s,k[0]['radial_velocity_error']*u.km/u.s]
+            self.rv1 = [j[0][key]*u.km/u.s,j[0][error_key]*u.km/u.s]
+            self.rv2 = [k[0][key]*u.km/u.s,k[0][error_key]*u.km/u.s]
             rv1 = MonteCarloIt(self.rv1)
             rv2 = MonteCarloIt(self.rv2)
             self.rv = [ -np.mean(rv2-rv1) , np.std(rv2-rv1) ]   # km/s
@@ -247,6 +319,15 @@ class FitOrbit(object):
         self.write_stats = write_stats
         self.results_filename = fitterobject.results_filename
         self.stats_filename = fitterobject.stats_filename
+        self.astrometry = fitterobject.astrometry
+        if self.astrometry:
+            self.astrometric_ra = fitterobject.astrometric_ra
+            self.astrometric_dec = fitterobject.astrometric_dec
+            self.astrometric_dates = fitterobject.astrometric_dates
+        self.use_user_rv = fitterobject.use_user_rv
+        if self.use_user_rv:
+            self.user_rv = fitterobject.user_rv
+            self.user_rv_dates = fitterobject.user_rv_dates
 
         # run orbit fitter:
         self.fitorbit()
@@ -269,14 +350,47 @@ class FitOrbit(object):
         parameters_init = draw_samples(10000, self.mtot_init, self.distance, self.ref_epoch)
         # Compute positions and velocities:
         X,Y,Z,Xdot,Ydot,Zdot,Xddot,Yddot,Zddot,parameters = calc_OFTI(parameters_init,self.ref_epoch,self.sep,self.pa)
+
         # Compute chi squared:
         if self.rv[0] != 0:
-            measurements = np.array([Y,X,Ydot,Xdot,Zdot])
-            model = np.array([self.deltaRA, self.deltaDec, self.pmRA, self.pmDec, self.rv])
+            model = np.array([Y,X,Ydot,Xdot,Zdot])
+            data = np.array([self.deltaRA, self.deltaDec, self.pmRA, self.pmDec, self.rv])
         else:
-            measurements = np.array([Y,X,Ydot,Xdot])
-            model = np.array([self.deltaRA, self.deltaDec, self.pmRA, self.pmDec])
-        chi2 = ComputeChi2(model,measurements)
+            model = np.array([Y,X,Ydot,Xdot])
+            data = np.array([self.deltaRA, self.deltaDec, self.pmRA, self.pmDec])
+        chi2 = ComputeChi2(data,model)
+
+        if self.astrometry:
+            p = parameters.copy()
+            a,T,const,to,e,i,w,O,m1,dist = p[0],p[1],p[2],p[3],p[4],p[5],p[6],p[7],p[8],p[9]
+            chi2_astr = np.zeros(10000)
+            # Calculate predicted positions at astr observation dates for each orbit:
+            for j in range(self.astrometric_ra.shape[1]):
+                # for each date, compute XYZ for each 10000 trial orbit.  We can
+                # skip scale and rotate because that was accomplished in the calc_OFTI call above.
+                X1,Y1,Z1,E1 = calc_XYZ(a,T,to,e,i,w,O,self.astrometric_dates[j])
+                # Place astrometry into data array where: data[0][0]=ra obs, data[0][1]=ra err, etc:
+                data = np.array([self.astrometric_ra[:,j], self.astrometric_dec[:,j]])
+                # place corresponding predicited positions at that date for each trial orbit:
+                model = np.array([Y1*1000,X1*1000])
+                # compute chi2 for trial orbits at that date and add to the total chi2 sum:
+                chi2_astr += ComputeChi2(data,model)
+            chi2 = chi2 + chi2_astr
+        
+        if self.use_user_rv:
+            p = parameters.copy()
+            a,T,const,to,e,i,w,O,m1,dist = p[0],p[1],p[2],p[3],p[4],p[5],p[6],p[7],p[8],p[9]
+            chi2_rv = np.zeros(10000)
+            for j in range(self.user_rv.shape[1]):
+                # compute ecc anomaly at that date:
+                X1,Y1,Z1,E1 = calc_XYZ(a,T,to,e,i,w,O,self.user_rv_dates[j])
+                # compute velocities at that ecc anom:
+                Xdot,Ydot,Zdot = calc_velocities(a,T,to,e,i,w,O,dist,E1)
+                # compute chi2:
+                chi2_rv += ComputeChi2(np.array([self.user_rv[:,j]]),np.array([Zdot]))
+            chi2 = chi2 + chi2_rv
+        print('inital chi min',np.nanmin(chi2))
+
         self.chi_min = np.nanmin(chi2)
 
         # Accept/reject:
@@ -304,7 +418,7 @@ class FitOrbit(object):
             parameters_init = draw_samples(10000, self.mtot_init, self.distance, self.ref_epoch)
             # Compute positions and velocities and new parameters array with scaled and rotated values:
             X,Y,Z,Xdot,Ydot,Zdot,Xddot,Yddot,Zddot,parameters = calc_OFTI(parameters_init,self.ref_epoch,self.sep,self.pa)
-            # compute chi2 for orbits:
+            # compute chi2 for orbits using Gaia observations:
             if self.rv[0] != 0:
                 measurements = np.array([Y,X,Ydot,Xdot,Zdot])
                 model = np.array([self.deltaRA, self.deltaDec, self.pmRA, self.pmDec, self.rv])
@@ -312,6 +426,38 @@ class FitOrbit(object):
                 measurements = np.array([Y,X,Ydot,Xdot])
                 model = np.array([self.deltaRA, self.deltaDec, self.pmRA, self.pmDec])
             chi2 = ComputeChi2(model,measurements)
+
+            # add user astrometry if given:
+            if self.astrometry:
+                p = parameters.copy()
+                a,T,const,to,e,i,w,O,m1,dist = p[0],p[1],p[2],p[3],p[4],p[5],p[6],p[7],p[8],p[9]
+                chi2_astr = np.zeros(10000)
+                # Calculate predicted positions at astr observation dates for each orbit:
+                for j in range(self.astrometric_ra.shape[1]):
+                    # for each date, compute XYZ for each 10000 trial orbit.  We can
+                    # skip scale and rotate because that was accomplished in the calc_OFTI call above.
+                    X1,Y1,Z1,E1 = calc_XYZ(a,T,to,e,i,w,O,self.astrometric_dates[j])
+                    # Place astrometry into data array where: data[0][0]=ra obs, data[0][1]=ra err, etc:
+                    data = np.array([self.astrometric_ra[:,j], self.astrometric_dec[:,j]])
+                    # place corresponding predicited positions at that date for each trial orbit:
+                    model = np.array([Y1*1000,X1*1000])
+                    # compute chi2 for trial orbits at that date and add to the total chi2 sum:
+                    chi2_astr += ComputeChi2(data,model)
+                chi2 = chi2 + chi2_astr
+            
+            # add user rv if given:
+            if self.use_user_rv:
+                p = parameters.copy()
+                a,T,const,to,e,i,w,O,m1,dist = p[0],p[1],p[2],p[3],p[4],p[5],p[6],p[7],p[8],p[9]
+                chi2_rv = np.zeros(10000)
+                for j in range(self.user_rv.shape[1]):
+                    # compute ecc anomaly at that date:
+                    X1,Y1,Z1,E1 = calc_XYZ(a,T,to,e,i,w,O,self.user_rv_dates[j])
+                    # compute velocities at that ecc anom:
+                    Xdot,Ydot,Zdot = calc_velocities(a,T,to,e,i,w,O,dist,E1)
+                    # compute chi2:
+                    chi2_rv += ComputeChi2(np.array([self.user_rv[:,j]]),np.array([Zdot]))
+                chi2 = chi2 + chi2_rv
             
             # Accept/reject:
             accepted, lnprob, lnrand = AcceptOrReject(chi2,self.chi_min)
@@ -333,6 +479,7 @@ class FitOrbit(object):
             if np.nanmin(chi2) < self.chi_min:
                 # If there is a new min chi2:
                 self.chi_min = np.nanmin(chi2)
+                #print('found new chi min:',self.chi_min)
                 # re-evaluate to accept/reject with new chi_min:
                 
                 if number_orbits_accepted != 0:
