@@ -49,8 +49,6 @@ Planned Updates:
 ++++++++++++++++
 
 - Speed ups of fitting function
-- Accept user RV inputs
-- Accept user astrometry inputs
 - Basic function of package will be redesigned when Gaia DR3 is released
 
 Change Log:
