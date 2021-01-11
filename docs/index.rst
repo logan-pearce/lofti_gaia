@@ -56,7 +56,7 @@ Planned Updates:
 Change Log:
 +++++++++++
 
-**1.0.1 (08-12-2020)**
+**1.0.2 (08-12-2020)**
 
 - Changed ecc prior from np.random.uniform to np.random.random_sample to exclude 1.0 from prior
 
