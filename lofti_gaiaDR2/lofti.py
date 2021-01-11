@@ -1,7 +1,7 @@
 import astropy.units as u
 import numpy as np
-#from lofti_gaiaDR2.loftitools import *
-from loftitools import *
+from lofti_gaiaDR2.loftitools import *
+#from loftitools import *
 import pickle
 import time
 import matplotlib.pyplot as plt
@@ -32,9 +32,10 @@ class Fitter(object):
             named FitResults.yr.mo.day.hr.min.s
         astrometry (dict): User-supplied astrometric measurements. Must be dictionary or table or pandas dataframe with\
             column names "sep,seperr,pa,paerr,dates" or "ra,raerr,dec,decerr,dates". May be same as the rv table. \
+            Sep, deltaRA, and deltaDEC must be in arcseconds, PA in degrees, dates in decimal years. \
             Default = None
         user_rv (dict): User-supplied radial velocity measurements. Must be dictionary or table or pandas dataframe with\
-            column names "rv,rverr,dates". May be as the astrometry table. Default = None.
+            column names "rv,rverr,rv_dates". May be as the astrometry table. Default = None.
         catalog (str): name of Gaia catalog to query. Default = 'gaiaedr3.gaia_source' 
         ruwe1, ruwe2 (flt): RUWE value from Gaia archive
         ref_epoch (flt): reference epoch in decimal years. For Gaia DR2 this is 2015.5
@@ -135,9 +136,9 @@ class Fitter(object):
             try:
                 # set attributes; multiply rv by -1 due to difference in coordinate systems:
                 self.user_rv = np.array([user_rv['rv']*-1,user_rv['rverr']])
-                self.user_rv_dates = np.array(user_rv['dates'])
+                self.user_rv_dates = np.array(user_rv['rv_dates'])
             except:
-                raise ValueError('RV keys not recognized.  Please use column names "rv,rverr,dates"')
+                raise ValueError('RV keys not recognized.  Please use column names "rv,rverr,rv_dates"')
         self.catalog = catalog
 
         # Get Gaia measurements, compute needed constraints, and add to object:
@@ -166,15 +167,21 @@ class Fitter(object):
         job = Gaia.launch_job("SELECT * FROM "+catalog+" WHERE source_id = "+str(self.sourceid2))
         k = job.get_results()
 
-        # Retrieve RUWE for both sources and add to object state:
-        job = Gaia.launch_job("SELECT * FROM "+catalog+" WHERE source_id = "+str(self.sourceid1))
-        jruwe = job.get_results()
+        if catalog == 'gaiadr2.gaia_source':
+            # Retrieve RUWE from RUWE catalog for both sources and add to object state:
+            job = Gaia.launch_job("SELECT * FROM gaiadr2.ruwe WHERE source_id = "+str(self.sourceid1))
+            jruwe = job.get_results()
 
-        job = Gaia.launch_job("SELECT * FROM "+catalog+" WHERE source_id = "+str(self.sourceid2))
-        kruwe = job.get_results()
+            job = Gaia.launch_job("SELECT * FROM gaiadr2.ruwe WHERE source_id = "+str(self.sourceid2))
+            kruwe = job.get_results()
 
-        self.ruwe1 = jruwe['ruwe'][0]
-        self.ruwe2 = kruwe['ruwe'][0]
+            self.ruwe1 = jruwe['ruwe'][0]
+            self.ruwe2 = kruwe['ruwe'][0]
+        else:
+            # EDR3 contains ruwe in the main catalog:
+            self.ruwe1 = j['ruwe'][0]
+            self.ruwe2 = k['ruwe'][0]
+
         # Check RUWE for both objects and warn if too high:
         if self.ruwe1>1.2 or self.ruwe2>1.2:
             yn = input('''WARNING: RUWE for one or more of your solutions is greater than 1.2. This indicates 
@@ -371,7 +378,7 @@ class FitOrbit(object):
                 X1,Y1,Z1,E1 = calc_XYZ(a,T,to,e,i,w,O,self.astrometric_dates[j])
                 # Place astrometry into data array where: data[0][0]=ra obs, data[0][1]=ra err, etc:
                 data = np.array([self.astrometric_ra[:,j], self.astrometric_dec[:,j]])
-                # place corresponding predicited positions at that date for each trial orbit:
+                # place corresponding predicited positions at that date for each trial orbit in arcsec:
                 model = np.array([Y1*1000,X1*1000])
                 # compute chi2 for trial orbits at that date and add to the total chi2 sum:
                 chi2_astr += ComputeChi2(data,model)
