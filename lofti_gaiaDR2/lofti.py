@@ -30,6 +30,12 @@ class Fitter(object):
         Norbits (int): Number of desired orbits in posterior sample.  Default = 100000
         results_filename (str): Filename for fit results files.  If none, results will be written to files \
             named FitResults.yr.mo.day.hr.min.s
+        astrometry (dict): User-supplied astrometric measurements. Must be dictionary or table or pandas dataframe with\
+            column names "sep,seperr,pa,paerr,dates" or "ra,raerr,dec,decerr,dates". May be same as the rv table. \
+            Default = None
+        user_rv (dict): User-supplied radial velocity measurements. Must be dictionary or table or pandas dataframe with\
+            column names "rv,rverr,dates". May be as the astrometry table. Default = None.
+        catalog (str): name of Gaia catalog to query. Default = 'gaiaedr3.gaia_source' 
         ruwe1, ruwe2 (flt): RUWE value from Gaia archive
         ref_epoch (flt): reference epoch in decimal years. For Gaia DR2 this is 2015.5
         plx1, plx2 (flt): parallax from Gaia DR2 in mas
@@ -59,7 +65,8 @@ class Fitter(object):
     def __init__(self, sourceid1, sourceid2, mass1, mass2, Norbits = 100000, \
         results_filename = None, 
         astrometry = None,
-        user_rv = None
+        user_rv = None,
+        catalog = 'gaiaedr3.gaia_source'
         ):
         
         self.sourceid1 = sourceid1
@@ -131,18 +138,19 @@ class Fitter(object):
                 self.user_rv_dates = np.array(user_rv['dates'])
             except:
                 raise ValueError('RV keys not recognized.  Please use column names "rv,rverr,dates"')
-
+        self.catalog = catalog
 
         # Get Gaia measurements, compute needed constraints, and add to object:
-        self.PrepareConstraints()
+        self.PrepareConstraints(catalog = self.catalog)
 
-    def PrepareConstraints(self, rv=False):
+    def PrepareConstraints(self, rv=False, catalog='gaiaedr3.gaia_source'):
         '''Retrieves parameters for both objects from Gaia DR2 archive and computes system attriubtes,
         and assigns them to the Fitter object class.
         
         Args:
             rv (bool): flag for handling the presence or absence of RV measurements for both objects \
                 in DR2.  Gets set to True if both objects have Gaia RV measurements. Default = False
+            catalog (str): name of Gaia catalog to query. Default = 'gaiaedr3.gaia_source'
         
         Written by Logan Pearce, 2020
 
@@ -152,17 +160,17 @@ class Fitter(object):
         mas_to_deg = 1./3600000.
         
         # Retrieve astrometric solution from Gaia DR2
-        job = Gaia.launch_job("SELECT * FROM gaiadr2.gaia_source WHERE source_id = "+str(self.sourceid1))
+        job = Gaia.launch_job("SELECT * FROM "+catalog+" WHERE source_id = "+str(self.sourceid1))
         j = job.get_results()
 
-        job = Gaia.launch_job("SELECT * FROM gaiadr2.gaia_source WHERE source_id = "+str(self.sourceid2))
+        job = Gaia.launch_job("SELECT * FROM "+catalog+" WHERE source_id = "+str(self.sourceid2))
         k = job.get_results()
 
         # Retrieve RUWE for both sources and add to object state:
-        job = Gaia.launch_job("SELECT * FROM gaiadr2.ruwe WHERE source_id = "+str(self.sourceid1))
+        job = Gaia.launch_job("SELECT * FROM "+catalog+" WHERE source_id = "+str(self.sourceid1))
         jruwe = job.get_results()
 
-        job = Gaia.launch_job("SELECT * FROM gaiadr2.ruwe WHERE source_id = "+str(self.sourceid2))
+        job = Gaia.launch_job("SELECT * FROM "+catalog+" WHERE source_id = "+str(self.sourceid2))
         kruwe = job.get_results()
 
         self.ruwe1 = jruwe['ruwe'][0]
@@ -194,10 +202,16 @@ class Fitter(object):
         self.pmDec1 = [j[0]['pmdec']*u.mas/u.yr, j[0]['pmdec_error']*u.mas/u.yr]
         self.pmDec2 = [k[0]['pmdec']*u.mas/u.yr, k[0]['pmdec_error']*u.mas/u.yr]
         # See if both objects have RV's in DR2:
-        if type(k[0]['radial_velocity']) == np.float64 and type(j[0]['radial_velocity']) == np.float64:
+        if catalog == 'gaiaedr3.gaia_source':
+            key = 'dr2_radial_velocity'
+            error_key = 'dr2_radial_velocity_error'
+        elif catalog == 'gaiadr2.gaia_source':
+            key = 'radial_velocity'
+            error_key = 'radial_velocity_error'
+        if type(k[0][key]) == np.float64 and type(j[0][key]) == np.float64:
             rv = True
-            self.rv1 = [j[0]['radial_velocity']*u.km/u.s,j[0]['radial_velocity_error']*u.km/u.s]
-            self.rv2 = [k[0]['radial_velocity']*u.km/u.s,k[0]['radial_velocity_error']*u.km/u.s]
+            self.rv1 = [j[0][key]*u.km/u.s,j[0][error_key]*u.km/u.s]
+            self.rv2 = [k[0][key]*u.km/u.s,k[0][error_key]*u.km/u.s]
             rv1 = MonteCarloIt(self.rv1)
             rv2 = MonteCarloIt(self.rv2)
             self.rv = [ -np.mean(rv2-rv1) , np.std(rv2-rv1) ]   # km/s
