@@ -56,8 +56,7 @@ Change Log:
 **1.1.0 (01-11-2021)**
 
 - Added ability for user to supply tables of astrometric and rv data.
-- Changed the default Gaia query to the Gaia EDR3 catalog, and also allow users to query the DR2 catalog
-   by changing the keyword
+- Changed the default Gaia query to the Gaia EDR3 catalog, and also allow users to query the DR2 catalog by changing the keyword
 
 **1.0.2 (08-12-2020)**
 
