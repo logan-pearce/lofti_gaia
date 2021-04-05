@@ -350,6 +350,14 @@ class FitOrbit(object):
         Written by Logan Pearce, 2020
 
         '''
+        # write header:
+        print('Saving orbits in',self.results_filename)
+        k = open(self.results_filename, 'w')
+        output_file_header = '# sma [arcsec]    period [yrs]    orbit phase    t_0 [yr]    ecc    incl [deg]\
+        argp [deg]   lan [deg]    m_tot [Msun]    dist [pc]    chi^2    ln(prob)    ln(randn)'
+        k.write(output_file_header + "\n")
+        k.close()
+
         import time as tm
         ########### Perform initial run to get initial chi-squared: #############
         # Draw random orbits:
@@ -495,6 +503,7 @@ class FitOrbit(object):
                     dat[:,11] = lnprob
                     accepted_retest = np.where(lnprob > dat[:,12])
                     q = open(self.results_filename, 'w')
+                    q.write(output_file_header + "\n")
                     for data in dat[accepted_retest]:
                         string = '   '.join([str(d) for d in data])
                         q.write(string + "\n")
@@ -512,6 +521,7 @@ class FitOrbit(object):
         dat[:,11] = lnprob
         accepted_retest = np.where(lnprob > dat[:,12])
         q = open(self.results_filename, 'w')
+        q.write(output_file_header + "\n")
         for data in dat[accepted_retest]:
             string = '   '.join([str(d) for d in data])
             q.write(string + "\n")
@@ -530,7 +540,7 @@ class FitOrbit(object):
 
         # pickle dump the results attribute:
         if self.write_results:
-            self.results.SaveResults(self.results_filename.replace(".txt", ".pkl"))
+            self.results.SaveResults(self.results_filename.replace(".txt", ".pkl"), write_text_file = False)
         stop = tm.time()
         self.results.run_time = (stop - start)*u.s
         # compute stats and write to file:
@@ -545,7 +555,7 @@ class Results(object):
         sma (1 x Norbits array): semi-major axis in arcsec
         period (1 x Norbits array): period in years
         orbit_fraction (1 x Norbits array): fraction of orbit past periastron \
-            passage the observation (2015.5) occured on.  Values: [0,1)
+            passage the observation (2016) occured on.  Values: [0,1)
         t0 (1 x Norbits array): date of periastron passage in decimal years
         ecc (1 x Norbits array): eccentricity
         inc (1 x Norbits array): inclination relative to plane of the sky in deg
@@ -556,8 +566,7 @@ class Results(object):
         chi2 (1 x Norbits array): chi^2 value for the orbit
         lnprob (1 x Norbits array): log probability of orbit
         lnrand (1 x Norbits array): log of random "dice roll" for \
-            orbit acceptance
-        orbits (array): the (Norbits x 13 array) array of orbit samples. 
+            orbit acceptance 
         limit_aop, limit_lan (bool): In the absence of radial velocity info, \
             there is a degeneracy between arg of periastron and long of ascending \
             node.  Common practice is to limit one to the interval [0,180] deg. \

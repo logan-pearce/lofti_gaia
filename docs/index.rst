@@ -53,6 +53,10 @@ Planned Updates:
 
 Change Log:
 +++++++++++
+**1.1.2 (04-05-2021)**
+
+- Added header to results text file for readability
+
 **1.1.1 (04-05-2021)**
 
 - Corrected bug in writing orbit probabilities to text file
