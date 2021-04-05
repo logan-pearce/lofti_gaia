@@ -35,17 +35,17 @@ class Fitter(object):
             Sep, deltaRA, and deltaDEC must be in arcseconds, PA in degrees, dates in decimal years. \
             Default = None
         user_rv (dict): User-supplied radial velocity measurements. Must be dictionary or table or pandas dataframe with\
-            column names "rv,rverr,rv_dates". May be as the astrometry table. Default = None.
+            column names "rv,rverr,rv_dates". May be same as the astrometry table. Default = None.
         catalog (str): name of Gaia catalog to query. Default = 'gaiaedr3.gaia_source' 
         ruwe1, ruwe2 (flt): RUWE value from Gaia archive
-        ref_epoch (flt): reference epoch in decimal years. For Gaia DR2 this is 2015.5
-        plx1, plx2 (flt): parallax from Gaia DR2 in mas
-        RA1, RA2 (flt): right ascension from Gaia DR2; RA in deg, uncertainty in mas
-        Dec1, Dec2 (flt): declination from Gaia DR2; Dec in deg, uncertainty in mas
-        pmRA1, pmRA2 (flt): proper motion in RA in mas yr^-1 from Gaia DR2
-        pmDec1, pmDec2 (flt): proper motion in DEC in mas yr^-1 from Gaia DR2
-        rv1, rv2 (flt, optional): radial velocity in km s^-1 from Gaia DR2
-        rv (flt, optional): relative RV of 2 relative to 1, if both are present in Gaia DR2
+        ref_epoch (flt): reference epoch in decimal years. For Gaia DR2 this is 2015.5, for Gaia EDR3 it is 2016.0
+        plx1, plx2 (flt): parallax from Gaia in mas
+        RA1, RA2 (flt): right ascension from Gaia; RA in deg, uncertainty in mas
+        Dec1, Dec2 (flt): declination from Gaia; Dec in deg, uncertainty in mas
+        pmRA1, pmRA2 (flt): proper motion in RA in mas yr^-1 from Gaia
+        pmDec1, pmDec2 (flt): proper motion in DEC in mas yr^-1 from Gaia
+        rv1, rv2 (flt, optional): radial velocity in km s^-1 from Gaia
+        rv (flt, optional): relative RV of 2 relative to 1, if both are present in Gaia
         plx (flt): weighted mean parallax for the binary system in mas
         distance (flt): distance of system in pc, computed from Gaia parallax using method \
             of Bailer-Jones et. al 2018.
@@ -57,7 +57,7 @@ class Fitter(object):
         sep_km (flt): separation in km
         total_vel (flt): total velocity vector in km s^-1.  If RV is available for both, \
             this is the 3d velocity vector; if not it is just the plane of sky velocity. 
-        total_planeofsky_velocity (flt): total velocity in the plane of sky in km s^-1. \
+        total_planeofsky_vel (flt): total velocity in the plane of sky in km s^-1. \
             In the absence of RV this is equivalent to the total velocity vector.
         deltaGmag (flt): relative contrast in Gaia G magnitude.  Does not include uncertainty.
 
@@ -492,6 +492,7 @@ class FitOrbit(object):
                 if number_orbits_accepted != 0:
                     dat = np.loadtxt(open(self.results_filename,"r"),delimiter='   ',ndmin=2)
                     lnprob = -(dat[:,10]-self.chi_min)/2.0
+                    dat[:,11] = lnprob
                     accepted_retest = np.where(lnprob > dat[:,12])
                     q = open(self.results_filename, 'w')
                     for data in dat[accepted_retest]:
@@ -505,8 +506,21 @@ class FitOrbit(object):
             #print('loop count',loop_count)
             update_progress(number_orbits_accepted,self.Norbits)
 
+        # one last accept/reject with final chi_min value:
+        dat = np.loadtxt(open(self.results_filename,"r"),delimiter='   ',ndmin=2)
+        lnprob = -(dat[:,10]-self.chi_min)/2.0
+        dat[:,11] = lnprob
+        accepted_retest = np.where(lnprob > dat[:,12])
+        q = open(self.results_filename, 'w')
+        for data in dat[accepted_retest]:
+            string = '   '.join([str(d) for d in data])
+            q.write(string + "\n")
+        q.close()
+
         # when finished, upload results and store in object:
         dat = np.loadtxt(open(self.results_filename,"r"),delimiter='   ',ndmin=2)
+        number_orbits_accepted=dat.shape[0]
+        print('Final Norbits:', number_orbits_accepted)
         # intialise results object and store accepted orbits:
         if self.rv[0] != 0:
             self.results = Results(orbits = dat, limit_lan = False, limit_aop = False)

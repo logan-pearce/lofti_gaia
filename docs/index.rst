@@ -53,6 +53,10 @@ Planned Updates:
 
 Change Log:
 +++++++++++
+**1.1.1 (04-05-2021)**
+
+- Corrected bug in writing orbit probabilities to text file
+
 **1.1.0 (01-11-2021)**
 
 - Added ability for user to supply tables of astrometric and rv data.
