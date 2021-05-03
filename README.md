@@ -33,6 +33,7 @@ Please see the tutorial on the RTD page for how to use the package.
 [![PyPI version](https://badge.fury.io/py/lofti-gaiaDR2.svg)](https://badge.fury.io/py/lofti-gaiaDR2)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3955152.svg)](https://doi.org/10.5281/zenodo.3955152)
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
+[![ASCL](https://img.shields.io/badge/ascl-2104.030-blue.svg?colorB=262255)](https://ascl.net/2104.030)
 
 Copyright Logan Pearce, 2019
 
