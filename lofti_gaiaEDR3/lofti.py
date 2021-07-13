@@ -1,6 +1,7 @@
 import astropy.units as u
 import numpy as np
-from lofti_gaiaDR2.loftitools import *
+from lofti_gaiaedr3.loftitools import *
+from lofti_gaiaedr3.cFunctions import calcOFTI_C
 #from loftitools import *
 import pickle
 import time
@@ -9,7 +10,7 @@ import matplotlib.pyplot as plt
 import warnings
 warnings.filterwarnings("ignore")
 
-'''This module obtaines measurements from Gaia DR2 and runs through the LOFTI Gaia/OFTI 
+'''This module obtaines measurements from Gaia EDR3 (Gaia DR2 is also available as a secondary option) and runs through the LOFTI Gaia/OFTI 
 wide stellar binary orbit fitting technique.
 '''
 
@@ -60,6 +61,7 @@ class Fitter(object):
         total_planeofsky_vel (flt): total velocity in the plane of sky in km s^-1. \
             In the absence of RV this is equivalent to the total velocity vector.
         deltaGmag (flt): relative contrast in Gaia G magnitude.  Does not include uncertainty.
+        inflateProperMOtionError (flt): an optional factor to mulitply default gaia proper motion error by.
 
     Written by Logan Pearce, 2020
     '''
@@ -67,7 +69,8 @@ class Fitter(object):
         results_filename = None, 
         astrometry = None,
         user_rv = None,
-        catalog = 'gaiaedr3.gaia_source'
+        catalog = 'gaiaedr3.gaia_source',
+        inflateProperMotionError=1
         ):
         
         self.sourceid1 = sourceid1
@@ -142,15 +145,43 @@ class Fitter(object):
         self.catalog = catalog
 
         # Get Gaia measurements, compute needed constraints, and add to object:
-        self.PrepareConstraints(catalog = self.catalog)
-
-    def PrepareConstraints(self, rv=False, catalog='gaiaedr3.gaia_source'):
-        '''Retrieves parameters for both objects from Gaia DR2 archive and computes system attriubtes,
+        self.PrepareConstraints(catalog=self.catalog,inflateFactor=inflateProperMotionError)
+    '''
+    This function corrects for biases in proper motion. The function is from https://arxiv.org/pdf/2103.07432.pdf
+    Args:
+        pmra,pmdec (float): proper motion
+        ra, dec (float): right ascension and declination
+        G (float): G magnitude
+    '''
+    def edr3ToICRF(self,pmra,pmdec,ra,dec,G):
+        if G>=13:
+            return pmra , pmdec
+        import numpy as np
+        def sind(x):
+            return np.sin(np.radians(x))
+        def cosd(x):
+            return np.cos(np.radians(x))
+        table1="""
+        0.0 9.0 9.0 9.5 9.5 10.0 10.0 10.5 10.5 11.0 11.0 11.5 11.5 11.75 11.75 12.0 12.0 12.25 12.25 12.5 12.5 12.75 12.75 13.0
+        18.4 33.8 -11.3 14.0 30.7 -19.4 12.8 31.4 -11.8 13.6 35.7 -10.5 16.2 50.0 2.1 19.4 59.9 0.2 21.8 64.2 1.0 17.7 65.6 -1.9 21.3 74.8 2.1 25.7 73.6 1.0 27.3 76.6 0.5
+        34.9 68.9 -2.9 """
+        table1 = np.fromstring(table1,sep=" ").reshape((12,5)).T
+        Gmin = table1[0]
+        Gmax = table1[1]
+        #pick the appropriate omegaXYZ for the source’s magnitude:
+        omegaX = table1[2][(Gmin<=G)&(Gmax>G)][0]
+        omegaY = table1[3][(Gmin<=G)&(Gmax>G)][0] 
+        omegaZ = table1[4][(Gmin<=G)&(Gmax>G)][0]
+        pmraCorr = -1*sind(dec)*cosd(ra)*omegaX -sind(dec)*sind(ra)*omegaY + cosd(dec)*omegaZ
+        pmdecCorr = sind(ra)*omegaX -cosd(ra)*omegaY
+        return pmra-pmraCorr/1000., pmdec-pmdecCorr/1000.
+    def PrepareConstraints(self, rv=False, catalog='gaiaedr3.gaia_source',inflateFactor=1):
+        '''Retrieves parameters for both objects from Gaia EDR3 archive and computes system attriubtes,
         and assigns them to the Fitter object class.
         
         Args:
             rv (bool): flag for handling the presence or absence of RV measurements for both objects \
-                in DR2.  Gets set to True if both objects have Gaia RV measurements. Default = False
+                in EDR3.  Gets set to True if both objects have Gaia RV measurements. Default = False
             catalog (str): name of Gaia catalog to query. Default = 'gaiaedr3.gaia_source'
         
         Written by Logan Pearce, 2020
@@ -160,7 +191,7 @@ class Fitter(object):
         deg_to_mas = 3600000.
         mas_to_deg = 1./3600000.
         
-        # Retrieve astrometric solution from Gaia DR2
+        # Retrieve astrometric solution from Gaia EDR3
         job = Gaia.launch_job("SELECT * FROM "+catalog+" WHERE source_id = "+str(self.sourceid1))
         j = job.get_results()
 
@@ -184,13 +215,9 @@ class Fitter(object):
 
         # Check RUWE for both objects and warn if too high:
         if self.ruwe1>1.2 or self.ruwe2>1.2:
-            yn = input('''WARNING: RUWE for one or more of your solutions is greater than 1.2. This indicates 
+            print('''WARNING: RUWE for one or more of your solutions is greater than 1.2. This indicates 
             that the source might be an unresolved binary or experiencing acceleration 
-            during the observation.  Orbit fit results may not be trustworthy.  Do you 
-            wish to continue?
-            Hit enter to proceed, n to exit: ''')
-            if yn == 'n':
-                return None
+            during the observation.  Orbit fit results may not be trustworthy.''')
 
         # reference epoch:
         self.ref_epoch = j['ref_epoch'][0]
@@ -203,11 +230,13 @@ class Fitter(object):
         self.RA2 = [k[0]['ra']*u.deg, k[0]['ra_error']*mas_to_deg*u.deg]
         self.Dec1 = [j[0]['dec']*u.deg, j[0]['dec_error']*mas_to_deg*u.deg]
         self.Dec2 = [k[0]['dec']*u.deg, k[0]['dec_error']*mas_to_deg*u.deg]
-        # Proper motions:
-        self.pmRA1 = [j[0]['pmra']*u.mas/u.yr, j[0]['pmra_error']*u.mas/u.yr]
-        self.pmRA2 = [k[0]['pmra']*u.mas/u.yr, k[0]['pmra_error']*u.mas/u.yr]
-        self.pmDec1 = [j[0]['pmdec']*u.mas/u.yr, j[0]['pmdec_error']*u.mas/u.yr]
-        self.pmDec2 = [k[0]['pmdec']*u.mas/u.yr, k[0]['pmdec_error']*u.mas/u.yr]
+        # Proper motions
+        pmRACorrected1,pmDecCorrected1 = self.edr3ToICRF(j[0]['pmra'],j[0]['pmdec'],j[0]['ra'],j[0]['dec'],j[0]["phot_g_mean_mag"])
+        pmRACorrected2,pmDecCorrected2 = self.edr3ToICRF(k[0]['pmra'],k[0]['pmdec'],k[0]['ra'],k[0]['dec'],k[0]["phot_g_mean_mag"])
+        self.pmRA1 = [pmRACorrected1*u.mas/u.yr, j[0]['pmra_error']*u.mas/u.yr*inflateFactor]
+        self.pmRA2 = [pmRACorrected2*u.mas/u.yr, k[0]['pmra_error']*u.mas/u.yr*inflateFactor]
+        self.pmDec1 = [pmDecCorrected1*u.mas/u.yr, j[0]['pmdec_error']*u.mas/u.yr*inflateFactor]
+        self.pmDec2 = [pmDecCorrected2*u.mas/u.yr, k[0]['pmdec_error']*u.mas/u.yr*inflateFactor]
         # See if both objects have RV's in DR2:
         if catalog == 'gaiaedr3.gaia_source':
             key = 'dr2_radial_velocity'
@@ -255,11 +284,11 @@ class Fitter(object):
 
         # Compute separation/position angle:
         r, p = to_polar(r1,r2,d1,d2)
-        self.sep = [np.mean(r).value, np.std(r).value]              # mas
-        self.pa = [np.mean(p).value, np.std(p).value]               # deg
+        self.sep = tuple([np.mean(r).value, np.std(r).value])             # mas
+        self.pa = tuple([np.mean(p).value, np.std(p).value])               # deg
 
-        self.sep_au = [((self.sep[0]/1000)*self.distance[0]), ((self.sep[1]/1000)*self.distance[0])]
-        self.sep_km = [ self.sep_au[0]*u.au.to(u.km) , self.sep_au[1]*u.au.to(u.km)]
+        self.sep_au = tuple([((self.sep[0]/1000)*self.distance[0]), ((self.sep[1]/1000)*self.distance[0])])
+        self.sep_km = tuple([ self.sep_au[0]*u.au.to(u.km) , self.sep_au[1]*u.au.to(u.km)])
 
         # compute total velocities:
         if rv:
@@ -289,12 +318,12 @@ class FitOrbit(object):
             in addition to the text file created during the fit.  Default = True.
         deltaRA, deltaDec (flt): relative separation in RA and Dec directions, in mas
         pmRA, pmDec (flt): relative proper motion in RA/Dec directions in km s^-1
-        rv (flt, optional): relative RV of 2 relative to 1, if both are present in Gaia DR2
+        rv (flt, optional): relative RV of 2 relative to 1, if both are present in Gaia EDR3
         mtot_init (flt): initial total system mass in Msun from user input
         distance (flt): distance of system in pc, computed from Gaia parallax using method of Bailer-Jones et. al 2018.
         sep (flt): separation vector in mas
         pa (flt): postion angle of separation vector in degrees from North
-        ref_epoch (flt): epoch of the measurement, 2015.5 for Gaia DR2.
+        ref_epoch (flt): epoch of the measurement, 2016.0 for Gaia EDR3 and 2015.5 for Gaia DR2.
         Norbits (int): number of desired orbit samples
         write_stats (bool): if True, write summary of sample statistics to human-readable file at end of run.  Default = True
         write_results (bool): if True, write out current state of sample orbits in pickle file in periodic intervals during \
@@ -309,7 +338,7 @@ class FitOrbit(object):
     Written by Logan Pearce, 2020
 
     '''
-    def __init__(self, fitterobject, write_stats = True, write_results = True):
+    def __init__(self, fitterobject, write_stats = True, write_results = True,python_version=False):
         # establish fit parameters:
         self.deltaRA = fitterobject.deltaRA
         self.deltaDec = fitterobject.deltaDec
@@ -337,9 +366,9 @@ class FitOrbit(object):
             self.user_rv_dates = fitterobject.user_rv_dates
 
         # run orbit fitter:
-        self.fitorbit()
+        self.fitorbit(python_fitOFTI=python_version)
 
-    def fitorbit(self, save_results_every_X_loops = 100):
+    def fitorbit(self, save_results_every_X_loops = 100,python_fitOFTI=False):
         '''Run the OFTI fitting run on the Fitter object.  Called when FitOrbit object
         is created.
 
@@ -364,7 +393,13 @@ class FitOrbit(object):
         #parameters = a,T,const,to,e,i,w,O,m1,dist
         parameters_init = draw_samples(10000, self.mtot_init, self.distance, self.ref_epoch)
         # Compute positions and velocities:
-        X,Y,Z,Xdot,Ydot,Zdot,Xddot,Yddot,Zddot,parameters = calc_OFTI(parameters_init,self.ref_epoch,self.sep,self.pa)
+        np.save("/Users/sam/Downloads/parametersInitifile",parameters_init)
+        if(python_fitOFTI):
+                X,Y,Z,Xdot,Ydot,Zdot,Xddot,Yddot,Zddot,parameters=calc_OFTI(parameters_init,self.ref_epoch,self.sep,self.pa)
+            else:
+                returnArray = calcOFTI_C(parameters_init,self.ref_epoch,self.sep,self.pa)
+                X,Y,Z,Xdot,Ydot,Zdot,Xddot,Yddot,Zddot = returnArray[0:9]
+                parameters = returnArray[9:]
 
         # Compute chi squared:
         if self.rv[0] != 0:
@@ -432,7 +467,12 @@ class FitOrbit(object):
             # Draw random orbits:
             parameters_init = draw_samples(10000, self.mtot_init, self.distance, self.ref_epoch)
             # Compute positions and velocities and new parameters array with scaled and rotated values:
-            X,Y,Z,Xdot,Ydot,Zdot,Xddot,Yddot,Zddot,parameters = calc_OFTI(parameters_init,self.ref_epoch,self.sep,self.pa)
+            if(python_fitOFTI):
+                X,Y,Z,Xdot,Ydot,Zdot,Xddot,Yddot,Zddot,parameters=calc_OFTI(parameters_init,self.ref_epoch,self.sep,self.pa)
+            else:
+                returnArray = calcOFTI_C(parameters_init,self.ref_epoch,self.sep,self.pa)
+                X,Y,Z,Xdot,Ydot,Zdot,Xddot,Yddot,Zddot = returnArray[0:9]
+                parameters = returnArray[9:]
             # compute chi2 for orbits using Gaia observations:
             if self.rv[0] != 0:
                 measurements = np.array([Y,X,Ydot,Xdot,Zdot])

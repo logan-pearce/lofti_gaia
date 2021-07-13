@@ -563,8 +563,6 @@ def calc_accel(a,T,to,e,i,w,O,date,dist,E):
 
     Written by Logan Pearce, 2018
     '''
-    
-    #from lofti_gaiaDR2.loftifittingtools import to_si, solve
     # convert to km:
     a_km = mas_to_km2(a,dist)
     # mean motion:
@@ -628,10 +626,12 @@ def calc_OFTI(parameters,date,rho,pa):
     a,T,const,to,e,i,w,O,m1,dist = p[0],p[1],p[2],p[3],p[4],p[5],p[6],p[7],p[8],p[9]
     # Calculate predicted positions at observation date:
     X1,Y1,Z1,E1 = calc_XYZ(a,T,to,e,i,w,O,date)
+    print(X1[0])
     # scale and rotate:
     a2,T2,to2,O2 = scale_and_rotate(X1,Y1,rho,pa,a,const,m1,dist,date)
     # recompute predicted position:
     X2,Y2,Z2,E2 = calc_XYZ(a2,T2,to2,e,i,w,O2,date)
+    print(X2[0])
     # convert units:
     X2,Y2,Z2 = (X2*u.arcsec).to(u.mas).value, (Y2*u.arcsec).to(u.mas).value, (Z2*u.arcsec).to(u.mas).value
     # Compute velocities at observation date:
