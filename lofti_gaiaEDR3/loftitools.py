@@ -563,8 +563,6 @@ def calc_accel(a,T,to,e,i,w,O,date,dist,E):
 
     Written by Logan Pearce, 2018
     '''
-    
-    #from lofti_gaiaDR2.loftifittingtools import to_si, solve
     # convert to km:
     a_km = mas_to_km2(a,dist)
     # mean motion:
