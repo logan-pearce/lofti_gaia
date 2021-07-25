@@ -35,8 +35,8 @@ double eccentricity_anomaly(double E,double e,double M){
 double mikkola_solve(double M, double e){
     double alpha = (1.0-e)/((4.*e)+0.5);
     double beta = (0.5*M)/((4.*e)+0.5);
-    double ab = sqrtf(pow(beta,2.0f)+pow(alpha,3.0f));
-    double z = pow(copysign(1.0,beta+ab),1./3.);
+    double ab = sqrt(pow(beta,2.0)+pow(alpha,3.0));
+    double z = pow(fabs(beta+ab),1./3.);
 
     double s1 = z-alpha/z;
     double ds = -0.078*(pow(s1,5.0))/(1+e);
@@ -58,13 +58,15 @@ double mikkola_solve(double M, double e){
 //Newton-Ralphson eccentricity anomaly solver ("Danby" method). C version
 double danbySolve(double M0,double e,double h){
     int maxnum = 50;
+    double delta_D = 1.;
     double k = 0.85;
     double E0 = M0 + copysign(1.0,sin(M0))*k*e;
     double lastE = E0;
     double nextE = lastE + 10.0*h;
     int number = 0;
-    double delta_D = 1.;
-    while((delta_D>h)&& number<maxnum+1){
+    double iterator = delta_D; //using this for now, for some reason doesn't work with delta_D?
+    //Minimal performance increase anyways, so not bothering to fully trace problem/solution.
+    while((iterator>h)&& number<maxnum+1){
         double ex = eccentricity_anomaly(nextE,e,M0);
         double ep = (1.0-e*cos(lastE));
         double epp = e*sin(lastE);
@@ -78,6 +80,7 @@ double danbySolve(double M0,double e,double h){
         if(number>=maxnum){
             nextE = mikkola_solve(M0,e);
         }
+       iterator = delta_D;
     }
     return nextE;
 }
@@ -113,14 +116,16 @@ double rand_gen() {
 }
 //scale and rotate --  C version
 four_double *scale_and_rotate(double xi, double yi, double rho1, double rho2, double pa1, double pa2, double ai, double constantM,double m1,double dist,double d){
-    double PA_rand = sqrt(-2*log((double)rand() / (double)RAND_MAX))*cos(2*M_PI*(double)rand() / (double)RAND_MAX)*pa2+pa1;
+        double PA_rand = sqrt(-2*log((double)rand() / (double)RAND_MAX))*cos(2*M_PI*(double)rand() / (double)RAND_MAX)*pa2+pa1;
         double r_model = sqrt(xi*xi+yi*yi);
         double rho_rand = sqrt(-2*log(rand_gen()))*cos(2*M_PI*rand_gen())*rho2/1000.+rho1/1000.;
+        printf("\n %f",PA_rand);
+        //printf("\n %f",rho_rand);
         double a2i = ai*(rho_rand/r_model);
         double a2_au = a2i*dist;
         double T2i = sqrt(pow(fabs(a2_au),3.0)/fabs(m1));
         double to2i = d-(constantM*T2i);
-        double PA_model = fmod((atan2(xi,-yi)*180/M_PI+270),360.0);
+        double PA_model = fmod((atan2(xi,-1*yi)*180/M_PI+270),360.0);
         double O2i;
         if(PA_model<0){
             O2i = PA_rand-PA_model+360.0;
@@ -129,6 +134,7 @@ four_double *scale_and_rotate(double xi, double yi, double rho1, double rho2, do
             O2i = PA_rand-PA_model;
         }
         O2i*=M_PI/180;
+        
         
            
 
@@ -187,13 +193,16 @@ PyObject* calcOFTI(PyObject *self, PyObject *args){
     double date;
     PyObject *rho,*pa;
     PyObject* ArrayTotalObject;
-    if(!PyArg_ParseTuple(args, "OdOO",&ArrayTotalObject,&date,&rho,&pa)) {
+    PyObject* returnArray;
+    if(!PyArg_ParseTuple(args, "OdOOO",&ArrayTotalObject,&date,&rho,&pa,&returnArray)) {
         return NULL;
     }
     //convert to contiguous array so data can be accessed easily
     PyArrayObject* ArrayTotal = (PyArrayObject *)PyArray_ContiguousFromObject(ArrayTotalObject,NPY_FLOAT64,1,2);
     double* arrayData = (double*)(ArrayTotal->data);
     int m = ArrayTotal ->dimensions[1];
+    PyArrayObject* numpyArrayReturn = (PyArrayObject *)PyArray_ContiguousFromObject(returnArray,NPY_FLOAT64,1,2);
+    double* dataReturn = (double*)(numpyArrayReturn->data);
     //set variables as subarrays of main array
     a = &arrayData[0];
     T = &arrayData[1*m];
@@ -210,9 +219,9 @@ PyObject* calcOFTI(PyObject *self, PyObject *args){
     double rho2 = PyFloat_AsDouble(PyTuple_GetItem(rho,1));
     double pa1 = PyFloat_AsDouble(PyTuple_GetItem(pa,0));
     double pa2 = PyFloat_AsDouble(PyTuple_GetItem(pa,1));
-    int returnD1 = 19;
+    int returnD1 = 18;
     //allocate return array
-    double* dataReturn = (double*)malloc((size_t)m*returnD1*sizeof(double));
+    //double* dataReturn = (double*)PyMem_RawCalloc((size_t)m*returnD1,(size_t)sizeof(double));
     #if defined (_OPENMP)
 	#pragma omp parallel for
 	#endif
@@ -252,14 +261,9 @@ PyObject* calcOFTI(PyObject *self, PyObject *args){
         free(calcVelocitiesR);
         free(calcAccelR);
     }
-    
-    //construct numpy array from double array to return
-    npy_intp* dimArray2 = malloc((size_t)2*sizeof(npy_intp));
-    dimArray2[0] = (npy_intp)returnD1;
-    dimArray2[1] = (npy_intp)m;
-    PyObject *returnMisc = PyArray_SimpleNewFromData(2,dimArray2,NPY_FLOAT64,(void*)dataReturn);
-    free(dimArray2);
-    return PyArray_Return((PyArrayObject *)returnMisc);
+    //need to decref input array so that it is freed from memory
+    Py_DECREF(ArrayTotalObject);
+    return PyArray_Return(numpyArrayReturn);
 
 
 

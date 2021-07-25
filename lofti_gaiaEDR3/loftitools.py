@@ -446,7 +446,7 @@ def scale_and_rotate(X,Y,rho,pa,a,const,m1,dist,d):
         else:
             O2.append(PA_rand-PA_i)
     # ^ This step corrects for the fact that the arctan gives the angle from the +x axis being zero,
-    #while for RA/Dec the zero angle is +y axis.  
+    #while for RA/Dec the zero angle is +y axis. 
 
     #Recompute model with new rotation:
     O2 = np.array(O2)
