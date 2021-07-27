@@ -1,7 +1,7 @@
 import astropy.units as u
 import numpy as np
-from lofti_gaiaedr3.loftitools import *
-from lofti_gaiaedr3.cFunctions import calcOFTI_C
+from lofti_gaiaEDR3.loftitools import *
+from lofti_gaiaEDR3.cFunctions import calcOFTI_C
 #from loftitools import *
 import pickle
 import time
@@ -221,6 +221,7 @@ class Fitter(object):
 
         # reference epoch:
         self.ref_epoch = j['ref_epoch'][0]
+        print(self.ref_epoch)
 
         # parallax:
         self.plx1 = [j[0]['parallax']*u.mas, j[0]['parallax_error']*u.mas]
@@ -391,13 +392,14 @@ class FitOrbit(object):
         ########### Perform initial run to get initial chi-squared: #############
         # Draw random orbits:
         #parameters = a,T,const,to,e,i,w,O,m1,dist
-        parameters_init = draw_samples(10000, self.mtot_init, self.distance, self.ref_epoch)
+        numSamples = 10000
+        parameters_init = draw_samples(numSamples, self.mtot_init, self.distance, self.ref_epoch)
         # Compute positions and velocities:
-        np.save("/Users/sam/Downloads/parametersInitifile",parameters_init)
         if(python_fitOFTI):
                 X,Y,Z,Xdot,Ydot,Zdot,Xddot,Yddot,Zddot,parameters=calc_OFTI(parameters_init,self.ref_epoch,self.sep,self.pa)
-            else:
-                returnArray = calcOFTI_C(parameters_init,self.ref_epoch,self.sep,self.pa)
+        else:
+                returnArray = np.zeros((19,numSamples))
+                returnArray = calcOFTI_C(parameters_init,self.ref_epoch,self.sep,self.pa,returnArray.copy())
                 X,Y,Z,Xdot,Ydot,Zdot,Xddot,Yddot,Zddot = returnArray[0:9]
                 parameters = returnArray[9:]
 
@@ -426,7 +428,6 @@ class FitOrbit(object):
                 # compute chi2 for trial orbits at that date and add to the total chi2 sum:
                 chi2_astr += ComputeChi2(data,model)
             chi2 = chi2 + chi2_astr
-        
         if self.use_user_rv:
             p = parameters.copy()
             a,T,const,to,e,i,w,O,m1,dist = p[0],p[1],p[2],p[3],p[4],p[5],p[6],p[7],p[8],p[9]
@@ -465,14 +466,17 @@ class FitOrbit(object):
         
         while number_orbits_accepted < self.Norbits:
             # Draw random orbits:
-            parameters_init = draw_samples(10000, self.mtot_init, self.distance, self.ref_epoch)
+            numSamples = 10000
+            parameters_init = draw_samples(numSamples, self.mtot_init, self.distance, self.ref_epoch)
             # Compute positions and velocities and new parameters array with scaled and rotated values:
             if(python_fitOFTI):
                 X,Y,Z,Xdot,Ydot,Zdot,Xddot,Yddot,Zddot,parameters=calc_OFTI(parameters_init,self.ref_epoch,self.sep,self.pa)
             else:
-                returnArray = calcOFTI_C(parameters_init,self.ref_epoch,self.sep,self.pa)
+                returnArray = np.zeros((19,numSamples))
+                returnArray = calcOFTI_C(parameters_init,self.ref_epoch,self.sep,self.pa,returnArray.copy())
                 X,Y,Z,Xdot,Ydot,Zdot,Xddot,Yddot,Zddot = returnArray[0:9]
                 parameters = returnArray[9:]
+                returnArray = None
             # compute chi2 for orbits using Gaia observations:
             if self.rv[0] != 0:
                 measurements = np.array([Y,X,Ydot,Xdot,Zdot])
@@ -516,10 +520,14 @@ class FitOrbit(object):
             
             # Accept/reject:
             accepted, lnprob, lnrand = AcceptOrReject(chi2,self.chi_min)
+            
             if np.size(accepted) == 0:
                 pass
             else:
                 # count num accepted
+                p = parameters.copy()
+                a,T,const,to,e,i,w,O,m1,dist = p[0],p[1],p[2],p[3],p[4],p[5],p[6],p[7],p[8],p[9]
+                sampleResults = calc_XYZ(a,T,to,e,i/180*np.pi,w/180*np.pi,O/180*np.pi,2016.0)
                 number_orbits_accepted += np.size(accepted)
                 parameters = np.concatenate((parameters,chi2[None,:],lnprob[None,:],lnrand[None,:]), axis = 0)
                 parameters=np.transpose(parameters)
@@ -715,7 +723,7 @@ class Results(object):
         plt.tight_layout()
         return fig
 
-    def PlotOrbits(self, color = True, colorbar = True, ref_epoch = 2015.5, size = 100, plot3d = False, cmap = 'viridis'):
+    def PlotOrbits(self, color = True, colorbar = True, ref_epoch = 2016.0, size = 100, plot3d = False, cmap = 'viridis',xlim=False,ylim=False):
         '''Plot a random selection of orbits from the sample in the plane of the sky.
 
         Args:
@@ -802,10 +810,13 @@ class Results(object):
         plt.ylabel('Dec (")',fontsize=20)
         plt.xlabel('RA (")',fontsize=20)
         plt.gca().tick_params(labelsize=14)
-        
+        if(xlim):
+            plt.xlim(xlim)
+        if(ylim):
+            plt.ylim(ylim)
         return fig
 
-    def PlotSepPA(self, ref_epoch = 2015.5, size = 100, timespan = [20,20], orbitcolor = 'skyblue'):
+    def PlotSepPA(self, ref_epoch = 2016.0, size = 100, timespan = [20,20], orbitcolor = 'skyblue'):
         '''Plot a random selection of orbits from the sample in separation and position angle as 
         a function of time.
 
