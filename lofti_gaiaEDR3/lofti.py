@@ -146,14 +146,17 @@ class Fitter(object):
 
         # Get Gaia measurements, compute needed constraints, and add to object:
         self.PrepareConstraints(catalog=self.catalog,inflateFactor=inflateProperMotionError)
-    '''
-    This function corrects for biases in proper motion. The function is from https://arxiv.org/pdf/2103.07432.pdf
-    Args:
-        pmra,pmdec (float): proper motion
-        ra, dec (float): right ascension and declination
-        G (float): G magnitude
-    '''
+    
     def edr3ToICRF(self,pmra,pmdec,ra,dec,G):
+        ''' Corrects for biases in proper motion. The function is from https://arxiv.org/pdf/2103.07432.pdf
+
+        Args:
+            pmra,pmdec (float): proper motion
+            ra, dec (float): right ascension and declination
+            G (float): G magnitude
+
+        Written by Sam Christian, 2021
+        '''
         if G>=13:
             return pmra , pmdec
         import numpy as np
@@ -175,7 +178,8 @@ class Fitter(object):
         pmraCorr = -1*sind(dec)*cosd(ra)*omegaX -sind(dec)*sind(ra)*omegaY + cosd(dec)*omegaZ
         pmdecCorr = sind(ra)*omegaX -cosd(ra)*omegaY
         return pmra-pmraCorr/1000., pmdec-pmdecCorr/1000.
-    def PrepareConstraints(self, rv=False, catalog='gaiaedr3.gaia_source',inflateFactor=1):
+
+    def PrepareConstraints(self, rv=False, catalog='gaiaedr3.gaia_source', inflateFactor=1.):
         '''Retrieves parameters for both objects from Gaia EDR3 archive and computes system attriubtes,
         and assigns them to the Fitter object class.
         
@@ -183,9 +187,10 @@ class Fitter(object):
             rv (bool): flag for handling the presence or absence of RV measurements for both objects \
                 in EDR3.  Gets set to True if both objects have Gaia RV measurements. Default = False
             catalog (str): name of Gaia catalog to query. Default = 'gaiaedr3.gaia_source'
+            inflateFactor (flt): Factor by which to inflate the errors on Gaia proper motions to \
+                account for improper uncertainty estimates.  Default = 1.0
         
         Written by Logan Pearce, 2020
-
         '''
         from astroquery.gaia import Gaia
         deg_to_mas = 3600000.
@@ -221,7 +226,6 @@ class Fitter(object):
 
         # reference epoch:
         self.ref_epoch = j['ref_epoch'][0]
-        print(self.ref_epoch)
 
         # parallax:
         self.plx1 = [j[0]['parallax']*u.mas, j[0]['parallax_error']*u.mas]
@@ -245,7 +249,7 @@ class Fitter(object):
         elif catalog == 'gaiadr2.gaia_source':
             key = 'radial_velocity'
             error_key = 'radial_velocity_error'
-        if type(k[0][key]) == np.float64 and type(j[0][key]) == np.float64:
+        if type(k[0][key]) == np.float64 and type(j[0][key]) == np.float64 or type(k[0][key]) == np.float32 and type(j[0][key]) == np.float32:
             rv = True
             self.rv1 = [j[0][key]*u.km/u.s,j[0][error_key]*u.km/u.s]
             self.rv2 = [k[0][key]*u.km/u.s,k[0][error_key]*u.km/u.s]

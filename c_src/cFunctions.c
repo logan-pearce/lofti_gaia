@@ -119,7 +119,7 @@ four_double *scale_and_rotate(double xi, double yi, double rho1, double rho2, do
         double PA_rand = sqrt(-2*log((double)rand() / (double)RAND_MAX))*cos(2*M_PI*(double)rand() / (double)RAND_MAX)*pa2+pa1;
         double r_model = sqrt(xi*xi+yi*yi);
         double rho_rand = sqrt(-2*log(rand_gen()))*cos(2*M_PI*rand_gen())*rho2/1000.+rho1/1000.;
-        printf("\n %f",PA_rand);
+        //printf("\n %f",PA_rand);
         //printf("\n %f",rho_rand);
         double a2i = ai*(rho_rand/r_model);
         double a2_au = a2i*dist;

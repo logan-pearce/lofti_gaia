@@ -70,7 +70,7 @@ has_openmp, needs_gomp = detect_openmp()
 parallel_args = ['-fopenmp', '-std=c99'] if has_openmp else ['-std=c99']
 parallel_libraries = ['gomp'] if needs_gomp else []
 def main():
-    setup(name="LOFTI-package",
+    setup(name="lofti_gaia",
           version="2.0.0",
           description="Orbit fitting with Gaia astrometry",
           author="Logan Pearce",
