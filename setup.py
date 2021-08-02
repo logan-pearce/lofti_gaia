@@ -76,7 +76,7 @@ def main():
           author="Logan Pearce",
 		  url='https://github.com/logan-pearce/lofti_gaia',
           download_url='https://github.com/logan-pearce/lofti_gaia/archive/2.0.0.tar.gz',
-		  packages =['lofti_gaiaEDR3'],
+		  packages =['lofti_gaia'],
 		  zip_safe=False,
 		  classifiers=[
 			  "Development Status :: 5 - Production/Stable",
