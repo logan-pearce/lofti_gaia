@@ -1,7 +1,7 @@
 import astropy.units as u
 import numpy as np
-from lofti_gaiaEDR3.loftitools import *
-from lofti_gaiaEDR3.cFunctions import calcOFTI_C
+from lofti_gaia.loftitools import *
+from lofti_gaia.cFunctions import calcOFTI_C
 #from loftitools import *
 import pickle
 import time
