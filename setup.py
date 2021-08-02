@@ -89,7 +89,7 @@ def main():
 		  licence="MIT",
           include_dirs = [np.get_include()],
           install_requires = get_requires(),
-          ext_modules=[Extension("lofti_gaiaEDR3.cFunctions", ["c_src/cFunctions.c"],extra_compile_args = parallel_args,libraries = parallel_libraries)])
+          ext_modules=[Extension("lofti_gaia.cFunctions", ["c_src/cFunctions.c"],extra_compile_args = parallel_args,libraries = parallel_libraries)])
 
 if __name__ == "__main__":
     main()
