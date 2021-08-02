@@ -54,7 +54,7 @@ Planned Updates:
 Change Log:
 +++++++++++
 
-**2.0.0 (08-02-2021)**
+**2.0.1 (08-02-2021)**
 
 - Changed name from lofti_gaiaDR2 to lofti_gaia
 - Moved Kepler's equation solver to C for faster computation
