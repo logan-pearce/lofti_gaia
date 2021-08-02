@@ -2,7 +2,7 @@
 
 loftitools
 ==========
-.. module:: lofti_gaiaDR2
+.. module:: lofti_gaia
 
-.. automodule:: lofti_gaiaDR2.loftitools
+.. automodule:: lofti_gaia.loftitools
    :members:

@@ -2,7 +2,7 @@
 
 lofti
 =====
-.. module:: lofti_gaiaDR2
+.. module:: lofti_gaia
 
-.. automodule:: lofti_gaiaDR2.lofti
+.. automodule:: lofti_gaia.lofti
    :members:

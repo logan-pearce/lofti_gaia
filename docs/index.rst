@@ -1,14 +1,14 @@
-.. lofti_gaiaDR2 documentation master file, created by
+.. lofti_gaia documentation master file, created by
    sphinx-quickstart on Tue Jul 21 15:06:11 2020.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-lofti_gaiaDR2
+lofti_gaia
 =============
 
 lofti_gaia is a basic orbit fitter designed to fit orbital parameters for one wide stellar binary 
 relative to the other, when both objects are resolved in Gaia DR2.  It takes as input only the 
-Gaia DR2 source id of the two components, and their masses.  It retrieves the relevant parameters 
+Gaia EDR3 or DR2 source id of the two components, and their masses.  It retrieves the relevant parameters 
 from the Gaia archive, computes observational constraints for them, and fits orbital parameters to 
 those measurements using a method based on Orbits for the Impatient (OFTI; Blunt et al. 2017).  
 It assumes the two components are bound in an elliptical orbit.  
@@ -53,6 +53,15 @@ Planned Updates:
 
 Change Log:
 +++++++++++
+
+**2.0.0 (08-02-2021)**
+
+- Changed name from lofti_gaiaDR2 to lofti_gaia
+- Moved Kepler's equation solver to C for faster computation
+- Implemented OpenMPI for parallelized fitting
+- Added ability to pad proper motion errors
+- Implemented correction to proper motion for bright sources described in Cantat-Gaudin & Brandt (2021) (https://arxiv.org/pdf/2103.07432.pdf)
+
 **1.1.2 (04-05-2021)**
 
 - Added header to results text file for readability

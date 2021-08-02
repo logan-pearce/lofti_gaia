@@ -17,14 +17,14 @@ sys.path.insert(0, os.path.abspath('..'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'lofti_gaiaDR2'
+project = 'lofti_gaia'
 copyright = '2020, Logan Pearce'
 author = 'Logan Pearce'
 master_doc='index'
 
 # The full version, including alpha/beta/rc tags
-version = '1.0'
-release = '1.1.0'
+version = '2.0'
+release = '2.0.0'
 
 
 # -- General configuration ---------------------------------------------------
