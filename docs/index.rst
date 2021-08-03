@@ -47,9 +47,7 @@ User Guide:
 
 Planned Updates:
 ++++++++++++++++
-
-- Speed ups of fitting function
-- Basic function of package will be redesigned when Gaia DR3 is released
+ - New version at next Gaia data release
 
 Change Log:
 +++++++++++
