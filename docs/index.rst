@@ -42,7 +42,8 @@ User Guide:
    :maxdepth: 2
    
    installation
-   tutorials/*.ipynb
+   tutorials/QuickStart
+   tutorials/Tutorial
    api
 
 Planned Updates:
