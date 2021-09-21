@@ -52,6 +52,10 @@ Planned Updates:
 Change Log:
 +++++++++++
 
+**2.0.3 (09-21-2021)**
+
+- Fixed typos in cross term
+
 **2.0.2 (09-21-2021)**
 
 - Added ability to include proper motion in RA/Dec cross correlation term in Chi^2 calculation
