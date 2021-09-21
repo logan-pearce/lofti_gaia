@@ -343,7 +343,7 @@ class FitOrbit(object):
     Written by Logan Pearce, 2020
 
     '''
-    def __init__(self, fitterobject, write_stats = True, write_results = True,python_version=False):
+    def __init__(self, fitterobject, write_stats = True, write_results = True, python_version=False, use_pm_cross_term = False):
         # establish fit parameters:
         self.deltaRA = fitterobject.deltaRA
         self.deltaDec = fitterobject.deltaDec
@@ -371,15 +371,18 @@ class FitOrbit(object):
             self.user_rv_dates = fitterobject.user_rv_dates
 
         # run orbit fitter:
-        self.fitorbit(python_fitOFTI=python_version)
+        self.fitorbit(python_fitOFTI=python_version, use_pm_cross_term = use_pm_cross_term)
 
-    def fitorbit(self, save_results_every_X_loops = 100,python_fitOFTI=False):
+    def fitorbit(self, save_results_every_X_loops = 100, python_fitOFTI=False, use_pm_cross_term = False):
         '''Run the OFTI fitting run on the Fitter object.  Called when FitOrbit object
         is created.
 
         Args:
             save_results_every_X_loops (int): on every Xth loop, save status of the \
                 orbit sample arrays to a pickle file, if write_results = True (Default)
+            python_fitOFTI (bool): If True, fit using python only without using C Kepler's equation solver. Default = False
+            use_pm_cross_term (bool): If True, include the proper motion correlation cross term in the Chi^2 computation \
+                Default = False
 
         Written by Logan Pearce, 2020
 
@@ -415,6 +418,9 @@ class FitOrbit(object):
             model = np.array([Y,X,Ydot,Xdot])
             data = np.array([self.deltaRA, self.deltaDec, self.pmRA, self.pmDec])
         chi2 = ComputeChi2(data,model)
+        if use_pm_cross_term:
+            chi2 -= ( 2 * (data[2][0] - model[2]) * (data[3][0] - model[3]) ) / (data[2][1] * data[3][1]) 
+            
 
         if self.astrometry:
             p = parameters.copy()
@@ -483,12 +489,14 @@ class FitOrbit(object):
                 returnArray = None
             # compute chi2 for orbits using Gaia observations:
             if self.rv[0] != 0:
-                measurements = np.array([Y,X,Ydot,Xdot,Zdot])
-                model = np.array([self.deltaRA, self.deltaDec, self.pmRA, self.pmDec, self.rv])
+                model = np.array([Y,X,Ydot,Xdot,Zdot])
+                data = np.array([self.deltaRA, self.deltaDec, self.pmRA, self.pmDec, self.rv])
             else:
-                measurements = np.array([Y,X,Ydot,Xdot])
-                model = np.array([self.deltaRA, self.deltaDec, self.pmRA, self.pmDec])
-            chi2 = ComputeChi2(model,measurements)
+                model = np.array([Y,X,Ydot,Xdot])
+                data = np.array([self.deltaRA, self.deltaDec, self.pmRA, self.pmDec])
+            chi2 = ComputeChi2(data,model)
+            if use_pm_cross_term:
+                chi2 -= ( 2 * (data[2][0] - model[2]) * (data[3][0] - model[3]) ) / (data[2][1] * data[3][1]) 
 
             # add user astrometry if given:
             if self.astrometry:

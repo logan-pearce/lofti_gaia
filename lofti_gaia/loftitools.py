@@ -262,9 +262,9 @@ def danby_solve(f, M0, e, h, maxnum=50):
             nextE = mikkola_solve(M0,e)
     return nextE
 
-
 def mikkola_solve(M,e):
-    ''' Analytic solver for eccentricity anomaly from Mikkola 1987. Most efficient
+    ''' Analytic solver for eccentricity anomaly from Mikkola 1987 
+    (S. Mikkola. 1987. Celestial Mechanics, 40, 329-334.). Most efficient
     when M near 0/2pi and e >= 0.95.
 
     Args: 

@@ -52,6 +52,10 @@ Planned Updates:
 Change Log:
 +++++++++++
 
+**2.0.2 (09-21-2021)**
+
+- Added ability to include proper motion in RA/Dec cross correlation term in Chi^2 calculation
+
 **2.0.1 (08-02-2021)**
 
 - Changed name from lofti_gaiaDR2 to lofti_gaia
