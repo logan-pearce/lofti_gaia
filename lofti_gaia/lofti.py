@@ -343,7 +343,8 @@ class FitOrbit(object):
     Written by Logan Pearce, 2020
 
     '''
-    def __init__(self, fitterobject, write_stats = True, write_results = True, python_version=False, use_pm_cross_term = False):
+    def __init__(self, fitterobject, write_stats = True, write_results = True, python_version=False, \
+                use_pm_cross_term = False, corr_coeff = None):
         # establish fit parameters:
         self.deltaRA = fitterobject.deltaRA
         self.deltaDec = fitterobject.deltaDec
@@ -371,9 +372,9 @@ class FitOrbit(object):
             self.user_rv_dates = fitterobject.user_rv_dates
 
         # run orbit fitter:
-        self.fitorbit(python_fitOFTI=python_version, use_pm_cross_term = use_pm_cross_term)
+        self.fitorbit(python_fitOFTI=python_version, use_pm_cross_term = use_pm_cross_term, corr_coeff = corr_coeff)
 
-    def fitorbit(self, save_results_every_X_loops = 100, python_fitOFTI=False, use_pm_cross_term = False):
+    def fitorbit(self, save_results_every_X_loops = 100, python_fitOFTI=False, use_pm_cross_term = False, corr_coeff = None):
         '''Run the OFTI fitting run on the Fitter object.  Called when FitOrbit object
         is created.
 
@@ -419,7 +420,7 @@ class FitOrbit(object):
             data = np.array([self.deltaRA, self.deltaDec, self.pmRA, self.pmDec])
         chi2 = ComputeChi2(data,model)
         if use_pm_cross_term:
-            chi2 -= ( 2 * (data[2][0] - model[2]) * (data[3][0] - model[3]) ) / (data[2][1] * data[3][1]) 
+            chi2 -= ( 2 * corr_coeff * (data[2][0] - model[2]) * (data[3][0] - model[3]) ) / (data[2][1] * data[3][1]) 
             
 
         if self.astrometry:
