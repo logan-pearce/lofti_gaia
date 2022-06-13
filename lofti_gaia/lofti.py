@@ -39,7 +39,7 @@ class Fitter(object):
             column names "rv,rverr,rv_dates". May be same as the astrometry table. Default = None.
         catalog (str): name of Gaia catalog to query. Default = 'gaiadr3.gaia_source' 
         ruwe1, ruwe2 (flt): RUWE value from Gaia archive
-        ref_epoch (flt): reference epoch in decimal years. For Gaia DR2 this is 2015.5, for Gaia EDR3 it is 2016.0
+        ref_epoch (flt): reference epoch in decimal years. For Gaia DR2 this is 2015.5, for Gaia DR3 it is 2016.0
         plx1, plx2 (flt): parallax from Gaia in mas
         RA1, RA2 (flt): right ascension from Gaia; RA in deg, uncertainty in mas
         Dec1, Dec2 (flt): declination from Gaia; Dec in deg, uncertainty in mas
@@ -180,12 +180,12 @@ class Fitter(object):
         return pmra-pmraCorr/1000., pmdec-pmdecCorr/1000.
 
     def PrepareConstraints(self, rv=False, catalog='gaiadr3.gaia_source', inflateFactor=1.):
-        '''Retrieves parameters for both objects from Gaia EDR3 archive and computes system attriubtes,
+        '''Retrieves parameters for both objects from Gaia DR3 archive and computes system attriubtes,
         and assigns them to the Fitter object class.
         
         Args:
             rv (bool): flag for handling the presence or absence of RV measurements for both objects \
-                in EDR3.  Gets set to True if both objects have Gaia RV measurements. Default = False
+                in DR3.  Gets set to True if both objects have Gaia RV measurements. Default = False
             catalog (str): name of Gaia catalog to query. Default = 'gaiadr3.gaia_source'
             inflateFactor (flt): Factor by which to inflate the errors on Gaia proper motions to \
                 account for improper uncertainty estimates.  Default = 1.0
@@ -196,7 +196,7 @@ class Fitter(object):
         deg_to_mas = 3600000.
         mas_to_deg = 1./3600000.
         
-        # Retrieve astrometric solution from Gaia EDR3
+        # Retrieve astrometric solution from Gaia DR3
         job = Gaia.launch_job("SELECT * FROM "+catalog+" WHERE source_id = "+str(self.sourceid1))
         j = job.get_results()
 
@@ -214,7 +214,7 @@ class Fitter(object):
             self.ruwe1 = jruwe['ruwe'][0]
             self.ruwe2 = kruwe['ruwe'][0]
         else:
-            # EDR3 contains ruwe in the main catalog:
+            # DR3 contains ruwe in the main catalog:
             self.ruwe1 = j['ruwe'][0]
             self.ruwe2 = k['ruwe'][0]
 
@@ -323,12 +323,12 @@ class FitOrbit(object):
             in addition to the text file created during the fit.  Default = True.
         deltaRA, deltaDec (flt): relative separation in RA and Dec directions, in mas
         pmRA, pmDec (flt): relative proper motion in RA/Dec directions in km s^-1
-        rv (flt, optional): relative RV of 2 relative to 1, if both are present in Gaia EDR3
+        rv (flt, optional): relative RV of 2 relative to 1, if both are present in Gaia DR3
         mtot_init (flt): initial total system mass in Msun from user input
         distance (flt): distance of system in pc, computed from Gaia parallax using method of Bailer-Jones et. al 2018.
         sep (flt): separation vector in mas
         pa (flt): postion angle of separation vector in degrees from North
-        ref_epoch (flt): epoch of the measurement, 2016.0 for Gaia EDR3 and 2015.5 for Gaia DR2.
+        ref_epoch (flt): epoch of the measurement, 2016.0 for Gaia DR3 and 2015.5 for Gaia DR2.
         Norbits (int): number of desired orbit samples
         write_stats (bool): if True, write summary of sample statistics to human-readable file at end of run.  Default = True
         write_results (bool): if True, write out current state of sample orbits in pickle file in periodic intervals during \
