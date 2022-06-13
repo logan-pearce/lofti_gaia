@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import warnings
 warnings.filterwarnings("ignore")
 
-'''This module obtaines measurements from Gaia EDR3 (Gaia DR2 is also available as a secondary option) and runs through the LOFTI Gaia/OFTI 
+'''This module obtaines measurements from Gaia DR3 (Gaia DR2 is also available as a secondary option) and runs through the LOFTI Gaia/OFTI 
 wide stellar binary orbit fitting technique.
 '''
 
@@ -37,9 +37,9 @@ class Fitter(object):
             Default = None
         user_rv (dict): User-supplied radial velocity measurements. Must be dictionary or table or pandas dataframe with\
             column names "rv,rverr,rv_dates". May be same as the astrometry table. Default = None.
-        catalog (str): name of Gaia catalog to query. Default = 'gaiaedr3.gaia_source' 
+        catalog (str): name of Gaia catalog to query. Default = 'gaiadr3.gaia_source' 
         ruwe1, ruwe2 (flt): RUWE value from Gaia archive
-        ref_epoch (flt): reference epoch in decimal years. For Gaia DR2 this is 2015.5, for Gaia EDR3 it is 2016.0
+        ref_epoch (flt): reference epoch in decimal years. For Gaia DR2 this is 2015.5, for Gaia DR3 it is 2016.0
         plx1, plx2 (flt): parallax from Gaia in mas
         RA1, RA2 (flt): right ascension from Gaia; RA in deg, uncertainty in mas
         Dec1, Dec2 (flt): declination from Gaia; Dec in deg, uncertainty in mas
@@ -69,7 +69,7 @@ class Fitter(object):
         results_filename = None, 
         astrometry = None,
         user_rv = None,
-        catalog = 'gaiaedr3.gaia_source',
+        catalog = 'gaiadr3.gaia_source',
         inflateProperMotionError=1
         ):
         
@@ -147,7 +147,7 @@ class Fitter(object):
         # Get Gaia measurements, compute needed constraints, and add to object:
         self.PrepareConstraints(catalog=self.catalog,inflateFactor=inflateProperMotionError)
     
-    def edr3ToICRF(self,pmra,pmdec,ra,dec,G):
+    def dr3ToICRF(self,pmra,pmdec,ra,dec,G):
         ''' Corrects for biases in proper motion. The function is from https://arxiv.org/pdf/2103.07432.pdf
 
         Args:
@@ -179,14 +179,14 @@ class Fitter(object):
         pmdecCorr = sind(ra)*omegaX -cosd(ra)*omegaY
         return pmra-pmraCorr/1000., pmdec-pmdecCorr/1000.
 
-    def PrepareConstraints(self, rv=False, catalog='gaiaedr3.gaia_source', inflateFactor=1.):
-        '''Retrieves parameters for both objects from Gaia EDR3 archive and computes system attriubtes,
+    def PrepareConstraints(self, rv=False, catalog='gaiadr3.gaia_source', inflateFactor=1.):
+        '''Retrieves parameters for both objects from Gaia DR3 archive and computes system attriubtes,
         and assigns them to the Fitter object class.
         
         Args:
             rv (bool): flag for handling the presence or absence of RV measurements for both objects \
-                in EDR3.  Gets set to True if both objects have Gaia RV measurements. Default = False
-            catalog (str): name of Gaia catalog to query. Default = 'gaiaedr3.gaia_source'
+                in DR3.  Gets set to True if both objects have Gaia RV measurements. Default = False
+            catalog (str): name of Gaia catalog to query. Default = 'gaiadr3.gaia_source'
             inflateFactor (flt): Factor by which to inflate the errors on Gaia proper motions to \
                 account for improper uncertainty estimates.  Default = 1.0
         
@@ -196,7 +196,7 @@ class Fitter(object):
         deg_to_mas = 3600000.
         mas_to_deg = 1./3600000.
         
-        # Retrieve astrometric solution from Gaia EDR3
+        # Retrieve astrometric solution from Gaia DR3
         job = Gaia.launch_job("SELECT * FROM "+catalog+" WHERE source_id = "+str(self.sourceid1))
         j = job.get_results()
 
@@ -214,7 +214,7 @@ class Fitter(object):
             self.ruwe1 = jruwe['ruwe'][0]
             self.ruwe2 = kruwe['ruwe'][0]
         else:
-            # EDR3 contains ruwe in the main catalog:
+            # DR3 contains ruwe in the main catalog:
             self.ruwe1 = j['ruwe'][0]
             self.ruwe2 = k['ruwe'][0]
 
@@ -236,14 +236,14 @@ class Fitter(object):
         self.Dec1 = [j[0]['dec']*u.deg, j[0]['dec_error']*mas_to_deg*u.deg]
         self.Dec2 = [k[0]['dec']*u.deg, k[0]['dec_error']*mas_to_deg*u.deg]
         # Proper motions
-        pmRACorrected1,pmDecCorrected1 = self.edr3ToICRF(j[0]['pmra'],j[0]['pmdec'],j[0]['ra'],j[0]['dec'],j[0]["phot_g_mean_mag"])
-        pmRACorrected2,pmDecCorrected2 = self.edr3ToICRF(k[0]['pmra'],k[0]['pmdec'],k[0]['ra'],k[0]['dec'],k[0]["phot_g_mean_mag"])
+        pmRACorrected1,pmDecCorrected1 = self.dr3ToICRF(j[0]['pmra'],j[0]['pmdec'],j[0]['ra'],j[0]['dec'],j[0]["phot_g_mean_mag"])
+        pmRACorrected2,pmDecCorrected2 = self.dr3ToICRF(k[0]['pmra'],k[0]['pmdec'],k[0]['ra'],k[0]['dec'],k[0]["phot_g_mean_mag"])
         self.pmRA1 = [pmRACorrected1*u.mas/u.yr, j[0]['pmra_error']*u.mas/u.yr*inflateFactor]
         self.pmRA2 = [pmRACorrected2*u.mas/u.yr, k[0]['pmra_error']*u.mas/u.yr*inflateFactor]
         self.pmDec1 = [pmDecCorrected1*u.mas/u.yr, j[0]['pmdec_error']*u.mas/u.yr*inflateFactor]
         self.pmDec2 = [pmDecCorrected2*u.mas/u.yr, k[0]['pmdec_error']*u.mas/u.yr*inflateFactor]
         # See if both objects have RV's in DR2:
-        if catalog == 'gaiaedr3.gaia_source':
+        if catalog == 'gaiadr3.gaia_source':
             key = 'dr2_radial_velocity'
             error_key = 'dr2_radial_velocity_error'
         elif catalog == 'gaiadr2.gaia_source':
@@ -323,12 +323,12 @@ class FitOrbit(object):
             in addition to the text file created during the fit.  Default = True.
         deltaRA, deltaDec (flt): relative separation in RA and Dec directions, in mas
         pmRA, pmDec (flt): relative proper motion in RA/Dec directions in km s^-1
-        rv (flt, optional): relative RV of 2 relative to 1, if both are present in Gaia EDR3
+        rv (flt, optional): relative RV of 2 relative to 1, if both are present in Gaia DR3
         mtot_init (flt): initial total system mass in Msun from user input
         distance (flt): distance of system in pc, computed from Gaia parallax using method of Bailer-Jones et. al 2018.
         sep (flt): separation vector in mas
         pa (flt): postion angle of separation vector in degrees from North
-        ref_epoch (flt): epoch of the measurement, 2016.0 for Gaia EDR3 and 2015.5 for Gaia DR2.
+        ref_epoch (flt): epoch of the measurement, 2016.0 for Gaia DR3 and 2015.5 for Gaia DR2.
         Norbits (int): number of desired orbit samples
         write_stats (bool): if True, write summary of sample statistics to human-readable file at end of run.  Default = True
         write_results (bool): if True, write out current state of sample orbits in pickle file in periodic intervals during \
