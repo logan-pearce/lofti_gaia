@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import warnings
 warnings.filterwarnings("ignore")
 
-'''This module obtaines measurements from Gaia EDR3 (Gaia DR2 is also available as a secondary option) and runs through the LOFTI Gaia/OFTI 
+'''This module obtaines measurements from Gaia DR3 (Gaia DR2 is also available as a secondary option) and runs through the LOFTI Gaia/OFTI 
 wide stellar binary orbit fitting technique.
 '''
 
@@ -37,7 +37,7 @@ class Fitter(object):
             Default = None
         user_rv (dict): User-supplied radial velocity measurements. Must be dictionary or table or pandas dataframe with\
             column names "rv,rverr,rv_dates". May be same as the astrometry table. Default = None.
-        catalog (str): name of Gaia catalog to query. Default = 'gaiaedr3.gaia_source' 
+        catalog (str): name of Gaia catalog to query. Default = 'gaiadr3.gaia_source' 
         ruwe1, ruwe2 (flt): RUWE value from Gaia archive
         ref_epoch (flt): reference epoch in decimal years. For Gaia DR2 this is 2015.5, for Gaia EDR3 it is 2016.0
         plx1, plx2 (flt): parallax from Gaia in mas
@@ -69,7 +69,7 @@ class Fitter(object):
         results_filename = None, 
         astrometry = None,
         user_rv = None,
-        catalog = 'gaiaedr3.gaia_source',
+        catalog = 'gaiadr3.gaia_source',
         inflateProperMotionError=1
         ):
         
@@ -147,7 +147,7 @@ class Fitter(object):
         # Get Gaia measurements, compute needed constraints, and add to object:
         self.PrepareConstraints(catalog=self.catalog,inflateFactor=inflateProperMotionError)
     
-    def edr3ToICRF(self,pmra,pmdec,ra,dec,G):
+    def dr3ToICRF(self,pmra,pmdec,ra,dec,G):
         ''' Corrects for biases in proper motion. The function is from https://arxiv.org/pdf/2103.07432.pdf
 
         Args:
@@ -179,14 +179,14 @@ class Fitter(object):
         pmdecCorr = sind(ra)*omegaX -cosd(ra)*omegaY
         return pmra-pmraCorr/1000., pmdec-pmdecCorr/1000.
 
-    def PrepareConstraints(self, rv=False, catalog='gaiaedr3.gaia_source', inflateFactor=1.):
+    def PrepareConstraints(self, rv=False, catalog='gaiadr3.gaia_source', inflateFactor=1.):
         '''Retrieves parameters for both objects from Gaia EDR3 archive and computes system attriubtes,
         and assigns them to the Fitter object class.
         
         Args:
             rv (bool): flag for handling the presence or absence of RV measurements for both objects \
                 in EDR3.  Gets set to True if both objects have Gaia RV measurements. Default = False
-            catalog (str): name of Gaia catalog to query. Default = 'gaiaedr3.gaia_source'
+            catalog (str): name of Gaia catalog to query. Default = 'gaiadr3.gaia_source'
             inflateFactor (flt): Factor by which to inflate the errors on Gaia proper motions to \
                 account for improper uncertainty estimates.  Default = 1.0
         
@@ -236,14 +236,14 @@ class Fitter(object):
         self.Dec1 = [j[0]['dec']*u.deg, j[0]['dec_error']*mas_to_deg*u.deg]
         self.Dec2 = [k[0]['dec']*u.deg, k[0]['dec_error']*mas_to_deg*u.deg]
         # Proper motions
-        pmRACorrected1,pmDecCorrected1 = self.edr3ToICRF(j[0]['pmra'],j[0]['pmdec'],j[0]['ra'],j[0]['dec'],j[0]["phot_g_mean_mag"])
-        pmRACorrected2,pmDecCorrected2 = self.edr3ToICRF(k[0]['pmra'],k[0]['pmdec'],k[0]['ra'],k[0]['dec'],k[0]["phot_g_mean_mag"])
+        pmRACorrected1,pmDecCorrected1 = self.dr3ToICRF(j[0]['pmra'],j[0]['pmdec'],j[0]['ra'],j[0]['dec'],j[0]["phot_g_mean_mag"])
+        pmRACorrected2,pmDecCorrected2 = self.dr3ToICRF(k[0]['pmra'],k[0]['pmdec'],k[0]['ra'],k[0]['dec'],k[0]["phot_g_mean_mag"])
         self.pmRA1 = [pmRACorrected1*u.mas/u.yr, j[0]['pmra_error']*u.mas/u.yr*inflateFactor]
         self.pmRA2 = [pmRACorrected2*u.mas/u.yr, k[0]['pmra_error']*u.mas/u.yr*inflateFactor]
         self.pmDec1 = [pmDecCorrected1*u.mas/u.yr, j[0]['pmdec_error']*u.mas/u.yr*inflateFactor]
         self.pmDec2 = [pmDecCorrected2*u.mas/u.yr, k[0]['pmdec_error']*u.mas/u.yr*inflateFactor]
         # See if both objects have RV's in DR2:
-        if catalog == 'gaiaedr3.gaia_source':
+        if catalog == 'gaiadr3.gaia_source':
             key = 'dr2_radial_velocity'
             error_key = 'dr2_radial_velocity_error'
         elif catalog == 'gaiadr2.gaia_source':
