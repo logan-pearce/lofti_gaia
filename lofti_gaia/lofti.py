@@ -552,6 +552,9 @@ class FitOrbit(object):
                     k.write(string + "\n")
                 k.close()
 
+                if self.write_results:
+                    self.results.SaveResults(self.results_filename.replace(".txt", ".pkl"), write_text_file = False)
+
             if np.nanmin(chi2) < self.chi_min:
                 # If there is a new min chi2:
                 self.chi_min = np.nanmin(chi2)
@@ -736,7 +739,8 @@ class Results(object):
         plt.tight_layout()
         return fig
 
-    def PlotOrbits(self, color = True, colorbar = True, ref_epoch = 2016.0, size = 100, plot3d = False, cmap = 'viridis',xlim=False,ylim=False):
+    def PlotOrbits(self, color = True, colorbar = True, ref_epoch = 2016.0, size = 100, \
+            plot3d = False, cmap = 'viridis',xlim=False,ylim=False):
         '''Plot a random selection of orbits from the sample in the plane of the sky.
 
         Args:

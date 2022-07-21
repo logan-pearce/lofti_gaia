@@ -422,8 +422,7 @@ def scale_and_rotate(X,Y,rho,pa,a,const,m1,dist,d):
     
     r_model = np.sqrt((X**2)+(Y**2))
     rho_rand = np.random.normal(rho[0]/1000.,rho[1]/1000.) #This generates a gaussian random to 
-    #scale to that takes observational uncertainty into account.  #convert to arcsec
-    #rho_rand = rho/1000.
+    #scale to that takes observational uncertainty into account.  
 
     # scale:
     a2 = a*(rho_rand/r_model) 
