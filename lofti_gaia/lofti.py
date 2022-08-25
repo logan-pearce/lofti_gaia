@@ -249,6 +249,9 @@ class Fitter(object):
         elif catalog == 'gaiadr2.gaia_source':
             key = 'radial_velocity'
             error_key = 'radial_velocity_error'
+        elif catalog == 'gaiadr3.gaia_source':
+            key = 'radial_velocity'
+            error_key = 'radial_velocity_error'
         if type(k[0][key]) == np.float64 and type(j[0][key]) == np.float64 or type(k[0][key]) == np.float32 and type(j[0][key]) == np.float32:
             rv = True
             self.rv1 = [j[0][key]*u.km/u.s,j[0][error_key]*u.km/u.s]
@@ -551,9 +554,6 @@ class FitOrbit(object):
                     string = '   '.join([str(p) for p in params])
                     k.write(string + "\n")
                 k.close()
-
-                if self.write_results:
-                    self.results.SaveResults(self.results_filename.replace(".txt", ".pkl"), write_text_file = False)
 
             if np.nanmin(chi2) < self.chi_min:
                 # If there is a new min chi2:
