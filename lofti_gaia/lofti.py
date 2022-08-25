@@ -179,7 +179,7 @@ class Fitter(object):
         pmdecCorr = sind(ra)*omegaX -cosd(ra)*omegaY
         return pmra-pmraCorr/1000., pmdec-pmdecCorr/1000.
 
-    def PrepareConstraints(self, rv=False, catalog='gaiaedr3.gaia_source', inflateFactor=1.):
+    def PrepareConstraints(self, rv=False, catalog='gaiadr3.gaia_source', inflateFactor=1.):
         '''Retrieves parameters for both objects from Gaia EDR3 archive and computes system attriubtes,
         and assigns them to the Fitter object class.
         
