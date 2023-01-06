@@ -562,7 +562,7 @@ class FitOrbit(object):
                 # re-evaluate to accept/reject with new chi_min:
                 
                 if number_orbits_accepted != 0:
-                    dat = np.loadtxt(open(self.results_filename,"r"),delimiter='   ',ndmin=2)
+                    dat = np.genfromtxt(open(self.results_filename,"r"),delimiter='   ',ndmin=2)
                     lnprob = -(dat[:,10]-self.chi_min)/2.0
                     dat[:,11] = lnprob
                     accepted_retest = np.where(lnprob > dat[:,12])
@@ -572,7 +572,7 @@ class FitOrbit(object):
                         string = '   '.join([str(d) for d in data])
                         q.write(string + "\n")
                     q.close()
-                    dat2 = np.loadtxt(open(self.results_filename,"r"),delimiter='   ',ndmin=2)
+                    dat2 = np.genfromtxt(open(self.results_filename,"r"),delimiter='   ',ndmin=2)
                     number_orbits_accepted=dat2.shape[0]
             
             loop_count += 1

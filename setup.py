@@ -71,11 +71,11 @@ parallel_args = ['-fopenmp', '-std=c99'] if has_openmp else ['-std=c99']
 parallel_libraries = ['gomp'] if needs_gomp else []
 def main():
     setup(name="lofti_gaia",
-          version="2.0.3",
+          version="2.0.5",
           description="Orbit fitting with Gaia astrometry",
           author="Logan Pearce",
 		  url='https://github.com/logan-pearce/lofti_gaia',
-          download_url='https://github.com/logan-pearce/lofti_gaia/archive/2.0.0.tar.gz',
+          download_url='https://github.com/logan-pearce/lofti_gaia/archive/2.0.4.tar.gz',
 		  packages =['lofti_gaia'],
 		  zip_safe=False,
 		  classifiers=[
@@ -85,7 +85,7 @@ def main():
 			  "Programming Language :: Python :: 3 :: Only",
 			  "Programming Language :: C"
 		  ],
-          author_email="loganpearce1@email.arizona.edu",
+          author_email="loganpearce1@arizona.edu",
 		  licence="MIT",
           include_dirs = [np.get_include()],
           install_requires = get_requires(),
