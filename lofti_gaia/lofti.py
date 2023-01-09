@@ -580,7 +580,7 @@ class FitOrbit(object):
             update_progress(number_orbits_accepted,self.Norbits)
 
         # one last accept/reject with final chi_min value:
-        dat = np.loadtxt(open(self.results_filename,"r"),delimiter='   ',ndmin=2)
+        dat = np.genfromtxt(open(self.results_filename,"r"),delimiter='   ')
         lnprob = -(dat[:,10]-self.chi_min)/2.0
         dat[:,11] = lnprob
         accepted_retest = np.where(lnprob > dat[:,12])
@@ -592,7 +592,7 @@ class FitOrbit(object):
         q.close()
 
         # when finished, upload results and store in object:
-        dat = np.loadtxt(open(self.results_filename,"r"),delimiter='   ',ndmin=2)
+        dat = np.genfromtxt(open(self.results_filename,"r"),delimiter='   ')
         number_orbits_accepted=dat.shape[0]
         print('Final Norbits:', number_orbits_accepted)
         # intialise results object and store accepted orbits:
