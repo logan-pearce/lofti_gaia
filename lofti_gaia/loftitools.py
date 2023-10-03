@@ -676,7 +676,7 @@ def update_progress(n,max_value):
     import sys
     barLength = 20 # Modify this to change the length of the progress bar
     status = ""
-    progress = np.round(np.float(n/max_value),decimals=2)
+    progress = np.round(np.float64(n/max_value),decimals=2)
     if isinstance(progress, int):
         progress = float(progress)
     if not isinstance(progress, float):

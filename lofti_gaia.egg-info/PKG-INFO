@@ -1,0 +1,15 @@
+Metadata-Version: 2.1
+Name: lofti-gaia
+Version: 2.0.5
+Summary: Orbit fitting with Gaia astrometry
+Home-page: https://github.com/logan-pearce/lofti_gaia
+Download-URL: https://github.com/logan-pearce/lofti_gaia/archive/2.0.4.tar.gz
+Author: Logan Pearce
+Author-email: loganpearce1@arizona.edu
+License: MIT
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Programming Language :: C
+License-File: LICENSE
