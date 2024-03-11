@@ -52,6 +52,15 @@ Planned Updates:
 Change Log:
 +++++++++++
 
+**2.0.7 (03-11-2024)**
+
+- Fixed unit issue in user-inputed astrometry
+
+**2.0.6 (03-05-2024)**
+
+- Removed automatic limiting of lan to 180 deg
+
+
 **2.0.3 (09-21-2021)**
 
 - Fixed typos in cross term
