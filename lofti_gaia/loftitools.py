@@ -471,7 +471,7 @@ def calc_XYZ(a,T,to,e,i,w,O,date):
 
     Return: 
         3-tuple:
-            X, Y, Z: 3d positions in mas
+            X, Y, Z: 3d positions in as
 
     Written by Logan Pearce, 2018
     '''

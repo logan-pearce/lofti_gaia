@@ -39,7 +39,7 @@ class Fitter(object):
             column names "rv,rverr,rv_dates". May be same as the astrometry table. Default = None.
         catalog (str): name of Gaia catalog to query. Default = 'gaiaedr3.gaia_source' 
         ruwe1, ruwe2 (flt): RUWE value from Gaia archive
-        ref_epoch (flt): reference epoch in decimal years. For Gaia DR2 this is 2015.5, for Gaia EDR3 it is 2016.0
+        ref_epoch (flt): reference epoch in decimal years. For Gaia DR2 this is 2015.5, for Gaia DR3 it is 2016.0
         plx1, plx2 (flt): parallax from Gaia in mas
         RA1, RA2 (flt): right ascension from Gaia; RA in deg, uncertainty in mas
         Dec1, Dec2 (flt): declination from Gaia; Dec in deg, uncertainty in mas
@@ -97,7 +97,7 @@ class Fitter(object):
             # if so, set astrometric flag to True:
             self.astrometry = True
             # store observation dates:
-            self.astrometric_dates = astrometry['dates']
+            self.astrometric_dates = np.array(astrometry['dates'])
             # if in sep/pa, convert to ra/dec:
             if 'sep' in astrometry:
                 try:
@@ -377,7 +377,7 @@ class FitOrbit(object):
         # run orbit fitter:
         self.fitorbit(python_fitOFTI=python_version, use_pm_cross_term = use_pm_cross_term, corr_coeff = corr_coeff)
 
-    def fitorbit(self, save_results_every_X_loops = 100, python_fitOFTI=False, use_pm_cross_term = False, corr_coeff = None):
+    def fitorbit(self, python_fitOFTI=False, use_pm_cross_term = False, corr_coeff = None):
         '''Run the OFTI fitting run on the Fitter object.  Called when FitOrbit object
         is created.
 
@@ -438,7 +438,7 @@ class FitOrbit(object):
                 # Place astrometry into data array where: data[0][0]=ra obs, data[0][1]=ra err, etc:
                 data = np.array([self.astrometric_ra[:,j], self.astrometric_dec[:,j]])
                 # place corresponding predicited positions at that date for each trial orbit in arcsec:
-                model = np.array([Y1*1000,X1*1000])
+                model = np.array([Y1,X1])
                 # compute chi2 for trial orbits at that date and add to the total chi2 sum:
                 chi2_astr += ComputeChi2(data,model)
             chi2 = chi2 + chi2_astr
@@ -558,7 +558,7 @@ class FitOrbit(object):
             if np.nanmin(chi2) < self.chi_min:
                 # If there is a new min chi2:
                 self.chi_min = np.nanmin(chi2)
-                #print('found new chi min:',self.chi_min)
+                print('found new chi min:',self.chi_min)
                 # re-evaluate to accept/reject with new chi_min:
                 
                 if number_orbits_accepted != 0:
