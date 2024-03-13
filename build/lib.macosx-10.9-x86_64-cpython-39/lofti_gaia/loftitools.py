@@ -421,7 +421,7 @@ def scale_and_rotate(X,Y,rho,pa,a,const,m1,dist,d):
     import numpy as np
     
     r_model = np.sqrt((X**2)+(Y**2))
-    rho_rand = np.random.normal(rho[0]/1000.,rho[1]/1000.) #This generates a gaussian random to 
+    rho_rand = np.random.normal(rho[0],rho[1]) #This generates a gaussian random to 
     #scale to that takes observational uncertainty into account.  
 
     # scale:
@@ -471,7 +471,7 @@ def calc_XYZ(a,T,to,e,i,w,O,date):
 
     Return: 
         3-tuple:
-            X, Y, Z: 3d positions in as
+            X, Y, Z: 3d positions in mas
 
     Written by Logan Pearce, 2018
     '''
@@ -594,15 +594,15 @@ def calc_OFTI(parameters,date,rho,pa):
 
     Args:
         Parameters (9 x N array):
-        a (flt): semi-major axis, as
-        T (flt): period, yrs
-        to (flt): epoch of periastron passage (in same time structure as dates), yrs
-        e (flt): eccentricity
-        i (flt): inclination, rad
-        w (flt): argument of periastron, rad
-        O (flt): longitude of nodes, rad
-        m1 (flt): system mass, Msun
-        dist (flt): distance to system in pc, pc
+            a (flt): semi-major axis, as
+            T (flt): period, yrs
+            to (flt): epoch of periastron passage (in same time structure as dates), yrs
+            e (flt): eccentricity
+            i (flt): inclination, rad
+            w (flt): argument of periastron, rad
+            O (flt): longitude of nodes, rad
+            m1 (flt): system mass, Msun
+            dist (flt): distance to system, pc
         date (flt): observation date, yrs
         rho (tuple, flt): separation and error, mas
         pa (tuple, flt): position angle and error, deg
@@ -614,6 +614,17 @@ def calc_OFTI(parameters,date,rho,pa):
             X dot, Y dot, Z dot:  three dimensional velocities in km/s
 
             X ddot, Y ddot, Z ddot: 3d accelerations in m/s/yr
+
+            parameters: the input parameter array with the new a and O values after scale and rotate
+                    a (flt): semi-major axis, as
+                    T (flt): period, yrs
+                    to (flt): epoch of periastron passage (in same time structure as dates), yrs
+                    e (flt): eccentricity
+                    i (flt): inclination, deg
+                    w (flt): argument of periastron, deg
+                    O (flt): longitude of nodes, deg
+                    m1 (flt): system mass, Msun
+                    dist (flt): distance to system, pc
 
     Written by Logan Pearce, 2018
     '''

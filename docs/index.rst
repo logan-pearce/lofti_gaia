@@ -52,6 +52,10 @@ Planned Updates:
 Change Log:
 +++++++++++
 
+**2.0.8 (03-13-2024)**
+
+- Fixed bug in user-inputed astrometry
+
 **2.0.7 (03-11-2024)**
 
 - Fixed unit issue in user-inputed astrometry

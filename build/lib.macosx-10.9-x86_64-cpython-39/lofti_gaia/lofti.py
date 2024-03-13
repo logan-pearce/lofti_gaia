@@ -405,15 +405,16 @@ class FitOrbit(object):
         #parameters = a,T,const,to,e,i,w,O,m1,dist
         numSamples = 10000
         parameters_init = draw_samples(numSamples, self.mtot_init, self.distance, self.ref_epoch)
+
         # Compute positions and velocities:
         if(python_fitOFTI):
-                # mas comes out of calc_OFTI:
-                X,Y,Z,Xdot,Ydot,Zdot,Xddot,Yddot,Zddot,parameters=calc_OFTI(parameters_init,self.ref_epoch,self.sep,self.pa)
+            # mas comes out of calc_OFTI:
+            X,Y,Z,Xdot,Ydot,Zdot,Xddot,Yddot,Zddot,parameters=calc_OFTI(parameters_init,self.ref_epoch,self.sep,self.pa)
         else:
-                returnArray = np.zeros((19,numSamples))
-                returnArray = calcOFTI_C(parameters_init,self.ref_epoch,self.sep,self.pa,returnArray.copy())
-                X,Y,Z,Xdot,Ydot,Zdot,Xddot,Yddot,Zddot = returnArray[0:9]
-                parameters = returnArray[9:]
+            returnArray = np.zeros((19,numSamples))
+            returnArray = calcOFTI_C(parameters_init,self.ref_epoch,self.sep,self.pa,returnArray.copy())
+            X,Y,Z,Xdot,Ydot,Zdot,Xddot,Yddot,Zddot = returnArray[0:9]
+            parameters = returnArray[9:]
 
         # Compute chi squared:
         if self.rv[0] != 0:
@@ -425,8 +426,25 @@ class FitOrbit(object):
         chi2 = ComputeChi2(data,model)
         if use_pm_cross_term:
             chi2 -= ( 2 * corr_coeff * (data[2][0] - model[2]) * (data[3][0] - model[3]) ) / (data[2][1] * data[3][1]) 
+        
+        if self.astrometry:
+            p = parameters.copy()
+            a,T,const,to,e,i,w,O,m1,dist = p[0],p[1],p[2],p[3],p[4],p[5],p[6],p[7],p[8],p[9]
+            chi2_astr = np.zeros(10000)
+            for j in range(self.astrometric_ra.shape[1]):
+                # for each date, compute XYZ for each 10000 trial orbit.  We can
+                # skip scale and rotate because that was accomplished in the calc_OFTI call above.
+                # X&Y are in mas coming out of calc_XYZ
+                X1,Y1,Z1,E1 = calc_XYZ(a,T,to,e,np.radians(i),np.radians(w),np.radians(O),self.astrometric_dates[j])
+                # Place astrometry into data array where: data[0][0]=ra obs, data[0][1]=ra err, etc:
+                data = np.array([self.astrometric_ra[:,j], self.astrometric_dec[:,j]])
+                # place corresponding predicited positions at that date for each trial orbit in mas:
+                # Astrometry must also be in mas:
+                model = np.array([Y1,X1])
+                # compute chi2 for trial orbits at that date and add to the total chi2 sum:
+                chi2_astr += ComputeChi2(data,model)
+            chi2 = chi2 + chi2_astr
             
-
         if self.astrometry:
             p = parameters.copy()
             a,T,const,to,e,i,w,O,m1,dist = p[0],p[1],p[2],p[3],p[4],p[5],p[6],p[7],p[8],p[9]
@@ -435,12 +453,12 @@ class FitOrbit(object):
             for j in range(self.astrometric_ra.shape[1]):
                 # for each date, compute XYZ for each 10000 trial orbit.  We can
                 # skip scale and rotate because that was accomplished in the calc_OFTI call above.
-                # X&Y are in arcsec coming out of calc_XYZ
-                X1,Y1,Z1,E1 = calc_XYZ(a,T,to,e,i,w,O,self.astrometric_dates[j])
+                # X&Y are in mas coming out of calc_XYZ
+                X1,Y1,Z1,E1 = calc_XYZ(a,T,to,e,np.radians(i),np.radians(w),np.radians(O),self.astrometric_dates[j])
                 # Place astrometry into data array where: data[0][0]=ra obs, data[0][1]=ra err, etc:
                 data = np.array([self.astrometric_ra[:,j], self.astrometric_dec[:,j]])
-                # place corresponding predicited positions at that date for each trial orbit in arcsec:
-                # Astrometry must also be in arcsec:
+                # place corresponding predicited positions at that date for each trial orbit in mas:
+                # Astrometry must also be in mas:
                 model = np.array([Y1,X1])
                 # compute chi2 for trial orbits at that date and add to the total chi2 sum:
                 chi2_astr += ComputeChi2(data,model)
@@ -453,7 +471,7 @@ class FitOrbit(object):
                 # compute ecc anomaly at that date:
                 X1,Y1,Z1,E1 = calc_XYZ(a,T,to,e,i,w,O,self.user_rv_dates[j])
                 # compute velocities at that ecc anom:
-                Xdot,Ydot,Zdot = calc_velocities(a,T,to,e,i,w,O,dist,E1)
+                Xdot,Ydot,Zdot = calc_velocities(a,T,to,e,np.radians(i),np.radians(w),np.radians(O),dist,E1)
                 # compute chi2:
                 chi2_rv += ComputeChi2(np.array([self.user_rv[:,j]]),np.array([Zdot]))
             chi2 = chi2 + chi2_rv
@@ -514,7 +532,7 @@ class FitOrbit(object):
                 for j in range(self.astrometric_ra.shape[1]):
                     # for each date, compute XYZ for each 10000 trial orbit.  We can
                     # skip scale and rotate because that was accomplished in the calc_OFTI call above.
-                    X1,Y1,Z1,E1 = calc_XYZ(a,T,to,e,i,w,O,self.astrometric_dates[j])
+                    X1,Y1,Z1,E1 = calc_XYZ(a,T,to,e,np.radians(i),np.radians(w),np.radians(O),self.astrometric_dates[j])
                     # Place astrometry into data array where: data[0][0]=ra obs, data[0][1]=ra err, etc:
                     data = np.array([self.astrometric_ra[:,j], self.astrometric_dec[:,j]])
                     # place corresponding predicited positions at that date for each trial orbit:
@@ -532,7 +550,7 @@ class FitOrbit(object):
                     # compute ecc anomaly at that date:
                     X1,Y1,Z1,E1 = calc_XYZ(a,T,to,e,i,w,O,self.user_rv_dates[j])
                     # compute velocities at that ecc anom:
-                    Xdot,Ydot,Zdot = calc_velocities(a,T,to,e,i,w,O,dist,E1)
+                    Xdot,Ydot,Zdot = calc_velocities(a,T,to,e,np.radians(i),np.radians(w),np.radians(O),dist,E1)
                     # compute chi2:
                     chi2_rv += ComputeChi2(np.array([self.user_rv[:,j]]),np.array([Zdot]))
                 chi2 = chi2 + chi2_rv
