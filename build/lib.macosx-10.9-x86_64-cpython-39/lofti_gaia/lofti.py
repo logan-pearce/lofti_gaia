@@ -407,6 +407,7 @@ class FitOrbit(object):
         parameters_init = draw_samples(numSamples, self.mtot_init, self.distance, self.ref_epoch)
         # Compute positions and velocities:
         if(python_fitOFTI):
+                # mas comes out of calc_OFTI:
                 X,Y,Z,Xdot,Ydot,Zdot,Xddot,Yddot,Zddot,parameters=calc_OFTI(parameters_init,self.ref_epoch,self.sep,self.pa)
         else:
                 returnArray = np.zeros((19,numSamples))
@@ -434,10 +435,12 @@ class FitOrbit(object):
             for j in range(self.astrometric_ra.shape[1]):
                 # for each date, compute XYZ for each 10000 trial orbit.  We can
                 # skip scale and rotate because that was accomplished in the calc_OFTI call above.
+                # X&Y are in arcsec coming out of calc_XYZ
                 X1,Y1,Z1,E1 = calc_XYZ(a,T,to,e,i,w,O,self.astrometric_dates[j])
                 # Place astrometry into data array where: data[0][0]=ra obs, data[0][1]=ra err, etc:
                 data = np.array([self.astrometric_ra[:,j], self.astrometric_dec[:,j]])
                 # place corresponding predicited positions at that date for each trial orbit in arcsec:
+                # Astrometry must also be in arcsec:
                 model = np.array([Y1,X1])
                 # compute chi2 for trial orbits at that date and add to the total chi2 sum:
                 chi2_astr += ComputeChi2(data,model)
@@ -515,7 +518,7 @@ class FitOrbit(object):
                     # Place astrometry into data array where: data[0][0]=ra obs, data[0][1]=ra err, etc:
                     data = np.array([self.astrometric_ra[:,j], self.astrometric_dec[:,j]])
                     # place corresponding predicited positions at that date for each trial orbit:
-                    model = np.array([Y1*1000,X1*1000])
+                    model = np.array([Y1,X1])
                     # compute chi2 for trial orbits at that date and add to the total chi2 sum:
                     chi2_astr += ComputeChi2(data,model)
                 chi2 = chi2 + chi2_astr
@@ -558,7 +561,7 @@ class FitOrbit(object):
             if np.nanmin(chi2) < self.chi_min:
                 # If there is a new min chi2:
                 self.chi_min = np.nanmin(chi2)
-                print('found new chi min:',self.chi_min)
+                #print('found new chi min:',self.chi_min)
                 # re-evaluate to accept/reject with new chi_min:
                 
                 if number_orbits_accepted != 0:
@@ -974,6 +977,9 @@ class StatsSubclass(Stats):
 
         
         
+
+
+
 
 
 

@@ -384,7 +384,7 @@ def draw_samples(number, m_tot, d_star, date):
     w = np.random.uniform(0.0,360.0,number)
     w = np.radians(w) 
     # collect into array
-    samples = np.zeros((10,number))
+    samples = np.zeros((10,10000))
     samples[0,:],samples[1,:],samples[2,:],samples[3,:],samples[4,:],samples[5,:], \
         samples[6,:],samples[7,:],samples[8,:],samples[9,:] = a,T,const,to,e,i,w,O,m1,dist
     #samples = np.array([a,T,const,to,e,i,w,O,m1,dist])
@@ -488,7 +488,7 @@ def calc_XYZ(a,T,to,e,i,w,O,date):
     X = r * ( cos(O)*cos(w+f) - sin(O)*sin(w+f)*cos(i) )
     Y = r * ( sin(O)*cos(w+f) + cos(O)*sin(w+f)*cos(i) )
     Z = r * sin(w+f)*sin(i)
-    return X*1000,Y*1000,Z*1000,E
+    return X,Y,Z,E
 
 def calc_velocities(a,T,to,e,i,w,O,dist,E):
     ''' Compute 3-d velocity of a single object on a Keplerian orbit given a 
@@ -623,14 +623,14 @@ def calc_OFTI(parameters,date,rho,pa):
     p = parameters
     # pull values out of array:
     a,T,const,to,e,i,w,O,m1,dist = p[0],p[1],p[2],p[3],p[4],p[5],p[6],p[7],p[8],p[9]
-    # Calculate predicted positions in mas at observation date:
+    # Calculate predicted positions at observation date:
     X1,Y1,Z1,E1 = calc_XYZ(a,T,to,e,i,w,O,date)
     # scale and rotate:
     a2,T2,to2,O2 = scale_and_rotate(X1,Y1,rho,pa,a,const,m1,dist,date)
-    # recompute predicted position in mas:
+    # recompute predicted position:
     X2,Y2,Z2,E2 = calc_XYZ(a2,T2,to2,e,i,w,O2,date)
     # convert units:
-    #X2,Y2,Z2 = (X2*u.arcsec).to(u.mas).value, (Y2*u.arcsec).to(u.mas).value, (Z2*u.arcsec).to(u.mas).value
+    X2,Y2,Z2 = (X2*u.arcsec).to(u.mas).value, (Y2*u.arcsec).to(u.mas).value, (Z2*u.arcsec).to(u.mas).value
     # Compute velocities at observation date:
     Xdot,Ydot,Zdot = calc_velocities(a2,T2,to2,e,i,w,O2,dist,E2)
     # Compute accelerations at observation date:
